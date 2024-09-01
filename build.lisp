@@ -1,0 +1,38 @@
+(in-package #:cross-clasp)
+
+(defparameter *files*
+  '("lsp/foundation.lisp"
+    ;;"lsp/export.lisp"
+    "lsp/arraylib.lisp"
+    "lsp/predlib.lisp"
+    "lsp/listlib.lisp"
+    "lsp/mislib.lisp"
+    "lsp/defstruct.lisp"
+    "lsp/seqmacros.lisp"
+    "lsp/seq.lisp"
+    "lsp/seqlib.lisp"
+    "lsp/iolib.lisp"
+    "lsp/numlib.lisp"
+    "lsp/assorted.lisp"
+    "lsp/packlib.lisp"
+    "lsp/defpackage.lisp"
+    #+(or)"lsp/loop2.lisp"))
+
+(defun default-output-directory ()
+  (asdf:system-relative-pathname :cross-clasp "build/"))
+
+(defun build (&key (output (default-output-directory))
+                   ((:verbose *compile-verbose*) *compile-verbose*)
+                   ((:print *compile-print*) *compile-print*))
+  (ensure-directories-exist output)
+  (initialize)
+  (maclina.vm-cross:initialize-vm 20000)
+  (loop with kernel = (asdf:system-relative-pathname :cross-clasp "kernel/")
+        for file in *files*
+        for absolute = (merge-pathnames file kernel)
+        ;; FIXME: maclina compile-file-pathname should handle this
+        for out = (make-pathname :type "fasl" :defaults output
+                                 :name (pathname-name absolute))
+        do (cross-compile-file absolute :output-file out))
+  ;; link goes here
+  )
