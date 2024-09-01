@@ -32,8 +32,8 @@
 
 (defmethod common-macro-definitions:defun-compile-time-action
     ((client maclina.vm-cross:client) name lambda-list env)
-  (declare (ignore name lambda-list env))
-  ;; FIXME
+  (declare (ignore lambda-list))
+  (clostrum:note-function client (trucler:global-environment client env) name)
   nil)
 
 (defmethod common-macro-definitions:proclaim
