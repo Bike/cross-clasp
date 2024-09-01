@@ -64,5 +64,6 @@
                     (#:core #:cross-clasp.clasp.core)
                     (#:clos #:cross-clasp.clasp.clos)
                     (#:ext #:cross-clasp.clasp.ext))
+  (:shadow #:proclaim)
   (:export #:client)
   (:export #:fill-environment))

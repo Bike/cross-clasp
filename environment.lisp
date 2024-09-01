@@ -36,9 +36,19 @@
   (clostrum:note-function client (trucler:global-environment client env) name)
   nil)
 
+(defun proclaim (proclamation)
+  ;; FIXME: record types, etc
+  (when (consp proclamation)
+    (case (car proclamation)
+      ((special)
+       (loop for s in (rest proclamation)
+             do (clostrum:make-variable m:*client* *build-rte* s)))))
+  (values))
+
 (defmethod common-macro-definitions:proclaim
     ((client maclina.vm-cross:client) declspec env)
-  (declare (ignore declspec env))) ; FIXME
+  (declare (ignore env))
+  `(cl:proclaim ',declspec))
 
 (defmethod common-macro-definitions:get-setf-expansion
     ((client maclina.vm-cross:client) place &optional environment)
@@ -101,6 +111,9 @@
                        ext:parse-compiler-macro ext:parse-deftype
                        ext:parse-define-setf-expander)
         for f = (fdefinition fname)
+        do (setf (clostrum:fdefinition client rte fname) f))
+  (loop for (fname . src) in '((cl:proclaim . proclaim))
+        for f = (fdefinition src)
         do (setf (clostrum:fdefinition client rte fname) f))
   (loop for fname in '(core:invoke-internal-debugger
                        core:name-of-class core:fmt core::gdb
