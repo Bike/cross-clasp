@@ -36,6 +36,7 @@
     ((client client) name lambda-list env)
   (declare (ignore lambda-list))
   (clostrum:note-function client (trucler:global-environment client env) name)
+  (signal 'maclina.compile:resolve-function :name name)
   nil)
 
 (defun proclaim (proclamation)
