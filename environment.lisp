@@ -3,6 +3,8 @@
 (defvar *build-rte*)
 (defvar *build-ce*)
 
+(defclass client (maclina.vm-cross:client) ())
+
 (defclass reader-client (maclina.compile-file::reader-client) ())
 
 (defvar *reader-client* (make-instance 'reader-client))
@@ -16,7 +18,7 @@
          :reader-client *reader-client*
          keys))
 
-(defmethod clostrum-sys:variable-cell :around ((client maclina.vm-cross:client)
+(defmethod clostrum-sys:variable-cell :around ((client client)
                                                environment symbol)
   (if (keywordp symbol)
       (let ((cell (clostrum-sys:ensure-variable-cell client environment symbol)))
@@ -24,14 +26,14 @@
         cell)
       (call-next-method)))
 
-(defmethod clostrum-sys:variable-status :around ((client maclina.vm-cross:client)
+(defmethod clostrum-sys:variable-status :around ((client client)
                                                  environment symbol)
   (if (keywordp symbol)
       :constant
       (call-next-method)))
 
 (defmethod common-macro-definitions:defun-compile-time-action
-    ((client maclina.vm-cross:client) name lambda-list env)
+    ((client client) name lambda-list env)
   (declare (ignore lambda-list))
   (clostrum:note-function client (trucler:global-environment client env) name)
   nil)
@@ -46,12 +48,12 @@
   (values))
 
 (defmethod common-macro-definitions:proclaim
-    ((client maclina.vm-cross:client) declspec env)
+    ((client client) declspec env)
   (declare (ignore env))
   `(cl:proclaim ',declspec))
 
 (defmethod common-macro-definitions:get-setf-expansion
-    ((client maclina.vm-cross:client) place &optional environment)
+    ((client client) place &optional environment)
   (let ((env (or environment *build-rte*)))
     (extrinsicl:get-setf-expansion
      client env
@@ -155,7 +157,7 @@
   (values))
 
 (defun initialize ()
-  (setf m:*client* (make-instance 'maclina.vm-cross:client)
+  (setf m:*client* (make-instance 'client)
         *build-rte* (make-instance 'clostrum-basic:run-time-environment)
         *build-ce* (make-instance 'clostrum-basic:compilation-environment
                      :parent *build-rte*))
