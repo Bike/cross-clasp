@@ -105,6 +105,7 @@
   (extrinsicl.maclina:install-eval client rte)
   (loop for fname in '(core::make-constant
                        core::find-declarations core:process-declarations
+                       core::dm-too-many-arguments core::dm-too-few-arguments
                        ext:parse-macro
                        ;; FIXME: Used in common-macros defmacro expansions
                        ecclesia:list-structure
@@ -115,13 +116,37 @@
   (loop for (fname . src) in '((cl:proclaim . proclaim))
         for f = (fdefinition src)
         do (setf (clostrum:fdefinition client rte fname) f))
-  (loop for fname in '(core:invoke-internal-debugger
-                       core:name-of-class core:fmt core::gdb
-                       core:hash-table-pairs)
+  (loop for fname in '(core::generalp core:header-stamp
+                       core:function-name
+                       core::coerce-to-function core::coerce-fdesignator
+                       core::member1
+                       core::sequence-start-end
+                       core:vref (setf core:vref)
+                       core::copy-subarray core:replace-array
+                       core:data-vector-p
+                       core:sbv-bit-and core:sbv-bit-ior
+                       core:sbv-bit-nor core:sbv-bit-nand
+                       core:sbv-bit-xor core:sbv-bit-eqv
+                       core:sbv-bit-andc1 core:sbv-bit-andc2
+                       core:sbv-bit-orc1 core:sbv-bit-orc2
+                       core:sbv-bit-not
+                       core::%displacement core::%displaced-index-offset
+                       core::make-vector core::make-mdarray
+                       core::fill-array-with-elt
+                       core::base-string-p
+                       core::fixnump
+                       core:invoke-internal-debugger
+                       core::mkdir
+                       clos::classp core::subclassp core:name-of-class
+                       core:fmt core::gdb
+                       core:hash-table-pairs core:hash-eql
+                       core:unix-get-local-time-zone core:unix-daylight-saving-time
+                       gc:thread-local-unwind-counter gc:bytes-allocated)
         do (clostrum:note-function client rte fname))
   (loop for mname in '(eclector.reader:quasiquote
                        core::with-unique-names core::once-only
-                       core::defconstant-eqx core::defconstant-equal)
+                       core::defconstant-eqx core::defconstant-equal
+                       core::while core::until)
         for m = (macro-function mname)
         do (setf (clostrum:macro-function client rte mname) m))
   (loop for (mname . src) in '((defconstant . %defconstant))

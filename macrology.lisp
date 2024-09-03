@@ -422,3 +422,6 @@ Example:
     (name lambda-list body &optional env)
   (declare (ignore env))
   (expand-defmacro name lambda-list body 'setf-expander))
+
+(defmacro while (condition &body body) `(loop while ,condition do (progn ,@body)))
+(defmacro until (condition &body body) `(loop until ,condition do (progn ,@body)))

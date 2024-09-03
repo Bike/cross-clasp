@@ -63,6 +63,7 @@
   (:local-nicknames (#:m #:maclina.machine)
                     (#:core #:cross-clasp.clasp.core)
                     (#:clos #:cross-clasp.clasp.clos)
+                    (#:gc #:cross-clasp.clasp.gctools)
                     (#:ext #:cross-clasp.clasp.ext))
   (:shadow #:proclaim)
   (:export #:client)
