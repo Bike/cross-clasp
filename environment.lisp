@@ -121,6 +121,9 @@
   (loop for fname in '(core::generalp core:header-stamp
                        core:function-name
                        core::coerce-to-function core::coerce-fdesignator
+                       core:num-op-acosh core:num-op-asinh
+                       core:num-op-atanh
+                       core:num-op-acos core:num-op-asin core:num-op-atan
                        core::member1
                        core::sequence-start-end
                        core:vref (setf core:vref)
@@ -135,13 +138,15 @@
                        core::%displacement core::%displaced-index-offset
                        core::make-vector core::make-mdarray
                        core::fill-array-with-elt
-                       core::base-string-p
+                       core::base-string-p core::base-string-concatenate
                        core::fixnump
-                       core:invoke-internal-debugger
-                       core::mkdir
-                       clos::classp core::subclassp core:name-of-class
-                       core:fmt core::gdb
                        core:hash-table-pairs core:hash-eql
+                       core::coerce-to-package core::package-hash-tables
+                       clos::classp core::subclassp core:name-of-class
+                       core::get-sysprop (setf core::get-sysprop)
+                       core:write-addr
+                       core:fmt core::gdb core::mkdir
+                       core:invoke-internal-debugger
                        core:unix-get-local-time-zone core:unix-daylight-saving-time
                        gc:thread-local-unwind-counter gc:bytes-allocated)
         do (clostrum:note-function client rte fname))

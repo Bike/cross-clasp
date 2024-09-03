@@ -17,8 +17,8 @@
            #:sbv-bit-and #:sbv-bit-ior #:sbv-bit-xor #:sbv-bit-eqv
            #:sbv-bit-nand #:sbv-bit-nor #:sbv-bit-andc1 #:sbv-bit-andc2
            #:sbv-bit-orc1 #:sbv-bit-orc2 #:sbv-bit-not)
-  (:export #:num-op-asin #:num-op-acos #:num-op-asinh #:num-op-acosh
-           #:num-op-atanh)
+  (:export #:num-op-asin #:num-op-acos #:num-op-atan
+           #:num-op-asinh #:num-op-acosh #:num-op-atanh)
   (:export #:function-name)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
   (:export #:thread-local-write-to-string-output-stream
