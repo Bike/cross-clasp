@@ -8,6 +8,13 @@
                   symbols)
      ,@body))
 
+(defmacro with-clean-symbols (symbols &body body)
+  "Rewrites the given forms replacing the given symbols with uninterned
+ones, which is useful for creating hygienic macros."
+  `(progn ,@(sublis (mapcar #'(lambda (s) (cons s (make-symbol (symbol-name s))))
+			    symbols)
+		    body)))
+
 (defmacro once-only (specs &body body)
   "Once-Only ({(Var Value-Expression)}*) Form*
 

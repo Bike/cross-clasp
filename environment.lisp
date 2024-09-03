@@ -152,7 +152,8 @@
                        gc:thread-local-unwind-counter gc:bytes-allocated)
         do (clostrum:note-function client rte fname))
   (loop for mname in '(eclector.reader:quasiquote
-                       core::with-unique-names core::once-only
+                       core::with-clean-symbols core::with-unique-names
+                       core::once-only
                        core::defconstant-eqx core::defconstant-equal
                        core::while core::until)
         for m = (macro-function mname)
