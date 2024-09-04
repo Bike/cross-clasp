@@ -100,12 +100,16 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (core::make-constant ',name ,value)))
 
+(defun features ()
+  '(:clasp :unicode :clos :ansi-cl :common-lisp))
+
 (defun install-environment (&optional (client m:*client*)
                               (rte *build-rte*)
                               (ce *build-ce*))
   (declare (ignore ce))
   (extrinsicl:install-cl client rte)
   (extrinsicl.maclina:install-eval client rte)
+  (setf (m:symbol-value client rte '*features*) (features))
   (loop for fname in '(core::make-constant
                        core::find-declarations core:process-declarations
                        core::dm-too-many-arguments core::dm-too-few-arguments
