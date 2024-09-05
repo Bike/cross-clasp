@@ -10,13 +10,22 @@
 (defvar *reader-client* (make-instance 'reader-client))
 
 (defmethod maclina.compile-file::find-package ((client reader-client) package-name)
-  (clostrum:find-package m:*client* *build-rte* package-name))
+  (or (clostrum:find-package m:*client* *build-rte* package-name)
+    (warn "Unknown package ~s; substituting CORE" package-name)
+    (cl:find-package "CROSS-CLASP.CLASP.CORE")))
+
+(defmethod maclina.compile-file::package-name ((client client) env package)
+  (or (clostrum:package-name client env package)
+    (warn "Unknown package ~s; substituting CORE"
+          (cl:package-name package))
+    "CORE"))
 
 (defun cross-compile-file (input-file &rest keys)
-  (apply #'maclina.compile-file:compile-file input-file
-         :environment *build-rte*
-         :reader-client *reader-client*
-         keys))
+  (let ((maclina.compile-file::*primitive* t))
+    (apply #'maclina.compile-file:compile-file input-file
+           :environment *build-rte*
+           :reader-client *reader-client*
+           keys)))
 
 (defmethod clostrum-sys:variable-cell :around ((client client)
                                                environment symbol)
@@ -83,7 +92,8 @@
         (seq (find-package '#:cross-clasp.clasp.sequence))
         (ext (find-package '#:cross-clasp.clasp.ext))
         (kw (find-package "KEYWORD")))
-    (setf (clostrum:find-package client environment "COMMON-LISP") cl
+    (setf (clostrum:package-name client environment cl) "COMMON-LISP"
+          (clostrum:find-package client environment "COMMON-LISP") cl
           (clostrum:find-package client environment "CL") cl)
     (setf (clostrum:package-name client environment core) "CORE"
           (clostrum:find-package client environment "CORE") core
