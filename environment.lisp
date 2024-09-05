@@ -124,8 +124,10 @@
         for f = (fdefinition src)
         do (setf (clostrum:fdefinition client rte fname) f))
   (loop for fname in '(core::generalp core:header-stamp
+                       ext:specialp
                        core:function-name
                        core::coerce-to-function core::coerce-fdesignator
+                       core::fixnump
                        core:num-op-acosh core:num-op-asinh
                        core:num-op-atanh
                        core:num-op-acos core:num-op-asin core:num-op-atan
@@ -144,13 +146,15 @@
                        core::make-vector core::make-mdarray
                        core::fill-array-with-elt
                        core::base-string-p core::base-string-concatenate
-                       core::fixnump
+                       core::search-string
                        core:hash-table-pairs core:hash-eql
                        core::coerce-to-package core::package-hash-tables
                        clos::classp core::subclassp core:name-of-class
                        core::get-sysprop (setf core::get-sysprop)
-                       core:write-addr
-                       core:fmt core::gdb core::mkdir
+                       core::write-object core:write-addr
+                       core:get-thread-local-write-to-string-output-stream-string
+                       core:thread-local-write-to-string-output-stream
+                       core:fmt core::gdb core::mkdir core::file-kind
                        core:invoke-internal-debugger
                        core:unix-get-local-time-zone core:unix-daylight-saving-time
                        gc:thread-local-unwind-counter gc:bytes-allocated)
