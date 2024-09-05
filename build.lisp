@@ -3,6 +3,7 @@
 (defparameter *files*
   '("lsp/foundation.lisp"
     ;;"lsp/export.lisp"
+    "lsp/assert.lisp"
     "lsp/arraylib.lisp"
     "lsp/predlib.lisp"
     "lsp/listlib.lisp"

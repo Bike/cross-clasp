@@ -53,13 +53,25 @@
   (declare (ignore env))
   `(cl:proclaim ',declspec))
 
+(defun fdesignator (designator)
+  (etypecase designator
+    (function designator)
+    (symbol (clostrum:fdefinition m:*client* *build-rte* designator))))
+
+(defun macroexpand-hook ()
+  (fdesignator
+   (maclina.machine:symbol-value m:*client* *build-rte*
+                                 '*macroexpand-hook*)))
+
+(defun build-macroexpand (form &optional env)
+  (extrinsicl:macroexpand m:*client* (or env *build-rte*)
+                          (macroexpand-hook) form))
+
 (defmethod common-macro-definitions:get-setf-expansion
     ((client client) place &optional environment)
   (let ((env (or environment *build-rte*)))
     (extrinsicl:get-setf-expansion
-     client env
-     #'funcall ;(maclina.machine:symbol-value client env '*macroexpand-hook*)
-     place)))
+     client env (macroexpand-hook) place)))
 
 (defun install-packages (&optional (client m:*client*)
                            (environment *build-rte*))
@@ -110,6 +122,9 @@
   (extrinsicl:install-cl client rte)
   (extrinsicl.maclina:install-eval client rte)
   (setf (m:symbol-value client rte '*features*) (features))
+  (loop for vname in '(*features*
+                       core::*condition-restarts* core::*restart-clusters*)
+        do (clostrum:make-variable client rte vname))
   (loop for fname in '(core::make-constant
                        core::find-declarations core:process-declarations
                        core::dm-too-many-arguments core::dm-too-few-arguments
@@ -160,6 +175,7 @@
                        gc:thread-local-unwind-counter gc:bytes-allocated)
         do (clostrum:note-function client rte fname))
   (loop for mname in '(eclector.reader:quasiquote
+                       ext:with-current-source-form
                        core::with-clean-symbols core::with-unique-names
                        core::once-only
                        core::defconstant-eqx core::defconstant-equal
@@ -167,7 +183,9 @@
         for m = (macro-function mname)
         do (setf (clostrum:macro-function client rte mname) m))
   (loop for (mname . src) in '((defconstant . %defconstant)
-                               (check-type . %check-type))
+                               (restart-case . %restart-case)
+                               (restart-bind . %restart-bind)
+                               (with-condition-restarts . %with-condition-restarts))
         for m = (macro-function src)
         do (setf (clostrum:macro-function client rte mname) m))
   (values))
