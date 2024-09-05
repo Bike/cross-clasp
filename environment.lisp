@@ -73,22 +73,22 @@
         (kw (find-package "KEYWORD")))
     (setf (clostrum:find-package client environment "COMMON-LISP") cl
           (clostrum:find-package client environment "CL") cl)
-    (setf ;(clostrum:package-name client environment core) "CORE"
+    (setf (clostrum:package-name client environment core) "CORE"
           (clostrum:find-package client environment "CORE") core
           (clostrum:find-package client environment "SYS") core
           (clostrum:find-package client environment "SYSTEM") core
           (clostrum:find-package client environment "SI") core)
-    (setf ;(clostrum:package-name client environment gctools) "GCTOOLS"
+    (setf (clostrum:package-name client environment gctools) "GCTOOLS"
           (clostrum:find-package client environment "GCTOOLS") gctools)
-    (setf ;(clostrum:package-name client environment mp) "MP"
+    (setf (clostrum:package-name client environment mp) "MP"
           (clostrum:find-package client environment "MP") mp)
-    (setf ;(clostrum:package-name client environment clos) "CLOS"
+    (setf (clostrum:package-name client environment clos) "CLOS"
           (clostrum:find-package client environment "CLOS") clos)
-    (setf ;(clostrum:package-name client environment seq) "SEQUENCE"
+    (setf (clostrum:package-name client environment seq) "SEQUENCE"
           (clostrum:find-package client environment "SEQUENCE") seq)
-    (setf ;(clostrum:package-name client environment ext) "EXT"
+    (setf (clostrum:package-name client environment ext) "EXT"
           (clostrum:find-package client environment "EXT") ext)
-    (setf ;(clostrum:package-name client environment kw) "KEYWORD"
+    (setf (clostrum:package-name client environment kw) "KEYWORD"
           (clostrum:find-package client environment "KEYWORD") kw)))
 
 ;;; FIXME: defconstant should really be in common macros.
