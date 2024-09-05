@@ -28,14 +28,14 @@
   (ensure-directories-exist output)
   (initialize)
   (maclina.vm-cross:initialize-vm 20000)
-  (maclina.compile:with-compilation-unit ()
-    (loop with kernel = (asdf:system-relative-pathname
-                         :cross-clasp "kernel/")
-          for file in *files*
-          for absolute = (merge-pathnames file kernel)
-          ;; FIXME: maclina compile-file-pathname should handle this
-          for out = (make-pathname :type "fasl" :defaults output
-                                   :name (pathname-name absolute))
-          do (cross-compile-file absolute :output-file out)))
-  ;; link goes here
-  )
+  (apply #'maclina.compile-file:link-fasls
+         (make-pathname :name "clasp" :type "fasl" :defaults output)
+         (maclina.compile:with-compilation-unit ()
+           (loop with kernel = (asdf:system-relative-pathname
+                                :cross-clasp "kernel/")
+                 for file in *files*
+                 for absolute = (merge-pathnames file kernel)
+                 ;; FIXME: maclina compile-file-pathname should handle this
+                 for out = (make-pathname :type "fasl" :defaults output
+                                          :name (pathname-name absolute))
+                 collect (cross-compile-file absolute :output-file out)))))
