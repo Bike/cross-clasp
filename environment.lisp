@@ -57,10 +57,18 @@
              do (clostrum:make-variable m:*client* *build-rte* s)))))
   (values))
 
+(defun core::*make-special (var)
+  (clostrum:make-variable m:*client* *build-rte* var))
+
 (defmethod common-macro-definitions:proclaim
     ((client client) declspec env)
   (declare (ignore env))
-  `(cl:proclaim ',declspec))
+  (if (and (consp declspec) (eq (car declspec) 'special))
+      ;; special case this so clasp can load it early.
+      `(progn
+         ,@(loop for s in (rest declspec)
+                 collect `(core::*make-special ',s)))
+      nil #+(or)`(cl:proclaim ',declspec)))
 
 (defun fdesignator (designator)
   (etypecase designator
@@ -114,13 +122,27 @@
           (clostrum:find-package client environment "KEYWORD") kw)))
 
 ;;; FIXME: defconstant should really be in common macros.
-(defun core::make-constant (name value)
-  (clostrum:make-constant m:*client* *build-rte* name value))
+(defun core::symbol-constantp (name)
+  (clostrum:constantp m:*client* *build-rte* name))
+(defun (setf core::symbol-constantp) (value name)
+  (when value
+    (clostrum:make-constant m:*client* *build-rte* name
+                            (m:symbol-value m:*client* *build-rte* name)))
+  value)
 
 (defmacro %defconstant (name value &optional doc)
   (declare (ignore doc))
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (core::make-constant ',name ,value)))
+     (set ',name ,value)
+     (funcall #'(setf core::symbol-constantp) t ',name)
+     #+(or)
+     (core::make-constant ',name ,value)
+     ',name))
+
+(defun core::make-simple-vector-t (dimension initial-element iep)
+  (if iep
+      (make-array dimension :initial-element initial-element)
+      (make-array dimension)))
 
 (defun features ()
   '(:clasp :unicode :clos :ansi-cl :common-lisp))
@@ -135,14 +157,16 @@
   (loop for vname in '(*features*
                        core::*condition-restarts* core::*restart-clusters*)
         do (clostrum:make-variable client rte vname))
-  (loop for fname in '(core::make-constant
+  (loop for fname in '(core::symbol-constantp (setf core::symbol-constantp)
+                       core::*make-special
                        core::find-declarations core:process-declarations
                        core::dm-too-many-arguments core::dm-too-few-arguments
                        ext:parse-macro
                        ;; FIXME: Used in common-macros defmacro expansions
                        ecclesia:list-structure
                        ext:parse-compiler-macro ext:parse-deftype
-                       ext:parse-define-setf-expander)
+                       ext:parse-define-setf-expander
+                       core::make-simple-vector-t)
         for f = (fdefinition fname)
         do (setf (clostrum:fdefinition client rte fname) f))
   (loop for (fname . src) in '((cl:proclaim . proclaim))
