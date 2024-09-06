@@ -18,6 +18,8 @@
     "lsp/numlib.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
+    ;; macros
+    "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"
     #+(or)"lsp/loop2.lisp"))
 

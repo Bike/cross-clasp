@@ -1,5 +1,15 @@
 (in-package #:core)
 
+;;; based on the stupidly named export.lisp in clasp sources
+
+;;; Don't interrupt builder macros.
+(eval-when (:load-toplevel :execute)
+
+(defmacro when (condition &body forms)
+  `(if ,condition (progn ,@forms) nil))
+(defmacro unless (condition body forms)
+  `(if ,condition nil (progn ,@forms)))
+
 (defun expand-while-until (test body jmp-op)
   (let ((label (gensym))
         (exit (gensym)))
@@ -85,3 +95,4 @@
   (expand-do/do* 'do vars test result body))
 (defmacro do* ((&rest vars) (test &rest result) &body body)
   (expand-do/do* 'do* vars test result body))
+) ; eval-when
