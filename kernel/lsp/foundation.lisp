@@ -124,9 +124,12 @@
 (defun warn (x &rest args)
   (core:fmt t "WARN: {} {}%N" x args))
 
+(defun (setf documentation) (doc object doc-type)
+  (declare (ignore object doc-type))
+  doc)
 
 (defun class-name (x)
   (core:name-of-class x))
-
+;;#+(or) ; really inconvenient when debugging, but important later
 (defun invoke-debugger (cond)
   (core:invoke-internal-debugger cond))
