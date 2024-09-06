@@ -1,7 +1,8 @@
 (defpackage #:cross-clasp.clasp.core
   (:use #:cl)
   (:export #:+type-header-value-map+ #:header-stamp)
-  (:export #:vaslist-length #:vaslist-pop)
+  (:export #:vaslistp #:vaslist-length #:vaslist-pop
+           #:list-from-vaslist)
   (:export #:operator-shadowed-p #:process-declarations)
   (:export #:simple-program-error)
   (:export #:lambda-name)
@@ -24,7 +25,23 @@
   (:export #:thread-local-write-to-string-output-stream
            #:get-thread-local-write-to-string-output-stream-string
            #:write-addr)
-  (:export #:invoke-internal-debugger))
+  (:export #:file-scope #:file-scope-pathname)
+  (:export #:set-breakstep #:unset-breakstep #:breakstepping-p
+           #:invoke-internal-debugger)
+  (:export #:call-with-frame #:primitive-print-backtrace
+           #:debugger-frame-up #:debugger-frame-down
+           #:debugger-frame-fname #:debugger-frame-source-position
+           #:debugger-frame-function-description #:debugger-frame-lang
+           #:debugger-frame-closure #:debugger-frame-xep-p
+           #:debugger-frame-args-available-p #:debugger-frame-args
+           #:debugger-frame-locals)
+  (:export #:function-description-lambda-list
+           #:function-description-source-pathname
+           #:function-description-lineno #:function-description-column
+           #:function-description-docstring)
+  (:export #:make-source-pos-info
+           #:source-pos-info-lineno #:source-pos-info-column
+           #:source-pos-info-file-handle))
 
 (defpackage #:cross-clasp.clasp.gctools
   (:use #:cl)
@@ -49,6 +66,8 @@
   (:export #:specialp)
   (:export #:check-arguments-type)
   (:export #:ansi-stream)
+  (:export #:+process-standard-output+)
+  (:export #:constant-form-value)
   (:export #:with-current-source-form)
   (:export #:parse-define-setf-expander #:setf-expander)
   (:export #:parse-deftype)

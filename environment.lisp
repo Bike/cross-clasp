@@ -84,6 +84,34 @@
   (extrinsicl:macroexpand m:*client* (or env *build-rte*)
                           (macroexpand-hook) form))
 
+;;; make a package in the build environment.
+;;; this basically entails resolving all names with respect to that
+;;; environment, and then making a host package with CROSS-CLASP.CLASP.
+;;; prepended to the name.
+(defun %make-package (package-name &key nicknames use)
+  (let* ((name (string package-name))
+         (hname (concatenate 'string "CROSS-CLASP.CLASP." name))
+         (use
+           (loop for u in use
+                 for s = (string u)
+                 collect (or (clostrum:find-package
+                              m:*client* *build-rte* s)
+                           (error "Tried to use undefined package ~s" s))))
+         (_ (delete-package hname)) ; fuck it
+         (package (cl:make-package hname :use use)))
+    (declare (ignore _))
+    (setf (clostrum:package-name m:*client* *build-rte* package) name
+          (clostrum:find-package m:*client* *build-rte* name) package)
+    (loop for nick in nicknames
+          for snick = (string nick)
+          do (setf (clostrum:find-package m:*client* *build-rte* snick)
+                   package))
+    package))
+
+;;; We ignore package locks for now
+(defun ext:add-implementation-package (implementors &optional package)
+  (declare (ignore implementors package)))
+
 (defmethod common-macro-definitions:get-setf-expansion
     ((client client) place &optional environment)
   (let ((env (or environment *build-rte*)))
@@ -166,10 +194,12 @@
                        ecclesia:list-structure
                        ext:parse-compiler-macro ext:parse-deftype
                        ext:parse-define-setf-expander
+                       ext:add-implementation-package
                        core::make-simple-vector-t)
         for f = (fdefinition fname)
         do (setf (clostrum:fdefinition client rte fname) f))
-  (loop for (fname . src) in '((cl:proclaim . proclaim))
+  (loop for (fname . src) in '((cl:proclaim . proclaim)
+                               (cl:make-package . %make-package))
         for f = (fdefinition src)
         do (setf (clostrum:fdefinition client rte fname) f))
   (loop for fname in '(core::generalp core:header-stamp

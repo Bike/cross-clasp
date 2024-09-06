@@ -13,6 +13,8 @@
     "lsp/seq.lisp"
     "lsp/seqlib.lisp"
     "lsp/iolib.lisp"
+    "lsp/trace.lisp"
+    "lsp/debug.lisp"
     "lsp/numlib.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
