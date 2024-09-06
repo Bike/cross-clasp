@@ -33,13 +33,23 @@ Builds a new function which accepts any number of arguments but always outputs N
     (t #'(lambda (&rest x) (declare (ignore x)) n))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
-  (defparameter *subtypep-cache* (make-array 256 :initial-element nil))
+  (defparameter *subtypep-cache* (core:make-simple-vector-t 256 nil nil))
   (defparameter *upgraded-array-element-type-cache*
-    (make-array 128 :initial-element nil))
+    (core:make-simple-vector-t 128 nil nil))
+  #+(or)
+  (defparameter *subtypep-cache* (make-array 256 :initial-element nil))
+  #+(or)
+  (defparameter *upgraded-array-element-type-cache*
+    (make-array 128 :initial-element nil)))
 
+(eval-when (:compile-toplevel)
   (defun subtypep-clear-cache ()
     (fill *subtypep-cache* nil)
     (fill *upgraded-array-element-type-cache* nil)))
+(eval-when (:load-toplevel :execute)
+  (defun subtypep-clear-cache ()
+    (fill-array-with-elt *subtypep-cache* nil 0 nil)
+    (fill-array-with-elt *upgraded-array-element-type-cache* nil 0 nil)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun create-type-name (name)
