@@ -175,6 +175,49 @@
 (defun features ()
   '(:clasp :unicode :clos :ansi-cl :common-lisp))
 
+(defparameter *noted-functions*
+  '(core::generalp core:header-stamp
+    ext:specialp
+    core:function-name
+    core::coerce-to-function core::coerce-fdesignator
+    core::fixnump
+    core:num-op-acosh core:num-op-asinh
+    core:num-op-atanh
+    core:num-op-acos core:num-op-asin core:num-op-atan
+    core::member1
+    core::sequence-start-end
+    core:vref (setf core:vref)
+    core::copy-subarray core:replace-array
+    core:data-vector-p
+    core:sbv-bit-and core:sbv-bit-ior
+    core:sbv-bit-nor core:sbv-bit-nand
+    core:sbv-bit-xor core:sbv-bit-eqv
+    core:sbv-bit-andc1 core:sbv-bit-andc2
+    core:sbv-bit-orc1 core:sbv-bit-orc2
+    core:sbv-bit-not
+    core::%displacement core::%displaced-index-offset
+    core::make-vector core::make-mdarray
+    core::fill-array-with-elt
+    core::base-string-p core::base-string-concatenate
+    core::search-string
+    core:hash-table-pairs core:hash-eql
+    core::coerce-to-package core::package-hash-tables
+    clos::classp core::subclassp core:name-of-class
+    core::get-sysprop (setf core::get-sysprop)
+    core::write-object core:write-addr
+    core:get-thread-local-write-to-string-output-stream-string
+    core:thread-local-write-to-string-output-stream
+    core:fmt core::gdb core::mkdir core::file-kind
+    core:invoke-internal-debugger
+    core:debugger-frame-up core:debugger-frame-down
+    core:debugger-frame-fname core:debugger-frame-source-position
+    core:debugger-frame-function-description core:debugger-frame-lang
+    core:debugger-frame-closure core:debugger-frame-xep-p
+    core:debugger-frame-args-available-p core:debugger-frame-args
+    core:debugger-frame-locals
+    core:unix-get-local-time-zone core:unix-daylight-saving-time
+    gc:thread-local-unwind-counter gc:bytes-allocated))
+
 (defun install-environment (&optional (client m:*client*)
                               (rte *build-rte*)
                               (ce *build-ce*))
@@ -202,41 +245,7 @@
                                (cl:make-package . %make-package))
         for f = (fdefinition src)
         do (setf (clostrum:fdefinition client rte fname) f))
-  (loop for fname in '(core::generalp core:header-stamp
-                       ext:specialp
-                       core:function-name
-                       core::coerce-to-function core::coerce-fdesignator
-                       core::fixnump
-                       core:num-op-acosh core:num-op-asinh
-                       core:num-op-atanh
-                       core:num-op-acos core:num-op-asin core:num-op-atan
-                       core::member1
-                       core::sequence-start-end
-                       core:vref (setf core:vref)
-                       core::copy-subarray core:replace-array
-                       core:data-vector-p
-                       core:sbv-bit-and core:sbv-bit-ior
-                       core:sbv-bit-nor core:sbv-bit-nand
-                       core:sbv-bit-xor core:sbv-bit-eqv
-                       core:sbv-bit-andc1 core:sbv-bit-andc2
-                       core:sbv-bit-orc1 core:sbv-bit-orc2
-                       core:sbv-bit-not
-                       core::%displacement core::%displaced-index-offset
-                       core::make-vector core::make-mdarray
-                       core::fill-array-with-elt
-                       core::base-string-p core::base-string-concatenate
-                       core::search-string
-                       core:hash-table-pairs core:hash-eql
-                       core::coerce-to-package core::package-hash-tables
-                       clos::classp core::subclassp core:name-of-class
-                       core::get-sysprop (setf core::get-sysprop)
-                       core::write-object core:write-addr
-                       core:get-thread-local-write-to-string-output-stream-string
-                       core:thread-local-write-to-string-output-stream
-                       core:fmt core::gdb core::mkdir core::file-kind
-                       core:invoke-internal-debugger
-                       core:unix-get-local-time-zone core:unix-daylight-saving-time
-                       gc:thread-local-unwind-counter gc:bytes-allocated)
+  (loop for fname in *noted-functions*
         do (clostrum:note-function client rte fname))
   (loop for mname in '(eclector.reader:quasiquote
                        ext:with-current-source-form
