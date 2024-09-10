@@ -28,6 +28,22 @@
 (defmacro ext:with-current-source-form ((&rest forms) &body body)
   `(progn ,@forms ,@body))
 
+(defmacro %handler-bind (bindings &body forms)
+  `(let ((core::*handler-clusters*
+           (cons (list ,@(mapcar #'(lambda (binding)
+                                     (ext:with-current-source-form (binding)
+                                       (unless (and (listp binding)
+                                                    (= (length binding) 2))
+                                         (error
+                                          "Ill-formed handler binding ~s."
+                                          binding))
+                                       `(cons (lambda (condition)
+                                                (typep condition ',(car binding)))
+                                              ,(cadr binding))))
+                                 bindings))
+                 core::*handler-clusters*)))
+     ,@forms))
+
 (defun munge-restart-case-clause (clause)
   (ext:with-current-source-form (clause)
     (destructuring-bind (name lambda-list . body) clause

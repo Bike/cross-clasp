@@ -21,13 +21,18 @@
   (:export #:num-op-asin #:num-op-acos #:num-op-atan
            #:num-op-asinh #:num-op-acosh #:num-op-atanh)
   (:export #:function-name)
+  (:export #:allocate-standard-instance)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
   (:export #:thread-local-write-to-string-output-stream
            #:get-thread-local-write-to-string-output-stream-string
            #:write-addr)
+  (:export #:*echo-repl-tpl-read*)
+  (:export #:signal-servicing)
+  (:export #:noprint-p #:noinform-p)
   (:export #:file-scope #:file-scope-pathname)
+  (:export #:interpret)
   (:export #:set-breakstep #:unset-breakstep #:breakstepping-p
-           #:invoke-internal-debugger)
+           #:invoke-internal-debugger #:debugger-disabled-p)
   (:export #:call-with-frame #:primitive-print-backtrace
            #:debugger-frame-up #:debugger-frame-down
            #:debugger-frame-fname #:debugger-frame-source-position
@@ -49,6 +54,17 @@
 
 (defpackage #:cross-clasp.clasp.mp
   (:use #:cl)
+  (:local-nicknames (#:core #:cross-clasp.clasp.core))
+  (:export #:make-lock #:get-lock #:giveup-lock)
+  (:export #:shared-lock #:write-lock
+           #:shared-unlock #:write-unlock)
+  (:export #:make-condition-variable
+           #:condition-variable-wait #:condition-variable-signal)
+  (:export #:with-lock #:with-rwlock
+           #:without-interrupts #:with-interrupts)
+  (:export #:*current-process* #:all-processes
+           #:process-name #:process-active-p
+           #:interrupt-process #:process-suspend #:process-resume)
   (:export #:get-atomic-expansion #:define-atomic-expander))
 
 (defpackage #:cross-clasp.clasp.clos
@@ -73,9 +89,12 @@
   (:export #:parse-deftype)
   (:export #:parse-macro #:parse-compiler-macro)
   (:export #:array-index)
+  (:export #:interactive-interrupt)
   (:export #:add-package-local-nickname #:add-implementation-package
            #:lock-package)
-  (:export #:*ed-functions*))
+  (:export #:*ed-functions*)
+  (:export #:*invoke-debugger-hook*)
+  (:export #:tpl-frame #:tpl-argument #:tpl-arguments))
 
 (defpackage #:cross-clasp
   (:use #:cl)
@@ -87,4 +106,5 @@
   (:shadow #:proclaim)
   (:export #:client)
   (:export #:fill-environment)
+  (:export #:find-compiler-class)
   (:export #:build))
