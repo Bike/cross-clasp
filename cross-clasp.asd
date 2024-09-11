@@ -4,5 +4,7 @@
                (:file "macrology" :depends-on ("packages"))
                (:file "condition-system-macros" :depends-on ("packages"))
                (:file "mp-macros" :depends-on ("macrology" "packages"))
+               (:file "clos-cpl" :depends-on ("packages"))
+               (:file "clos-early-macros" :depends-on ("packages"))
                (:file "environment" :depends-on ("packages"))
                (:file "build" :depends-on ("packages"))))

@@ -2,6 +2,7 @@
 
 (defparameter *files*
   '("lsp/foundation.lisp"
+    "clos/hierarchy.lisp"
     ;;"lsp/export.lisp"
     "lsp/assert.lisp"
     "lsp/arraylib.lisp"
@@ -18,6 +19,7 @@
     "lsp/numlib.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
+    #+(or)"lsp/top.lisp"
     ;; macros
     "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"

@@ -21,7 +21,12 @@
   (:export #:num-op-asin #:num-op-acos #:num-op-atan
            #:num-op-asinh #:num-op-acosh #:num-op-atanh)
   (:export #:function-name)
-  (:export #:allocate-standard-instance)
+  (:export #:allocate-standard-instance #:allocate-raw-instance
+           #:class-stamp-for-instances
+           #:class-new-stamp #:instance-sig-set
+           #:make-rack #:rack-ref #:instance-rack)
+  (:export #:setf-find-class)
+  (:export #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
   (:export #:thread-local-write-to-string-output-stream
            #:get-thread-local-write-to-string-output-stream-string
@@ -46,7 +51,8 @@
            #:function-description-docstring)
   (:export #:make-source-pos-info
            #:source-pos-info-lineno #:source-pos-info-column
-           #:source-pos-info-file-handle))
+           #:source-pos-info-file-handle)
+  (:export #:unbound))
 
 (defpackage #:cross-clasp.clasp.gctools
   (:use #:cl)
@@ -56,7 +62,8 @@
   (:use #:cl)
   (:local-nicknames (#:core #:cross-clasp.clasp.core))
   (:export #:make-lock #:get-lock #:giveup-lock)
-  (:export #:shared-lock #:write-lock
+  (:export #:make-shared-mutex
+           #:shared-lock #:write-lock
            #:shared-unlock #:write-unlock)
   (:export #:make-condition-variable
            #:condition-variable-wait #:condition-variable-signal)
@@ -68,7 +75,8 @@
   (:export #:get-atomic-expansion #:define-atomic-expander))
 
 (defpackage #:cross-clasp.clasp.clos
-  (:use #:cl))
+  (:use #:cl)
+  (:local-nicknames (#:core #:cross-clasp.clasp.core)))
 
 (defpackage #:cross-clasp.clasp.sequence
   (:use #:cl)
@@ -102,6 +110,7 @@
                     (#:core #:cross-clasp.clasp.core)
                     (#:clos #:cross-clasp.clasp.clos)
                     (#:gc #:cross-clasp.clasp.gctools)
+                    (#:mp #:cross-clasp.clasp.mp)
                     (#:ext #:cross-clasp.clasp.ext))
   (:shadow #:proclaim)
   (:export #:client)

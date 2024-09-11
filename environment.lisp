@@ -84,6 +84,9 @@
   (extrinsicl:macroexpand m:*client* (or env *build-rte*)
                           (macroexpand-hook) form))
 
+(defun find-compiler-class (name)
+  (clostrum:find-class m:*client* *build-rte* name t))
+
 ;;; make a package in the build environment.
 ;;; this basically entails resolving all names with respect to that
 ;;; environment, and then making a host package with CROSS-CLASP.CLASP.
@@ -202,9 +205,19 @@
     core::search-string
     core:hash-table-pairs core:hash-eql
     core::coerce-to-package core::package-hash-tables
+    core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class
+    core:allocate-raw-instance core:class-stamp-for-instances
+    core:make-rack core:rack-ref (setf core:rack-ref)
+    clos::standard-instance-access
+    (setf clos::standard-instance-access)
+    clos::funcallable-standard-instance-access
+    (setf clos::funcallable-standard-instance-access)
+    core:instance-rack core:instance-sig-set
+    core:setf-find-class
     core::get-sysprop (setf core::get-sysprop)
     core::write-object core:write-addr
+    mp:make-shared-mutex
     core:get-thread-local-write-to-string-output-stream-string
     core:thread-local-write-to-string-output-stream
     core:fmt core::gdb core::mkdir core::file-kind
@@ -216,7 +229,8 @@
     core:debugger-frame-args-available-p core:debugger-frame-args
     core:debugger-frame-locals
     core:unix-get-local-time-zone core:unix-daylight-saving-time
-    gc:thread-local-unwind-counter gc:bytes-allocated))
+    gc:thread-local-unwind-counter gc:bytes-allocated
+    core:unbound))
 
 (defun install-environment (&optional (client m:*client*)
                               (rte *build-rte*)
@@ -252,15 +266,25 @@
                        core::with-clean-symbols core::with-unique-names
                        core::once-only
                        core::defconstant-eqx core::defconstant-equal
-                       core::while core::until)
+                       core::while core::until
+                       clos::with-early-accessors
+                       clos::early-initialize-instance
+                       clos::early-make-instance
+                       clos::with-mutual-defclass)
         for m = (macro-function mname)
         do (setf (clostrum:macro-function client rte mname) m))
   (loop for (mname . src) in '((defconstant . %defconstant)
+                               (defclass . clos::early-defclass)
+                               (handler-bind . %handler-bind)
                                (restart-case . %restart-case)
                                (restart-bind . %restart-bind)
                                (with-condition-restarts . %with-condition-restarts))
         for m = (macro-function src)
         do (setf (clostrum:macro-function client rte mname) m))
+  ;; Extrinsicl copies over a bunch of classes, but we actually need
+  ;; to use our own instead.
+  (loop for s being the external-symbols of "CL"
+        do (setf (clostrum:find-class client rte s) nil))
   (values))
 
 (defun initialize ()
