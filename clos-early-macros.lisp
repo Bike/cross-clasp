@@ -462,9 +462,14 @@
                             ,(initialize-class-form 'class class)))
          ;; Finally, go through the classes setting the sigs of
          ;; their slotds, which did not exist when they were created.
+         ;; Also set the sigs of the classes themselves. This is
+         ;; necessary because they were created when their classes
+         ;; didn't yet have slots. I don't understand how the existing
+         ;; bootstrap code does or avoids this.
          (with-early-accessors (std-class)
            ,@(loop for (name . class) in compiler-classes
                    collect `(let ((class (find-class ',name)))
+                              (core:instance-sig-set class)
                               (loop for s in (class-slots class)
                                     do (core:instance-sig-set s))
                               (loop for s in (class-direct-slots class)
