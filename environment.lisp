@@ -100,7 +100,8 @@
                  collect (or (clostrum:find-package
                               m:*client* *build-rte* s)
                            (error "Tried to use undefined package ~s" s))))
-         (_ (delete-package hname)) ; fuck it
+         (_ (when (find-package hname)
+              (delete-package hname))) ; fuck it
          (package (cl:make-package hname :use use)))
     (declare (ignore _))
     (setf (clostrum:package-name m:*client* *build-rte* package) name
