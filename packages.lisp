@@ -115,5 +115,5 @@
   (:shadow #:proclaim)
   (:export #:client)
   (:export #:fill-environment)
-  (:export #:find-compiler-class)
+  (:export #:find-compiler-class #:gf-info)
   (:export #:build))

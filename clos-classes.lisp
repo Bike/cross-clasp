@@ -12,7 +12,6 @@
    (%default-initargs :accessor default-initargs)
    (%metaclass :initarg :metaclass :reader metaclass)))
 
-;;; for debugging
 (defmethod print-object ((o compiler-class) stream)
   (print-unreadable-object (o stream :type t)
     (write (name o) :stream stream))
@@ -28,11 +27,55 @@
    (%type :initarg :type :initform t :reader stype)
    (%location :initarg :location :initform nil :reader location)))
 
-;;; also for debugging
 (defmethod print-object ((o compiler-slotd) stream)
   (print-unreadable-object (o stream :type t)
     (write (name o) :stream stream))
   o)
+
+(defclass compiler-method-combination ()
+  ((%name :initarg :name :reader name)
+   (%options :initarg :options :reader options)))
+
+;;; we could cache these but meh
+(defun ensure-method-combination (spec)
+  (make-instance 'compiler-method-combination
+    :name (first spec) :options (rest spec)))
+
+(defclass compiler-generic ()
+  ((%name :initarg :name :reader name)
+   (%lambda-list :initarg :lambda-list :reader lambda-list)
+   (%apo :initarg :apo :reader apo) ; argument precedence order
+   (%method-combination :initarg :method-combination
+                        :reader gf-method-combination
+                        :type compiler-method-combination)
+   (%method-class :initarg :method-class :reader method-class)
+   (%declarations :initarg :declarations :reader declarations)
+   (%gf-class :initarg :class :reader gf-class)
+   (%methods :initarg :methods :initform () :accessor methods)))
+
+(defmethod print-object ((o compiler-generic) stream)
+  (print-unreadable-object (o stream :type t)
+    (write (name o) :stream stream))
+  o)
+
+(defclass compiler-method ()
+  ((%gf :initarg :gf :reader gf)
+   (%lambda-list :initarg :lambda-list :reader lambda-list)
+   (%specializers :initarg :specializers :reader specializers)
+   (%qualifiers :initarg :qualifiers :reader qualifiers)
+   (%mclass :initarg :class :reader mclass)))
+
+(defmethod print-object ((o compiler-method) stream)
+  (print-unreadable-object (o stream :type t)
+    (format stream "~s ~{~s ~}(~{~s~^ ~})"
+            (name (gf o)) (qualifiers o)
+            (mapcar #'name (specializers o))))
+  o)
+
+(defclass compiler-accessor (compiler-method)
+  ((%slot :initarg :slot :reader slot)))
+(defclass compiler-reader (compiler-accessor) ())
+(defclass compiler-writer (compiler-accessor) ())
 
 (defun parse-slot-specifier (slot-specifier)
   (etypecase slot-specifier
@@ -367,11 +410,64 @@
              (class-size ,var) ,(length (slots class))))
      ,var))
 
+;;; Return a list of forms to install accessors in the compilation
+;;; environment. Note that no generics are defined in the _load_
+;;; environment until way later.
+(defun build-note-accessors (class &optional (find-class
+                                              #'cross-clasp:find-compiler-class))
+  (loop with rll = (list (name class))
+        with wll = (list 'new (name class))
+        for slot in (slots class)
+        nconc (loop for reader in (readers slot)
+                    for egf = (cross-clasp:gf-info reader)
+                    for gf = (or egf
+                               (make-instance 'compiler-generic
+                                 :name reader :lambda-list rll
+                                 :apo rll
+                                 :method-combination '(standard)
+                                 :method-class (funcall find-class 'standard-method)
+                                 :declarations ()
+                                 :class (funcall find-class 'standard-generic-function)))
+                    for method = (make-instance 'compiler-reader
+                                   :gf gf :lambda-list rll
+                                   :qualifiers () :slot slot
+                                   :specializers (list class)
+                                   :class (funcall find-class 'standard-reader-method))
+                    unless egf
+                      collect `(note-generic ',reader ,gf)
+                    collect `(note-method ,gf ,method))
+        nconc (loop for writer in (writers slot)
+                    for egf = (cross-clasp:gf-info writer)
+                    for gf = (or egf
+                               (make-instance 'compiler-generic
+                                 :name writer :lambda-list wll
+                                 :apo wll
+                                 :method-combination '(standard)
+                                 :method-class (funcall find-class 'standard-method)
+                                 :declarations ()
+                                 :class (funcall find-class 'standard-generic-function)))
+                    for method = (make-instance 'compiler-writer
+                                   :gf gf :lambda-list wll
+                                   :qualifiers () :slot slot
+                                   :specializers (list (funcall find-class 't)
+                                                       class)
+                                   :class (funcall find-class 'standard-writer-method))
+                    unless egf
+                      collect `(note-generic ',writer ,gf)
+                    collect `(note-method ,gf ,method))))
+
+;;; note-generic is defined in environment
+(defun note-method (compiler-generic compiler-method)
+  ;; TODO: Sanity checks
+  (push compiler-method (methods compiler-generic))
+  (values))
+
 (defmacro early-defclass (name (&rest supers) (&rest slotds) &rest options)
   (let ((class (make-compiler-class name supers slotds options)))
     `(progn
        (eval-when (:compile-toplevel)
-         (setf (find-class ',name) ,class))
+         (setf (find-class ',name) ,class)
+         ,@(build-note-accessors class))
        (eval-when (:load-toplevel :execute)
          (let ((class
                   (or (find-class ',name nil)
@@ -414,18 +510,19 @@
   ;; Note that we refer back to this list rather than doing
   ;; (setf find-class) at macroexpansion time, so that expanding this
   ;; macro does not have or rely on side effects.
-  (let ((compiler-classes
-          (loop for (_ name) in body
-                for class = (make-instance 'compiler-class :name name)
-                collect (cons name class))))
+  (let* ((compiler-classes
+           (loop for (_ name) in body
+                 for class = (make-instance 'compiler-class :name name)
+                 collect (cons name class)))
+         (find-class (lambda (name)
+                       (or (cdr (assoc name compiler-classes))
+                         (error "No class: ~s" name)))))
     ;; initialize the classes
     (loop for (_1 _2 supers slotds . options) in body
           for (name . cclass) in compiler-classes
           do (initialize-compiler-class
               cclass name supers slotds options
-              :find-class (lambda (name)
-                            (or (cdr (assoc name compiler-classes))
-                              (error "No class: ~s" name)))))
+              :find-class find-class))
     ;; and finalize their inheritance.
     (loop for (_ . cclass) in compiler-classes
           unless (finalizedp cclass) do (finalize-inheritance cclass))
@@ -433,7 +530,9 @@
     `(progn
        (eval-when (:compile-toplevel)
          ,@(loop for (name . class) in compiler-classes
-                 collect `(setf (find-class ',name) ',class)))
+                 collect `(setf (find-class ',name) ',class))
+         ,@(loop for (_ . class) in compiler-classes
+                 nconc (build-note-accessors class find-class)))
        (eval-when (:load-toplevel :execute)
          ;; Here is what the FASL is actually going to do.
          ;; First, make all the classes. We already have all class sizes,

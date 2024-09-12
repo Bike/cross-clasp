@@ -102,43 +102,14 @@
   (;; see effective-accessor.lisp
    (%effective-readers :initform nil :reader %direct-slotd-effective-readers)
    (%effective-writers :initform nil :reader %direct-slotd-effective-writers)))
-) ; with-mutual-defclass
-
-;;; Enough classes now exist that we can use the "real" but still
-;;; early defclass macro (does not invoke generics, etc.).
 
 (defclass funcallable-standard-class (std-class) ())
-
-;;; These should really be cut down - I mean, since when do they have
-;;; a need for finalizedp and default initargs?
-(defclass forward-referenced-class (std-class) ())
-(defclass core:cxx-class (std-class) ())
-(defclass core:clbind-cxx-class (std-class) ())
-(defclass core:derivable-cxx-class (std-class) ())
-
-(defclass eql-specializer (specializer)
-  ((object :initarg :object :reader eql-specializer-object)))
-
-;;; maybe also needs trimming?
-(defclass structure-class (std-class)
-  ;; Note that we don't need some of the class-slots, e.g. initargs, so we
-  ;; could hypothetically reorganize things.
-  ;; We also don't really need any of these slots, but it might be good to have
-  ;; some kind of structure to represent descriptions of structures later.
-  (slot-descriptions
-   initial-offset
-   constructors))
 
 (defclass function () () (:metaclass built-in-class))
 
 (defclass funcallable-standard-object (function standard-object)
   ()
   (:metaclass funcallable-standard-class))
-
-(defclass method-combination (metaobject)
-  ((name :initarg :name :accessor method-combination-name)
-   (compiler :initarg :compiler :accessor method-combination-compiler)
-   (options :initarg :options :accessor method-combination-options)))
 
 (defclass generic-function (metaobject funcallable-standard-object)
   ()
@@ -240,3 +211,32 @@
 
 (defclass standard-reader-method (standard-accessor-method) ())
 (defclass standard-writer-method (standard-accessor-method) ())
+) ; with-mutual-defclass
+
+;;; Enough classes now exist that we can use the "real" but still
+;;; early defclass macro (does not invoke generics, etc.).
+
+(defclass method-combination (metaobject)
+  ((name :initarg :name :accessor method-combination-name)
+   (compiler :initarg :compiler :accessor method-combination-compiler)
+   (options :initarg :options :accessor method-combination-options)))
+
+;;; These should really be cut down - I mean, since when do they have
+;;; a need for finalizedp and default initargs?
+(defclass forward-referenced-class (std-class) ())
+(defclass core:cxx-class (std-class) ())
+(defclass core:clbind-cxx-class (std-class) ())
+(defclass core:derivable-cxx-class (std-class) ())
+
+(defclass eql-specializer (specializer)
+  ((object :initarg :object :reader eql-specializer-object)))
+
+;;; maybe also needs trimming?
+(defclass structure-class (std-class)
+  ;; Note that we don't need some of the class-slots, e.g. initargs, so we
+  ;; could hypothetically reorganize things.
+  ;; We also don't really need any of these slots, but it might be good to have
+  ;; some kind of structure to represent descriptions of structures later.
+  (slot-descriptions
+   initial-offset
+   constructors))

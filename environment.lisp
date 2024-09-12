@@ -87,6 +87,20 @@
 (defun find-compiler-class (name)
   (clostrum:find-class m:*client* *build-rte* name t))
 
+(defun gf-info (name)
+  ;; stuffed into inline data for now
+  (let ((dat (clostrum:operator-inline-data m:*client* *build-rte*
+                                            name)))
+    (etypecase dat
+      ((or null clos::compiler-generic) dat)
+      (t (error "Not a generic: ~s" name)))))
+
+(defun clos::note-generic (name compiler-generic)
+  (clostrum:note-function m:*client* *build-rte* name)
+  (setf (clostrum:operator-inline-data m:*client* *build-rte* name)
+        compiler-generic)
+  (values))
+
 ;;; make a package in the build environment.
 ;;; this basically entails resolving all names with respect to that
 ;;; environment, and then making a host package with CROSS-CLASP.CLASP.
@@ -248,6 +262,9 @@
                        core::find-declarations core:process-declarations
                        core::dm-too-many-arguments core::dm-too-few-arguments
                        ext:parse-macro
+                       ;; used in CLOS, not expected to actually exist
+                       ;; in the target
+                       clos::note-generic clos::note-method
                        ;; FIXME: Used in common-macros defmacro expansions
                        ecclesia:list-structure
                        ext:parse-compiler-macro ext:parse-deftype
