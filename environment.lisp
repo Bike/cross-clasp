@@ -286,6 +286,7 @@
                        core::defconstant-eqx core::defconstant-equal
                        core::while core::until
                        clos::with-early-accessors
+                       clos::early-allocate-instance
                        clos::early-initialize-instance
                        clos::early-make-instance
                        clos::with-mutual-defclass)

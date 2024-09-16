@@ -240,3 +240,7 @@
   (slot-descriptions
    initial-offset
    constructors))
+
+(defclass structure-object (t)
+  ()
+  (:metaclass structure-class))

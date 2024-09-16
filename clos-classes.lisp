@@ -278,6 +278,20 @@
     (standard-class 'standard-instance-access)
     (funcallable-standard-class 'funcallable-standard-instance-access)))
 
+(defun expand-early-allocate-instance (class)
+  `(let* ((class (find-class ',(name class)))
+          (slotds (with-early-accessors (std-class)
+                    (class-slots class)))
+          (size (length slotds))
+          (stamp (core:class-stamp-for-instances class)))
+     (core:allocate-raw-instance
+      class
+      (core:make-rack
+       size slotds stamp (core:unbound)))))
+
+(defmacro early-allocate-instance (class-name)
+  (expand-early-allocate-instance (cross-clasp:find-compiler-class class-name)))
+
 (defmacro early-initialize-instance (class-name object &rest initargs)
   (let* ((class (cross-clasp:find-compiler-class class-name))
          ;; FIXME: This won't actually work since it can trip the
@@ -417,7 +431,7 @@
                                               #'cross-clasp:find-compiler-class))
   (loop with rll = (list (name class))
         with wll = (list 'new (name class))
-        for slot in (slots class)
+        for slot in (direct-slots class)
         nconc (loop for reader in (readers slot)
                     for egf = (cross-clasp:gf-info reader)
                     for gf = (or egf
@@ -462,29 +476,24 @@
   (push compiler-method (methods compiler-generic))
   (values))
 
-(defmacro early-defclass (name (&rest supers) (&rest slotds) &rest options)
-  (let ((class (make-compiler-class name supers slotds options)))
+(defun expand-early-defclass (class)
+  (let ((name (name class)))
     `(progn
        (eval-when (:compile-toplevel)
          (setf (find-class ',name) ,class)
          ,@(build-note-accessors class))
        (eval-when (:load-toplevel :execute)
          (let ((class
-                  (or (find-class ',name nil)
-                    (let* ((metaclass (find-class ',(name (metaclass class))))
-                           (slotds (with-early-accessors (std-class)
-                                     (class-slots metaclass)))
-                           (size (length slotds))
-                           (stamp (core:class-stamp-for-instances metaclass)))
-                      (core:allocate-raw-instance
-                       metaclass
-                       (core:make-rack
-                        size slotds stamp (core:unbound)))))))
+                 (or (find-class ',name nil)
+                   ,(expand-early-allocate-instance (metaclass class)))))
            ;; Install class.
            ;; we do this first so the CPL can refer to the class.
            (core:setf-find-class class ',name)
            ;; Initialize rack slots.
            ,(initialize-class-form 'class class))))))
+
+(defmacro early-defclass (name (&rest supers) (&rest slotds) &rest options)
+  (expand-early-defclass (make-compiler-class name supers slotds options)))
 
 ;;; Welcome to the deep magic.
 ;;; This macro allows defmacro forms as its toplevel to refer to each
