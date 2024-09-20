@@ -47,26 +47,29 @@
     (declare (ignore doc))
     (unless (null methods)
       (error ":method not yet supported"))
-    (let* ((method-combination
-             (ensure-method-combination
-              (or method-combination '(standard))))
-           (apo (or apo
-                  ;; first value returned is the required parameters
-                  (alexandria:parse-ordinary-lambda-list lambda-list)))
-           (gf (make-instance 'compiler-generic
-                 :name name
-                 :lambda-list lambda-list
-                 :apo apo
-                 :method-combination method-combination
-                 :method-class (cross-clasp:find-compiler-class
-                                (or method-class 'standard-method))
-                 :declarations declarations
-                 :class (cross-clasp:find-compiler-class
-                         (or class 'standard-generic-function)))))
-    `(progn
-       (eval-when (:compile-toplevel)
-         (note-generic ',name ,gf))
-       (setf (fdefinition ',name) ,(build-gf-form gf))))))
+    (multiple-value-bind (required optional rest keys aokp aux keysp)
+        (alexandria:parse-ordinary-lambda-list lambda-list)
+      (declare (ignore keys aokp aux))
+      (let* ((restp (or optional rest keysp))
+             (method-combination
+               (ensure-method-combination
+                (or method-combination '(standard))))
+             (apo (or apo required))
+             (gf (make-instance 'compiler-generic
+                   :name name
+                   :lambda-list lambda-list
+                   :reqargs required :restp restp
+                   :apo apo
+                   :method-combination method-combination
+                   :method-class (cross-clasp:find-compiler-class
+                                  (or method-class 'standard-method))
+                   :declarations declarations
+                   :class (cross-clasp:find-compiler-class
+                           (or class 'standard-generic-function)))))
+        `(progn
+           (eval-when (:compile-toplevel)
+             (note-generic ',name ,gf))
+           (setf (fdefinition ',name) ,(build-gf-form gf)))))))
 
 ;;; return the unspecialized lambda list and the specializer specs.
 (defun parse-method-lambda-list (lambda-list)
@@ -136,18 +139,22 @@
            (generic-function
              (if gfp
                  generic-function
-                 (make-instance 'compiler-generic
-                   :name name
-                   :lambda-list lambda-list ; FIXME: adjust &key?
-                   :apo (alexandria:parse-ordinary-lambda-list
-                         lambda-list)
-                   :method-combination (ensure-method-combination
-                                        '(standard))
-                   :method-class (cross-clasp:find-compiler-class
-                                  'standard-method)
-                   :declarations ()
-                   :class (cross-clasp:find-compiler-class
-                           'standard-generic-function))))
+                 (multiple-value-bind (required optional rest
+                                       keys aokp aux keysp)
+                     (alexandria:parse-ordinary-lambda-list lambda-list)
+                   (declare (ignore keys aokp aux))
+                   (make-instance 'compiler-generic
+                     :name name
+                     :lambda-list lambda-list ; FIXME: adjust &key?
+                     :reqargs required :restp (or optional rest keysp)
+                     :apo required
+                     :method-combination (ensure-method-combination
+                                          '(standard))
+                     :method-class (cross-clasp:find-compiler-class
+                                    'standard-method)
+                     :declarations ()
+                     :class (cross-clasp:find-compiler-class
+                             'standard-generic-function)))))
            (mfname (gensym "METHOD"))
            (method (make-instance 'compiler-method
                      :gf generic-function
@@ -254,7 +261,7 @@
       (let ((final (make-instance 'effective-reader
                      :gf (gf method) :lambda-list (lambda-list method)
                      :specializers classes :qualifiers (qualifiers method)
-                     :mclass (mclass method) :slot (slot method)
+                     :class (mclass method)
                      :original method :effective-slot effective)))
         (push final (effective-readers direct))
         final))))
@@ -266,7 +273,7 @@
       (let ((final (make-instance 'effective-writer
                      :gf (gf method) :lambda-list (lambda-list method)
                      :specializers classes :qualifiers (qualifiers method)
-                     :mclass (mclass method) :slot (slot method)
+                     :class (mclass method)
                      :original method :effective-slot effective)))
         (push final (effective-writers direct))
         final))))
@@ -277,63 +284,19 @@
     (assert pos)
     `(elt ,methods-var ,pos)))
 
-(defun build-outcome (outcome methods-var fname)
-  (let ((methods `(list ,@(loop for method in (methods outcome)
-                                collect (find-method-form method methods-var)))))
-    (if fname
-        `(early-make-instance effective-method-outcome
-           :methods ,methods
-           :form ',(form outcome)
-           :function #',fname)
-        ;; must be an accessor.
-        (let ((method (second (form outcome)))) ; (call-method #<method> ...)
-          `(early-make-instance ,(etypecase method
-                                   (effective-reader 'optimized-slot-reader)
-                                   (effective-writer 'optimized-slot-writer))
-             :methods ,methods
-             :index ',(location (effective-slot method))
-             :slot-name ',(name (effective-slot method))
-             :class (find-class ',(name (sclass method))))))))
-
-(defun call-history-form (gf-form call-history fdefs)
-  (let ((methods (gensym "METHODS")))
-    `(let ((methods (with-early-accessors (standard-generic-function)
-                      (generic-function-methods ,gf-form))))
-       (flet (,@(remove nil fdefs))
-         (list
-          ,@(loop for (classes . outcome) in call-history
-                  for classforms = (loop for class in classes
-                                         collect `(find-class ',(name class)))
-                  for classvec = `(vector ,@classforms)
-                  for fdef in fdefs
-                  for outform = (build-outcome outcome methods (first fdef))
-                  collect `(cons ,classvec ,outform)))))))
-
-;; given a call history, output a list of function definitions for the outcomes,
-;; or NIL if there isn't one (basically if it's an accessor).
-;; a function definition is (name lambda-list . body).
-;; I put this in with the thought of sharing between the discriminator and the
-;; outcomes, but honestly that's a lot of work for little reason.
-(defun history-outcome-fdefs (gf call-history)
-  (loop with req = (required-parameters gf)
-        with rest = (if (restp gf) (gensym "REST") nil)
-        with ll = `(,@req ,@(if rest `(&rest ,rest) nil))
-        for (_ . outcome) in call-history
-        for form = (form outcome)
-        collect (if (and (consp form)
-                      (eq (first form) 'call-method)
-                      (typep (first form) 'effective-accessor))
-                    nil
-                    `(,(gensym "OUTCOME") ,ll
-                      (with-effective-method-parameters (,@req ,rest)
-                        ,form)))))
+(defun call-history-form (call-history)
+  `(list
+    ,@(loop for (classes . outcome) in call-history
+            for classforms = (loop for class in classes
+                                   collect `(find-class ',(name class)))
+            for classvec = `(vector ,@classforms)
+            collect `(cons ,classvec ,outcome))))
 
 (defmacro satiate (name &rest speclists)
   (let* ((gfun (cross-clasp:gf-info name))
          (call-history (call-history-from-speclists gfun speclists))
          (gfv (gensym (string name))) (chv (gensym "CALL-HISTORY"))
-         (outcome-fdefs (history-outcome-fdefs gfun call-history))
-         (ch-form (call-history-form gfv call-history outcome-fdefs)))
+         (ch-form (call-history-form call-history)))
     `(with-early-accessors (standard-generic-function)
        (let* ((,gfv (fdefinition ',name))
               (,chv ,ch-form))

@@ -293,13 +293,16 @@
                        clos::early-allocate-instance
                        clos::early-initialize-instance
                        clos::early-make-instance
-                       clos::with-mutual-defclass)
+                       clos::with-mutual-defclass
+                       clos::with-effective-method-parameters
+                       clos::satiate)
         for m = (macro-function mname)
         do (setf (clostrum:macro-function client rte mname) m))
   (loop for (mname . src) in '((defconstant . %defconstant)
                                (defclass . clos::early-defclass)
                                (defgeneric . clos::early-defgeneric)
                                (defmethod . clos::early-defmethod)
+                               (call-method . clos::%call-method)
                                (handler-bind . %handler-bind)
                                (restart-case . %restart-case)
                                (restart-bind . %restart-bind)

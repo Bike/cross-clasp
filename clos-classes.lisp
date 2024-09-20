@@ -51,6 +51,9 @@
   ((%name :initarg :name :reader name)
    (%lambda-list :initarg :lambda-list :reader lambda-list)
    (%required-parameters :initarg :reqargs :reader required-parameters)
+   ;; this is broader than whether there's a &rest - it's whether there are
+   ;; any more parameters after the required parameters at all.
+   ;; so it's also true with &optional or &key.
    (%restp :initarg :restp :reader restp)
    (%apo :initarg :apo :reader apo) ; argument precedence order
    ;; a vector with T if a parameter is specialized at all, otherwise NIL.
@@ -473,8 +476,10 @@
                     for gf = (or egf
                                (make-instance 'compiler-generic
                                  :name reader :lambda-list rll
+                                 :reqargs rll :restp nil
                                  :apo rll
-                                 :method-combination '(standard)
+                                 :method-combination
+                                 (ensure-method-combination '(standard))
                                  :method-class (funcall find-class 'standard-method)
                                  :declarations ()
                                  :class (funcall find-class 'standard-generic-function)))
@@ -491,8 +496,10 @@
                     for gf = (or egf
                                (make-instance 'compiler-generic
                                  :name writer :lambda-list wll
+                                 :reqargs wll :restp nil
                                  :apo wll
-                                 :method-combination '(standard)
+                                 :method-combination
+                                 (ensure-method-combination '(standard))
                                  :method-class (funcall find-class 'standard-method)
                                  :declarations ()
                                  :class (funcall find-class 'standard-generic-function)))

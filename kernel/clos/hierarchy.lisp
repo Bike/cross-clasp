@@ -223,6 +223,13 @@
    (compiler :initarg :compiler :accessor method-combination-compiler)
    (options :initarg :options :accessor method-combination-options)))
 
+;;; Used in discriminating function computation.
+(defclass effective-accessor-method (method)
+  ((%original :initarg :original :reader effective-accessor-method-original)
+   (%location :initarg :location :reader effective-accessor-method-location)))
+(defclass effective-reader-method (effective-accessor-method) ())
+(defclass effective-writer-method (effective-accessor-method) ())
+
 ;;; These should really be cut down - I mean, since when do they have
 ;;; a need for finalizedp and default initargs?
 (defclass forward-referenced-class (std-class) ())

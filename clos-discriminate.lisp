@@ -22,7 +22,7 @@ to similar outcomes or anything.
        (error "Duplicate call history entries: ~s" call-history))
      `(go ,(or (cdr (assoc (cdr (first call-history)) outcome-tags))
              (error "No tag for outcome: ~s" (cdr (first call-history))))))
-    ((null (nth (first positions) specializer-profile))
+    ((null (elt specializer-profile (first positions)))
      (generate-discrimination
       outcome-tags miss-tag
       (rest positions) args specializer-profile call-history))
@@ -40,7 +40,7 @@ to similar outcomes or anything.
          if existing
            do (push entry (cdr existing))
          else
-           do (push (cons spec entry) tree)
+           do (push (list spec entry) tree)
          do (assert (typep spec 'compiler-class))
          finally
             (return

@@ -5,6 +5,7 @@
     "clos/hierarchy.lisp"
     "clos/outcome.lisp"
     "clos/applicable-methods.lisp"
+    "clos/satiate.lisp"
     ;;"lsp/export.lisp"
     "lsp/assert.lisp"
     "lsp/arraylib.lisp"
