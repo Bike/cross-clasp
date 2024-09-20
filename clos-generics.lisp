@@ -236,7 +236,7 @@
         for classes = (mapcar #'cross-clasp:find-compiler-class speclist)
         for am = (compute-applicable-methods-using-classes gfun classes)
         for fm = (final-methods am classes)
-        for existing = (find fm outcomes :key #'methods)
+        for existing = (find fm outcomes :key #'methods :test #'equal)
         for outcome = (or existing
                         (make-instance 'outcome
                           :methods fm
