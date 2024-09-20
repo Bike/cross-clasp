@@ -25,7 +25,13 @@
    (%readers :initarg :readers :initform () :reader readers)
    (%writers :initarg :writers :initform () :reader writers)
    (%type :initarg :type :initform t :reader stype)
+   (%allocation :initarg :allocation :initform :instance :reader allocation)
    (%location :initarg :location :initform nil :reader location)))
+(defclass direct-slotd (compiler-slotd)
+  (;; only relevant for direct slots
+   (%effective-readers :initform nil :accessor effective-readers)
+   (%effective-writers :initform nil :accessor effective-writers)))
+(defclass effective-slotd (compiler-slotd) ())
 
 (defmethod print-object ((o compiler-slotd) stream)
   (print-unreadable-object (o stream :type t)
@@ -44,7 +50,12 @@
 (defclass compiler-generic ()
   ((%name :initarg :name :reader name)
    (%lambda-list :initarg :lambda-list :reader lambda-list)
+   (%required-parameters :initarg :reqargs :reader required-parameters)
+   (%restp :initarg :restp :reader restp)
    (%apo :initarg :apo :reader apo) ; argument precedence order
+   ;; a vector with T if a parameter is specialized at all, otherwise NIL.
+   (%specializer-profile :initarg :specializer-profile
+                         :accessor specializer-profile)
    (%method-combination :initarg :method-combination
                         :reader gf-method-combination
                         :type compiler-method-combination)
@@ -52,6 +63,20 @@
    (%declarations :initarg :declarations :reader declarations)
    (%gf-class :initarg :class :reader gf-class)
    (%methods :initarg :methods :initform () :accessor methods)))
+
+(defmethod initialize-instance :after ((i compiler-generic) &rest initargs)
+  (declare (ignore initargs))
+  (setf (specializer-profile i)
+        (make-array (length (apo i)) :initial-element nil)))
+
+(defun update-specializer-profile (generic specializers
+                                   &optional (find-class #'cross-clasp:find-compiler-class))
+  (loop with tclass = (funcall find-class 't)
+        with sprof = (specializer-profile generic)
+        for i from 0
+        for spec in specializers
+        unless (eq spec tclass)
+          do (setf (aref sprof i) t)))
 
 (defmethod print-object ((o compiler-generic) stream)
   (print-unreadable-object (o stream :type t)
@@ -76,6 +101,16 @@
   ((%slot :initarg :slot :reader slot)))
 (defclass compiler-reader (compiler-accessor) ())
 (defclass compiler-writer (compiler-accessor) ())
+
+(defclass effective-accessor (compiler-method)
+  ((%original :initarg :original :reader original)
+   (%effective-slot :initarg :effective-slot :reader effective-slot)))
+(defclass effective-reader (effective-accessor) ())
+(defclass effective-writer (effective-accessor) ())
+
+(defgeneric sclass (effective-accessor))
+(defmethod sclass ((e effective-reader)) (first (specializers e)))
+(defmethod sclass ((e effective-writer)) (second (specializers e)))
 
 (defun parse-slot-specifier (slot-specifier)
   (etypecase slot-specifier
@@ -124,11 +159,11 @@
                                         readers writers type
                                         location))))))
 
-(defun make-compiler-slotd (slot-specifier)
+(defun make-direct-slotd (slot-specifier)
   (multiple-value-bind (name initform initformp initargs
                         readers writers type location)
       (parse-slot-specifier slot-specifier)
-    (make-instance 'compiler-slotd
+    (make-instance 'direct-slotd
       :name name :initform initform :initformp initformp
       :initargs initargs :readers readers :writers writers
       :type type :location location)))
@@ -180,7 +215,7 @@
                                  (name (first slotds)))))
                  (setf locp t))
       ;; Make the slotd
-      (make-instance 'compiler-slotd
+      (make-instance 'effective-slotd
         :name (name (first slotds)) :initform initform :initformp initformp
         :initargs (app #'initargs)
         :readers (app #'readers) :writers (app #'writers)
@@ -256,7 +291,7 @@
                             ()
                             '(t))))))
            (supers (mapcar find-class supers))
-           (slotds (mapcar #'make-compiler-slotd slotds))
+           (slotds (mapcar #'make-direct-slotd slotds))
            (rmetaclass (funcall find-class metaclass)))
       (reinitialize-instance
        class
@@ -350,21 +385,21 @@
                       nconc (early-accessors class)))
      ,@body))
 
-(defun build-direct-slot-form (compiler-slotd)
+(defun build-direct-slot-form (slotd)
   `(early-make-instance standard-direct-slot-definition
-                        :name ',(name compiler-slotd)
-                        :initform ,(if (initformp compiler-slotd)
-                                       `',(initform compiler-slotd)
+                        :name ',(name slotd)
+                        :initform ,(if (initformp slotd)
+                                       `',(initform slotd)
                                        '+initform-unsupplied+)
-                        :initfunction ,(if (initformp compiler-slotd)
+                        :initfunction ,(if (initformp slotd)
                                            `#'(lambda ()
-                                                ,(initform compiler-slotd))
+                                                ,(initform slotd))
                                            nil)
-                        :initargs ',(initargs compiler-slotd)
-                        :readers ',(readers compiler-slotd)
-                        :writers ',(writers compiler-slotd)
-                        :type ',(stype compiler-slotd)
-                        :location ',(location compiler-slotd)))
+                        :initargs ',(initargs slotd)
+                        :readers ',(readers slotd)
+                        :writers ',(writers slotd)
+                        :type ',(stype slotd)
+                        :location ',(location slotd)))
 
 (defun build-slot-form (compiler-slotd)
   `(early-make-instance standard-effective-slot-definition
@@ -416,8 +451,7 @@
              ,(canonicalized-default-initargs-form
                (default-initargs class))
              (%class-direct-subclasses ,var)
-             (list ,@(loop for sub
-                             in (direct-subclasses class)
+             (list ,@(loop for sub in (direct-subclasses class)
                            for sname = (name sub)
                            collect `(find-class ',sname)))
              (%class-finalized-p ,var) t
@@ -470,10 +504,11 @@
                       collect `(note-generic ',writer ,gf)
                     collect `(note-method ,gf ,method))))
 
-;;; note-generic is defined in environment
+;;; note-generic is defined in environment.lisp
 (defun note-method (compiler-generic compiler-method)
   ;; TODO: Sanity checks
   (push compiler-method (methods compiler-generic))
+  (update-specializer-profile compiler-generic (specializers compiler-method))
   (values))
 
 (defun expand-early-defclass (class)

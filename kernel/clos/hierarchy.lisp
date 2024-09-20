@@ -78,7 +78,9 @@
 (defclass built-in-class (std-class) ()) ; see "cut down" below
   
 (defclass slot-definition (metaobject) ())
-(defclass direct-slot-definition (slot-definition) ())
+(defclass direct-slot-definition (slot-definition)
+  ((%effective-readers :initform nil :reader %effective-readers)
+   (%effective-writers :initform nil :reader %effective-writers)))
 (defclass effective-slot-definition (slot-definition) ())
 (defclass standard-slot-definition (slot-definition)
   ((name :initarg :name :initform nil :reader slot-definition-name)

@@ -80,6 +80,9 @@
    (maclina.machine:symbol-value m:*client* *build-rte*
                                  '*macroexpand-hook*)))
 
+(defun build-macroexpand-1 (form &optional env)
+  (extrinsicl:macroexpand-1 m:*client* (or env *build-rte*)
+                            (macroexpand-hook) form))
 (defun build-macroexpand (form &optional env)
   (extrinsicl:macroexpand m:*client* (or env *build-rte*)
                           (macroexpand-hook) form))
