@@ -90,7 +90,7 @@
     (compiler-accessor (error "Unreplaced accessor method: ~s" method))
     ((cons (eql make-method) (cons t null)) (second method))
     (compiler-method
-     `(apply ,(method-contf-form method)
+     `(apply ,(contf-form method)
              ,(if (null next-methods)
                   `(lambda (&rest args)
                      (declare (ignore args))

@@ -36,7 +36,6 @@
     :lambda-list ',(lambda-list compiler-generic)
     :method-combination nil ; installed later
     :argument-precedence-order ',(apo compiler-generic)
-    :specializer-profile ,(specializer-profile compiler-generic)
     :method-class (find-class
                    ',(name (method-class compiler-generic)))
     :declarations ',(declarations compiler-generic)))
@@ -55,6 +54,7 @@
                   ;; first value returned is the required parameters
                   (alexandria:parse-ordinary-lambda-list lambda-list)))
            (gf (make-instance 'compiler-generic
+                 :name name
                  :lambda-list lambda-list
                  :apo apo
                  :method-combination method-combination
@@ -123,6 +123,11 @@
   `(early-make-instance ,(name (mclass compiler-method))
                         ,@(build-method-initargs compiler-method)))
 
+(defun block-name (function-name)
+  (etypecase function-name
+    (symbol function-name)
+    ((cons (eql setf) (cons symbol null)) (second function-name))))
+
 (defun expand-early-defmethod (name qualifiers lambda-list body)
   (multiple-value-bind (lambda-list specializers)
       (parse-method-lambda-list lambda-list)
@@ -132,6 +137,7 @@
              (if gfp
                  generic-function
                  (make-instance 'compiler-generic
+                   :name name
                    :lambda-list lambda-list ; FIXME: adjust &key?
                    :apo (alexandria:parse-ordinary-lambda-list
                          lambda-list)
@@ -142,23 +148,39 @@
                    :declarations ()
                    :class (cross-clasp:find-compiler-class
                            'standard-generic-function))))
+           (mfname (gensym "METHOD"))
            (method (make-instance 'compiler-method
                      :gf generic-function
                      :lambda-list lambda-list
-                     :specializers specializers
-                     :qualifiers qualifiers))
+                     :specializers (mapcar #'cross-clasp:find-compiler-class
+                                           specializers)
+                     :qualifiers qualifiers
+                     :class (method-class generic-function)
+                     :contf-form `#',mfname))
            (gfg (gensym "GENERIC-FUNCTION")))
       `(progn
          (eval-when (:compile-toplevel)
            (note-method ,generic-function ,method))
+         ,(multiple-value-bind (body decls)
+              (alexandria:parse-body body :documentation t)
+            `(defun ,mfname (,@lambda-list)
+               ,@decls
+               (block ,(block-name name) ,@body)))
          (let ((,gfg ,(if gfp
                           `(fdefinition ',name)
                           (build-gf-form generic-function))))
            ,@(unless gfp
                `((setf (fdefinition ',name) ,gfg)))
-           (push ,(build-method-form method)
-                 (with-early-accessors (standard-generic-function)
+           (with-early-accessors (standard-generic-function)
+             (push ,(build-method-form method)
                    (%generic-function-methods ,gfg))))))))
+
+(defmacro early-defmethod (name &rest rest)
+  (loop for r on rest
+        for e = (first rest)
+        if (consp e)
+          return (expand-early-defmethod name qualifiers e (rest r))
+        else collect e into qualifiers))
 
 ;;;
 

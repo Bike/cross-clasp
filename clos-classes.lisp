@@ -88,7 +88,9 @@
    (%lambda-list :initarg :lambda-list :reader lambda-list)
    (%specializers :initarg :specializers :reader specializers)
    (%qualifiers :initarg :qualifiers :reader qualifiers)
-   (%mclass :initarg :class :reader mclass)))
+   (%mclass :initarg :class :reader mclass)
+   ;; a form that, evaluated at load time, will return the contf function
+   (%contf-form :initarg :contf-form :reader contf-form)))
 
 (defmethod print-object ((o compiler-method) stream)
   (print-unreadable-object (o stream :type t)

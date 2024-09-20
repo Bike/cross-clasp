@@ -100,6 +100,7 @@
 
 (defun clos::note-generic (name compiler-generic)
   (clostrum:note-function m:*client* *build-rte* name)
+  (signal 'maclina.compile:resolve-function :name name)
   (setf (clostrum:operator-inline-data m:*client* *build-rte* name)
         compiler-generic)
   (values))
@@ -297,6 +298,8 @@
         do (setf (clostrum:macro-function client rte mname) m))
   (loop for (mname . src) in '((defconstant . %defconstant)
                                (defclass . clos::early-defclass)
+                               (defgeneric . clos::early-defgeneric)
+                               (defmethod . clos::early-defmethod)
                                (handler-bind . %handler-bind)
                                (restart-case . %restart-case)
                                (restart-bind . %restart-bind)

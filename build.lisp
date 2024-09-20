@@ -3,7 +3,8 @@
 (defparameter *files*
   '("lsp/foundation.lisp"
     "clos/hierarchy.lisp"
-    ;;"clos/outcome.lisp"
+    "clos/outcome.lisp"
+    "clos/applicable-methods.lisp"
     ;;"lsp/export.lisp"
     "lsp/assert.lisp"
     "lsp/arraylib.lisp"
