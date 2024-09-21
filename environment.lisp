@@ -199,6 +199,7 @@
 
 (defparameter *noted-functions*
   '(core::generalp core:header-stamp
+    core::derivable-stamp core::rack-stamp core::wrapped-stamp
     ext:specialp
     core:function-name
     core::coerce-to-function core::coerce-fdesignator
