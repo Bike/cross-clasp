@@ -111,16 +111,18 @@
                                   (specializers method)))
     :qualifiers ',(qualifiers method)))
 
-(defun slot-form (class slot)
-  (let ((pos (position slot (slots class))))
+(defun direct-slot-form (class slot)
+  (let ((pos (position slot (direct-slots class))))
     (assert pos)
     `(with-early-accessors (std-class)
        (nth ,pos (class-direct-slots (find-class ',(name class)))))))
 
 (defmethod build-method-initargs append ((method compiler-reader))
-  `(:slot-definition ,(slot-form (first (specializers method)) (slot method))))
+  `(:slot-definition
+    ,(direct-slot-form (first (specializers method)) (slot method))))
 (defmethod build-method-initargs append ((method compiler-writer))
-  `(:slot-definition ,(slot-form (second (specializers method)) (slot method))))
+  `(:slot-definition
+    ,(direct-slot-form (second (specializers method)) (slot method))))
 
 (defun build-method-form (compiler-method)
   `(early-make-instance ,(name (mclass compiler-method))
@@ -167,6 +169,8 @@
            (gfg (gensym "GENERIC-FUNCTION")))
       `(progn
          (eval-when (:compile-toplevel)
+           ,@(unless gfp
+               `((note-generic ',name ,generic-function)))
            (note-method ,generic-function ,method))
          ,(multiple-value-bind (body decls)
               (alexandria:parse-body body :documentation t)

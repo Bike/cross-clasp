@@ -227,7 +227,8 @@
     core::coerce-to-package core::package-hash-tables
     core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class
-    core:allocate-raw-instance core:class-stamp-for-instances
+    core:allocate-raw-instance core:allocate-raw-funcallable-instance
+    core:class-stamp-for-instances
     core:make-rack core:rack-ref (setf core:rack-ref)
     core:instance-ref
     clos::standard-instance-access
@@ -294,6 +295,7 @@
                        core::while core::until
                        clos::with-early-accessors
                        clos::early-allocate-instance
+                       clos::earlier-allocate-instance
                        clos::early-initialize-instance
                        clos::early-make-instance
                        clos::with-mutual-defclass

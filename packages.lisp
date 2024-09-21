@@ -22,6 +22,7 @@
            #:num-op-asinh #:num-op-acosh #:num-op-atanh)
   (:export #:function-name)
   (:export #:allocate-standard-instance #:allocate-raw-instance
+           #:allocate-raw-funcallable-instance
            #:class-stamp-for-instances
            #:class-new-stamp #:instance-sig-set
            #:make-rack #:rack-ref #:instance-rack)

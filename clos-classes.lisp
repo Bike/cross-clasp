@@ -320,18 +320,34 @@
     (funcallable-standard-class 'funcallable-standard-instance-access)))
 
 (defun expand-early-allocate-instance (class)
-  `(let* ((class (find-class ',(name class)))
-          (slotds (with-early-accessors (std-class)
-                    (class-slots class)))
-          (size (length slotds))
-          (stamp (core:class-stamp-for-instances class)))
-     (core:allocate-raw-instance
-      class
-      (core:make-rack
-       size slotds stamp (core:unbound)))))
+  (let ((funcallablep (find (cross-clasp:find-compiler-class
+                             'funcallable-standard-object)
+                            (class-precedence-list class))))
+    `(let* ((class (find-class ',(name class)))
+            (slotds (with-early-accessors (std-class)
+                      (class-slots class)))
+            (size (length slotds))
+            (stamp (core:class-stamp-for-instances class)))
+       ;; note that we don't set the funcallable instance function
+       ;; for funcallables. that's because we're going to set those up
+       ;; later anyway.
+       (,(if funcallablep
+             'core:allocate-raw-funcallable-instance
+             'core:allocate-raw-instance)
+        class
+        (core:make-rack
+         size slotds stamp (core:unbound))))))
 
 (defmacro early-allocate-instance (class-name)
   (expand-early-allocate-instance (cross-clasp:find-compiler-class class-name)))
+
+;;; Used to make slots in the weird early parts.
+;;; They expand into this. The delay is important since when they expand
+;;; into this, the compiler class doesn't have slots yet. Or something.
+(defmacro earlier-allocate-instance (class-name)
+  `(core:allocate-standard-instance
+    (find-class ',class-name)
+    ,(length (slots (cross-clasp:find-compiler-class class-name)))))
 
 (defmacro early-initialize-instance (class-name object &rest initargs)
   (let* ((class (cross-clasp:find-compiler-class class-name))
@@ -367,9 +383,7 @@
 (defmacro early-make-instance (class-name &rest initargs)
   `(early-initialize-instance
     ,class-name
-    (core:allocate-standard-instance
-     (find-class ',class-name)
-     ,(length (slots (cross-clasp:find-compiler-class class-name))))
+    (early-allocate-instance ,class-name)
     ,@initargs))
 
 ;; returns a bunch of bindings for macrolet.
@@ -392,36 +406,40 @@
      ,@body))
 
 (defun build-direct-slot-form (slotd)
-  `(early-make-instance standard-direct-slot-definition
-                        :name ',(name slotd)
-                        :initform ,(if (initformp slotd)
-                                       `',(initform slotd)
-                                       '+initform-unsupplied+)
-                        :initfunction ,(if (initformp slotd)
-                                           `#'(lambda ()
-                                                ,(initform slotd))
-                                           nil)
-                        :initargs ',(initargs slotd)
-                        :readers ',(readers slotd)
-                        :writers ',(writers slotd)
-                        :type ',(stype slotd)
-                        :location ',(location slotd)))
+  `(early-initialize-instance
+    standard-direct-slot-definition
+    (earlier-allocate-instance standard-direct-slot-definition)
+    :name ',(name slotd)
+    :initform ,(if (initformp slotd)
+                   `',(initform slotd)
+                   '+initform-unsupplied+)
+    :initfunction ,(if (initformp slotd)
+                       `#'(lambda ()
+                            ,(initform slotd))
+                       nil)
+    :initargs ',(initargs slotd)
+    :readers ',(readers slotd)
+    :writers ',(writers slotd)
+    :type ',(stype slotd)
+    :location ',(location slotd)))
 
 (defun build-slot-form (compiler-slotd)
-  `(early-make-instance standard-effective-slot-definition
-                        :name ',(name compiler-slotd)
-                        :initform ,(if (initformp compiler-slotd)
-                                       `',(initform compiler-slotd)
-                                       '+initform-unsupplied+)
-                        :initfunction ,(if (initformp compiler-slotd)
-                                           `#'(lambda ()
-                                                ,(initform compiler-slotd))
-                                           nil)
-                        :initargs ',(initargs compiler-slotd)
-                        :readers ',(readers compiler-slotd)
-                        :writers ',(writers compiler-slotd)
-                        :type ',(stype compiler-slotd)
-                        :location ',(location compiler-slotd)))
+  `(early-initialize-instance
+    standard-effective-slot-definition
+    (earlier-allocate-instance standard-effective-slot-definition)
+    :name ',(name compiler-slotd)
+    :initform ,(if (initformp compiler-slotd)
+                   `',(initform compiler-slotd)
+                   '+initform-unsupplied+)
+    :initfunction ,(if (initformp compiler-slotd)
+                       `#'(lambda ()
+                            ,(initform compiler-slotd))
+                       nil)
+    :initargs ',(initargs compiler-slotd)
+    :readers ',(readers compiler-slotd)
+    :writers ',(writers compiler-slotd)
+    :type ',(stype compiler-slotd)
+    :location ',(location compiler-slotd)))
 
 (defun canonicalized-default-initargs-form (default-initargs)
   `(list
@@ -464,11 +482,9 @@
              (class-size ,var) ,(length (slots class))))
      ,var))
 
-;;; Return a list of forms to install accessors in the compilation
-;;; environment. Note that no generics are defined in the _load_
-;;; environment until way later.
-(defun build-note-accessors (class &optional (find-class
-                                              #'cross-clasp:find-compiler-class))
+;;; Return a list of accessor methods for a defclass form.
+(defun build-accessors (class &optional (find-class
+                                         #'cross-clasp:find-compiler-class))
   (loop with rll = (list (name class))
         with wll = (list 'new (name class))
         for slot in (direct-slots class)
@@ -489,9 +505,7 @@
                                    :qualifiers () :slot slot
                                    :specializers (list class)
                                    :class (funcall find-class 'standard-reader-method))
-                    unless egf
-                      collect `(note-generic ',reader ,gf)
-                    collect `(note-method ,gf ,method))
+                    collect method)
         nconc (loop for writer in (writers slot)
                     for egf = (cross-clasp:gf-info writer)
                     for gf = (or egf
@@ -510,9 +524,7 @@
                                    :specializers (list (funcall find-class 't)
                                                        class)
                                    :class (funcall find-class 'standard-writer-method))
-                    unless egf
-                      collect `(note-generic ',writer ,gf)
-                    collect `(note-method ,gf ,method))))
+                    collect method)))
 
 ;;; note-generic is defined in environment.lisp
 (defun note-method (compiler-generic compiler-method)
@@ -521,12 +533,37 @@
   (update-specializer-profile compiler-generic (specializers compiler-method))
   (values))
 
+(defun build-note-accessors (accessors)
+  (loop for method in accessors
+        for gf = (gf method)
+        unless (cross-clasp:gf-info (name gf))
+          collect `(note-generic ',(name gf) ,gf)
+        collect `(note-method ,gf ,method)))
+
+(defun build-install-accessors (accessors)
+  (loop for method in accessors
+        for gf = (gf method)
+        for name = (name gf)
+        for defgf = (not (cross-clasp:gf-info name))
+        for gfv = (gensym "GENERIC-FUNCTION")
+        ;; build-gf-form and build-method-form
+        ;; are defined in clos-generics.lisp.
+        collect `(let ((,gfv ,(if defgf
+                                  (build-gf-form gf)
+                                  `(fdefinition ',name))))
+                   ,@(when defgf
+                       `((setf (fdefinition ',name) ,gfv)))
+                   (with-early-accessors (standard-generic-function)
+                     (push ,(build-method-form method)
+                           (%generic-function-methods ,gfv))))))
+
 (defun expand-early-defclass (class)
-  (let ((name (name class)))
+  (let ((name (name class))
+        (accessors (build-accessors class)))
     `(progn
        (eval-when (:compile-toplevel)
          (setf (find-class ',name) ,class)
-         ,@(build-note-accessors class))
+         ,@(build-note-accessors accessors))
        (eval-when (:load-toplevel :execute)
          (let ((class
                  (or (find-class ',name nil)
@@ -535,7 +572,9 @@
            ;; we do this first so the CPL can refer to the class.
            (core:setf-find-class class ',name)
            ;; Initialize rack slots.
-           ,(initialize-class-form 'class class))))))
+           ,(initialize-class-form 'class class))
+         ,@(build-install-accessors accessors)
+         ',name))))
 
 (defmacro early-defclass (name (&rest supers) (&rest slotds) &rest options)
   (expand-early-defclass (make-compiler-class name supers slotds options)))
@@ -570,7 +609,8 @@
                  collect (cons name class)))
          (find-class (lambda (name)
                        (or (cdr (assoc name compiler-classes))
-                         (error "No class: ~s" name)))))
+                         (error "No class: ~s" name))))
+         accessors)
     ;; initialize the classes
     (loop for (_1 _2 supers slotds . options) in body
           for (name . cclass) in compiler-classes
@@ -580,13 +620,16 @@
     ;; and finalize their inheritance.
     (loop for (_ . cclass) in compiler-classes
           unless (finalizedp cclass) do (finalize-inheritance cclass))
+    ;; Generate accessor methods & generics.
+    (setf accessors
+          (loop for (_ . cclass) in compiler-classes
+                nconc (build-accessors cclass find-class)))
     ;; All compiler classes are done, let's expand.
     `(progn
        (eval-when (:compile-toplevel)
          ,@(loop for (name . class) in compiler-classes
                  collect `(setf (find-class ',name) ',class))
-         ,@(loop for (_ . class) in compiler-classes
-                 nconc (build-note-accessors class find-class)))
+         ,@(build-note-accessors accessors))
        (eval-when (:load-toplevel :execute)
          ;; Here is what the FASL is actually going to do.
          ;; First, make all the classes. We already have all class sizes,
@@ -613,6 +656,8 @@
                  for metaclass = (metaclass class)
                  collect `(let ((class (find-class ',name)))
                             ,(initialize-class-form 'class class)))
+         ;; Define accessor functions.
+         ,@(build-install-accessors accessors)
          ;; Finally, go through the classes setting the sigs of
          ;; their slotds, which did not exist when they were created.
          ;; Also set the sigs of the classes themselves. This is
