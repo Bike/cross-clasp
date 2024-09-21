@@ -228,10 +228,12 @@
     clos::classp core::subclassp core:name-of-class
     core:allocate-raw-instance core:class-stamp-for-instances
     core:make-rack core:rack-ref (setf core:rack-ref)
+    core:instance-ref
     clos::standard-instance-access
     (setf clos::standard-instance-access)
     clos::funcallable-standard-instance-access
     (setf clos::funcallable-standard-instance-access)
+    clos:set-funcallable-instance-function
     core:instance-rack core:instance-sig-set
     core:setf-find-class
     core::get-sysprop (setf core::get-sysprop)

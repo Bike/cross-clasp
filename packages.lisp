@@ -76,7 +76,8 @@
 
 (defpackage #:cross-clasp.clasp.clos
   (:use #:cl)
-  (:local-nicknames (#:core #:cross-clasp.clasp.core)))
+  (:local-nicknames (#:core #:cross-clasp.clasp.core))
+  (:export #:set-funcallable-instance-function))
 
 (defpackage #:cross-clasp.clasp.sequence
   (:use #:cl)
