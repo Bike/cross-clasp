@@ -109,7 +109,8 @@
 
 (defclass effective-accessor (compiler-method)
   ((%original :initarg :original :reader original)
-   (%effective-slot :initarg :effective-slot :reader effective-slot)))
+   (%allocation :initform :instance :reader allocation)
+   (%location :initarg :location :reader location)))
 (defclass effective-reader (effective-accessor) ())
 (defclass effective-writer (effective-accessor) ())
 

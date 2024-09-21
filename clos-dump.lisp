@@ -18,8 +18,8 @@
               ,oclass ,object
               :methods '(,@(methods object))
               ,@(if ep
-                    `(:index ,(location (effective-slot (second form)))
-                      :slot-name ',(name (effective-slot (second form)))
+                    `(:index ,(location (second form))
+                      :slot-name ',(name (slot (original (second form))))
                       :class ,(etypecase (second form)
                                 (effective-reader
                                  (first (specializers (second form))))
@@ -90,7 +90,7 @@
               `(progn
                  (early-initialize-instance ,mclass ,object
                    :original ',original
-                   :location ',(location (effective-slot object)))
+                   :location ',(location object))
                  (with-early-accessors (std-class direct-slot-definition)
                    (push ,object (,cache (elt (class-direct-slots ,class)
                                               ,dslotpos)))))))))
