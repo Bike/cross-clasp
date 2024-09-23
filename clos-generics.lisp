@@ -157,7 +157,12 @@
                      :declarations ()
                      :class (cross-clasp:find-compiler-class
                              'standard-generic-function)))))
-           (mfname (gensym "METHOD"))
+           (mfsname (format nil "~a~@[-~a~]-(~{~a~^ ~})-METHOD"
+                            (symbol-name name) qualifiers
+                            (mapcar #'symbol-name specializers)))
+           (mfname (intern mfsname "CROSS-CLASP.CLASP.CLOS"))
+           (cname (gensym "CONTINUATION"))
+           (argsname (gensym "METHOD-ARGS"))
            (method (make-instance 'compiler-method
                      :gf generic-function
                      :lambda-list lambda-list
@@ -174,9 +179,15 @@
            (note-method ,generic-function ,method))
          ,(multiple-value-bind (body decls)
               (alexandria:parse-body body :documentation t)
-            `(defun ,mfname (,@lambda-list)
-               ,@decls
-               (block ,(block-name name) ,@body)))
+            `(defun ,mfname (,cname &rest ,argsname)
+               (block ,(block-name name)
+                 (flet (;; If you want to use next-method-p: Too bad
+                        (call-next-method (&rest args)
+                          (if args
+                              (apply ,cname args)
+                              (apply ,cname ,argsname))))
+                   (declare (ignorable #'call-next-method))
+                   (apply (lambda ,lambda-list ,@decls ,@body) ,argsname)))))
          (let ((,gfg ,(if gfp
                           `(fdefinition ',name)
                           (build-gf-form generic-function))))
