@@ -1,13 +1,39 @@
 (in-package #:clos)
 
+;;; FIXME: Define in config, or at least elsewhere
+(defconstant +where-tag-mask+      #b11000)
+(defconstant +derivable-where-tag+ #b00000)
+(defconstant +rack-where-tag+      #b01000)
+(defconstant +wrapped-where-tag+   #b10000)
+(defconstant +header-where-tag+    #b11000)
+(defconstant +fixnum-tag+ 342)
+(defconstant +single-float-tag+ 310)
+(defconstant +character-tag+ 1582)
+(defconstant +cons-tag+ 30)
+
+(defmacro core::header-stamp-case (stamp derivable rack wrapped header)
+  `(case (logand (ash ,stamp 2) ,+where-tag-mask+)
+     (,+derivable-where-tag+ ,derivable)
+     (,+rack-where-tag+ ,rack)
+     (,+wrapped-where-tag+ ,wrapped)
+     (,+header-where-tag+ ,header)))
+
 (defun instance-stamp (object)
-  ;; FIXME: no magic numbers, also inline this or do fancier dfun generation.
-  (let ((hstamp (core::header-stamp object)))
-    (case (logand (ash hstamp 2) 24)
-      (0 (core::derivable-stamp object))
-      (8 (core::rack-stamp object))
-      (16 (core::wrapped-stamp object))
-      (24 hstamp)))) ; header
+  ;; This is way dumber than the eventual dfuns, but we can take advantage
+  ;; of one cheat - nothing we're satiating here wants a non-general.
+  (cond
+    ((core:generalp object)
+     (let ((hstamp (core::header-stamp object)))
+       (core::header-stamp-case hstamp
+         (core::derivable-stamp object)
+         (core::rack-stamp object)
+         (core::wrapped-stamp object)
+         hstamp)))
+    ((consp object) +cons-tag+)
+    ((core:fixnump object) +fixnum-tag+)
+    ((core:single-float-p object) +single-float-tag+)
+    ((characterp object) +character-tag+)
+    (t (error "Unknown object ~s" object))))
 
 ;;; Minimum needed to call generic functions.
 ;;; May be an overestimate since debugging my way down to a
