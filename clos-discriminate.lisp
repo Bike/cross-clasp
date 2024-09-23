@@ -48,7 +48,10 @@ to similar outcomes or anything.
                  (cond
                    ,@(loop for (spec . entries) in tree
                            for scode = `(load-time-value
-                                         (core:class-stamp-for-instances ,spec)
+                                         (let ((stamp (core:class-stamp-for-instances ,spec)))
+                                           (if (eq stamp (core:unbound))
+                                               (error "Unbound stamp for ~s" ',(name spec))
+                                               stamp))
                                          t)
                            collect `((= ,scode stamp)
                                      ,(generate-discrimination

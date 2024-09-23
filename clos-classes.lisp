@@ -572,7 +572,9 @@
            ;; we do this first so the CPL can refer to the class.
            (core:setf-find-class class ',name)
            ;; Initialize rack slots.
-           ,(initialize-class-form 'class class))
+           ,(initialize-class-form 'class class)
+           ;; Install stamp.
+           (core:class-new-stamp class))
          ,@(build-install-accessors accessors)
          ',name))))
 

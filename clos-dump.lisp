@@ -61,7 +61,7 @@
   (let* ((gf (gf object))
          (pos (position object (methods gf))))
     (assert pos () "Method on ~s for ~s ~s does not exist"
-            (name gf) (qualifiers object) (mapcar #'name (specializers gf)))
+            (name gf) (qualifiers object) (mapcar #'name (specializers object)))
     `(with-early-accessors (standard-generic-function)
        (elt (generic-function-methods (fdefinition ',(name gf))) ,pos))))
 
