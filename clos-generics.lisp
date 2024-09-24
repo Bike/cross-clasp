@@ -71,31 +71,31 @@
              (note-generic ',name ,gf))
            (setf (fdefinition ',name) ,(build-gf-form gf)))))))
 
-;;; return the unspecialized lambda list and the specializer specs.
+;;; return the parsed lambda list, but the second value is the list of
+;;; specializer specifiers.
 (defun parse-method-lambda-list (lambda-list)
   (multiple-value-bind (req opt rest keys aokp aux keyp)
       (alexandria:parse-ordinary-lambda-list lambda-list
                                              :allow-specializers t)
-    (values (nconc (mapcar (lambda (r)
-                             (if (consp r) (first r) r))
-                           req)
-                   (unless (null opt) (list '&optional))
-                   (loop for o in opt
-                         if (third o) ; suppliedp
-                           collect o
-                         else
-                           collect (list (first o) (second o)))
-                   (when rest (list '&rest rest))
-                   (when keyp (list '&key))
-                   (loop for k in keys
-                         if (third k)
-                           collect k
-                         else
-                           collect (list (first k) (second k)))
-                   (when aokp (list '&allow-other-keys))
-                   (when aux (list '&aux))
-                   (copy-list aux))
-            (mapcar (lambda (r) (if (consp r) (second r) 't)) req))))
+    (multiple-value-bind (req specs)
+        (loop for r in req
+              if (consp r)
+                collect (first r) into params
+                and collect (second r) into specs
+              else
+                collect r into params
+                and collect 't into specs
+              finally (return (values params specs)))
+      (values req specs opt rest keys aokp aux keyp))))
+
+;;; Given a parsed lambda list, reconstruct it.
+;;; This is used after getting the specializers out.
+(defun reconstruct-lambda-list (required optional rest keys aokp aux keyp)
+  `(,@required
+    ,@(when optional '(&optional)) ,@optional
+    ,@(when rest `(&rest ,rest))
+    ,@(when keyp '(&key)) ,@keys ,@(when aokp '(&allow-other-keys))
+    ,@(when aux `(&aux ,@aux))))
 
 (defun specializer-form (specializer)
   (etypecase specializer
@@ -134,29 +134,26 @@
     ((cons (eql setf) (cons symbol null)) (second function-name))))
 
 (defun expand-early-defmethod (name qualifiers lambda-list body)
-  (multiple-value-bind (lambda-list specializers)
+  (multiple-value-bind (required specializers optional rest keys aokp aux keysp)
       (parse-method-lambda-list lambda-list)
     (let* ((generic-function (cross-clasp:gf-info name))
            (gfp (not (not generic-function)))
+           (restp (or optional rest keysp))
            (generic-function
              (if gfp
                  generic-function
-                 (multiple-value-bind (required optional rest
-                                       keys aokp aux keysp)
-                     (alexandria:parse-ordinary-lambda-list lambda-list)
-                   (declare (ignore keys aokp aux))
-                   (make-instance 'compiler-generic
-                     :name name
-                     :lambda-list lambda-list ; FIXME: adjust &key?
-                     :reqargs required :restp (or optional rest keysp)
-                     :apo required
-                     :method-combination (ensure-method-combination
-                                          '(standard))
-                     :method-class (cross-clasp:find-compiler-class
-                                    'standard-method)
-                     :declarations ()
-                     :class (cross-clasp:find-compiler-class
-                             'standard-generic-function)))))
+                 (make-instance 'compiler-generic
+                   :name name
+                   :lambda-list lambda-list ; FIXME: adjust &key?
+                   :reqargs required :restp restp
+                   :apo required
+                   :method-combination (ensure-method-combination
+                                        '(standard))
+                   :method-class (cross-clasp:find-compiler-class
+                                  'standard-method)
+                   :declarations ()
+                   :class (cross-clasp:find-compiler-class
+                           'standard-generic-function))))
            (mfsname (format nil "~a~@[-~a~]-(~{~a~^ ~})-METHOD"
                             (symbol-name name) qualifiers
                             (mapcar #'symbol-name specializers)))
@@ -187,7 +184,11 @@
                               (apply ,cname args)
                               (apply ,cname ,argsname))))
                    (declare (ignorable #'call-next-method))
-                   (apply (lambda ,lambda-list ,@decls ,@body) ,argsname)))))
+                   (apply (lambda ,(reconstruct-lambda-list
+                                    required optional rest keys aokp aux keysp)
+                            ,@decls
+                            ,@body)
+                          ,argsname)))))
          (let ((,gfg ,(if gfp
                           `(fdefinition ',name)
                           (build-gf-form generic-function))))
