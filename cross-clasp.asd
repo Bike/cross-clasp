@@ -13,6 +13,7 @@
                (:file "clos-generics"
                 :depends-on ("clos-discriminate" "packages"))
                (:file "environment" :depends-on ("packages"))
+               (:file "base" :depends-on ("environment" "packages"))
                (:file "clos-dump"
                 :depends-on ("clos-generics" "environment" "packages"))
                (:file "build" :depends-on ("packages"))))
