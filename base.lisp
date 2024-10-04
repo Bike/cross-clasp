@@ -198,9 +198,8 @@
   (declare (ignore ce))
   (extrinsicl:install-cl client rte)
   (extrinsicl.maclina:install-eval client rte)
-  (setf (m:symbol-value client rte '*features*) (features))
-  (loop for vname in '(*features*
-                       core::*condition-restarts* core::*restart-clusters*)
+  (clostrum:make-variable client rte '*features* (features))
+  (loop for vname in '(core::*condition-restarts* core::*restart-clusters*)
         do (clostrum:make-variable client rte vname))
   (loop for fname in '(core::symbol-constantp (setf core::symbol-constantp)
                        core::*make-special
