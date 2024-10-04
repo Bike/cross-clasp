@@ -20,6 +20,10 @@
            #:sbv-bit-orc1 #:sbv-bit-orc2 #:sbv-bit-not)
   (:export #:num-op-asin #:num-op-acos #:num-op-atan
            #:num-op-asinh #:num-op-acosh #:num-op-atanh)
+  (:export #:car-atomic #:rplaca-atomic #:cas-car
+           #:cdr-atomic #:rplacd-atomic #:cas-cdr
+           #:atomic-symbol-value #:atomic-set-symbol-value #:cas-symbol-value
+           #:atomic-symbol-plist #:atomic-set-symbol-plist #:cas-symbol-plist)
   (:export #:function-name)
   (:export #:allocate-standard-instance #:allocate-raw-instance
            #:allocate-raw-funcallable-instance
@@ -37,6 +41,7 @@
   (:export #:noprint-p #:noinform-p)
   (:export #:file-scope #:file-scope-pathname)
   (:export #:interpret)
+  (:export #:sequence-out-of-bounds)
   (:export #:set-breakstep #:unset-breakstep #:breakstepping-p
            #:invoke-internal-debugger #:debugger-disabled-p)
   (:export #:call-with-frame #:primitive-print-backtrace
@@ -78,6 +83,8 @@
 (defpackage #:cross-clasp.clasp.clos
   (:use #:cl)
   (:local-nicknames (#:core #:cross-clasp.clasp.core))
+  (:export #:standard-instance-access
+           #:funcallable-standard-instance-access)
   (:export #:set-funcallable-instance-function))
 
 (defpackage #:cross-clasp.clasp.sequence
@@ -114,9 +121,11 @@
                     (#:gc #:cross-clasp.clasp.gctools)
                     (#:mp #:cross-clasp.clasp.mp)
                     (#:ext #:cross-clasp.clasp.ext))
-  (:shadow #:proclaim)
+  (:shadow #:proclaim #:constantp)
   (:export #:client)
   (:export #:fill-environment)
   (:export #:find-compiler-class #:gf-info)
-  (:export #:build-macroexpand #:build-macroexpand-1)
+  (:export #:build-macroexpand #:build-macroexpand-1
+           #:describe-variable
+           #:constantp #:constant-form-value )
   (:export #:build))

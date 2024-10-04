@@ -231,6 +231,14 @@
                        core::defconstant-eqx core::defconstant-equal
                        core::while core::until
                        clos::with-early-accessors
+                       mp::atomic mp::define-atomic-expander
+                       mp::define-simple-atomic-expander mp::cas
+                       mp::atomic-update-explicit mp::atomic-update
+                       mp::atomic-incf-explicit mp::atomic-incf
+                       mp::atomic-decf-explicit mp::atomic-decf
+                       mp::atomic-push-explicit mp::atomic-push
+                       mp::atomic-pop-explicit mp::atomic-pop
+                       mp::atomic-pushnew-explicit mp::atomic-pushnew
                        clos::early-allocate-instance
                        clos::earlier-allocate-instance
                        clos::early-initialize-instance
@@ -251,6 +259,9 @@
                                (with-condition-restarts . %with-condition-restarts))
         for m = (macro-function src)
         do (setf (clostrum:macro-function client rte mname) m))
+  (loop for (fname . set) in '((mp::atomic . mp::expand-atomic))
+        for f = (fdefinition set)
+        do (setf (clostrum:setf-expander client rte fname) f))
   ;; Extrinsicl copies over a bunch of classes, but we actually need
   ;; to use our own instead.
   (loop for s being the external-symbols of "CL"

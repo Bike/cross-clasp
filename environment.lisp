@@ -58,6 +58,34 @@
   (extrinsicl:macroexpand m:*client* (or env *build-rte*)
                           (macroexpand-hook) form))
 
+(defun describe-variable (symbol &optional env)
+  (trucler:describe-variable m:*client* (or env *build-rte*) symbol))
+
+(defun constantp (form &optional env)
+  (typecase form
+    (symbol (let ((info (describe-variable form env)))
+              (typecase info
+                (trucler:constant-variable-description t)
+                ;; could put symbol macros here
+                (t nil))))
+    (cons ; could expand this obviously
+     (case (first form)
+       ((quote) t)
+       (t nil)))
+    (t t)))
+
+(defun constant-form-value (form &optional env)
+  (let ((env (or env *build-rte*)))
+    (typecase form
+      (symbol (let ((info (describe-variable form env)))
+                (etypecase info
+                  (trucler:constant-variable-description
+                   (trucler:value info)))))
+      (cons
+       (ecase (first form)
+         ((quote) (second form))))
+      (t form))))
+
 (defun find-compiler-class (name)
   (clostrum:find-class m:*client* *build-rte* name t))
 
