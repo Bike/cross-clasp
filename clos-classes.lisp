@@ -92,8 +92,13 @@
    (%specializers :initarg :specializers :reader specializers)
    (%qualifiers :initarg :qualifiers :reader qualifiers)
    (%mclass :initarg :class :reader mclass)
-   ;; a form that, evaluated at load time, will return the contf function
-   (%contf-form :initarg :contf-form :reader contf-form)))
+   ;; A cons (LEAF mform) or (CONTF mform fform)
+   ;; mform, at load time, will be evaluated to produce the
+   ;; method function. fform, if present, evaluates to
+   ;; the raw leaf or contf function. The latter is only used
+   ;; in effective methods (clos-method-combination.lisp).
+   (%function :initarg :function-form :reader method-function
+              :type (cons (member leaf contf)))))
 
 (defmethod print-object ((o compiler-method) stream)
   (print-unreadable-object (o stream :type t)
@@ -482,6 +487,33 @@
              (class-size ,var) ,(length (slots class))))
      ,var))
 
+;;; FIXME? These are pretty verbose because make-%leaf-method-function
+;;; is defined later in method-function.lisp. We'd have to interleave
+;;; it in the with-mutual-defclass form which I think would be a little
+;;; tricky so I'll hold off.
+(defun reader-mf-form (slot-name)
+  `(let ((i (early-make-instance %leaf-method-function
+              :fmf (lambda (object)
+                     (slot-value object ',slot-name)))))
+     (set-funcallable-instance-function
+      i
+      (lambda (args next)
+        (declare (ignore next))
+        ;; argcount has been checked by gf already
+        (slot-value (first args) ',slot-name)))
+     i))
+(defun writer-mf-form (slot-name)
+  `(let ((i (early-make-instance %leaf-method-function
+              :fmf (lambda (value object)
+                     (setf (slot-value object ',slot-name) value)))))
+     (set-funcallable-instance-function
+      i
+      (lambda (args next)
+        (declare (ignore next))
+        ;; argcount has been checked by gf already
+        (setf (slot-value (second args) ',slot-name) (first args))))
+     i))
+
 ;;; Return a list of accessor methods for a defclass form.
 (defun build-accessors (class &optional (find-class
                                          #'cross-clasp:find-compiler-class))
@@ -500,10 +532,12 @@
                                  :method-class (funcall find-class 'standard-method)
                                  :declarations ()
                                  :class (funcall find-class 'standard-generic-function)))
+                    for fmf = (reader-mf-form (name slot))
                     for method = (make-instance 'compiler-reader
                                    :gf gf :lambda-list rll
                                    :qualifiers () :slot slot
                                    :specializers (list class)
+                                   :function-form `(leaf ,fmf)
                                    :class (funcall find-class 'standard-reader-method))
                     collect method)
         nconc (loop for writer in (writers slot)
@@ -518,11 +552,13 @@
                                  :method-class (funcall find-class 'standard-method)
                                  :declarations ()
                                  :class (funcall find-class 'standard-generic-function)))
+                    for fmf = (writer-mf-form (name slot))
                     for method = (make-instance 'compiler-writer
                                    :gf gf :lambda-list wll
                                    :qualifiers () :slot slot
                                    :specializers (list (funcall find-class 't)
                                                        class)
+                                   :function-form `(leaf ,fmf)
                                    :class (funcall find-class 'standard-writer-method))
                     collect method)))
 

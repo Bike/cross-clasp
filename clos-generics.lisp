@@ -109,7 +109,8 @@
     :lambda-list ',(lambda-list method)
     :specializers (list ,@(mapcar #'specializer-form
                                   (specializers method)))
-    :qualifiers ',(qualifiers method)))
+    :qualifiers ',(qualifiers method)
+    :function ,(second (method-function method))))
 
 (defun direct-slot-form (class slot)
   (let ((pos (position slot (direct-slots class))))
@@ -167,7 +168,7 @@
                                            specializers)
                      :qualifiers qualifiers
                      :class (method-class generic-function)
-                     :contf-form `#',mfname))
+                     :function-form `(contf (make-%contf-method-function #',mfname) #',mfname)))
            (gfg (gensym "GENERIC-FUNCTION")))
       `(progn
          (eval-when (:compile-toplevel)

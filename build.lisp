@@ -3,6 +3,7 @@
 (defparameter *files*
   '("lsp/foundation.lisp"
     "clos/hierarchy.lisp"
+    "clos/method-function.lisp"
     "clos/outcome.lisp"
     "clos/applicable-methods.lisp"
     "clos/satiate.lisp"

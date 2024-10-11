@@ -213,6 +213,11 @@
 
 (defclass standard-reader-method (standard-accessor-method) ())
 (defclass standard-writer-method (standard-accessor-method) ())
+
+;; needed to make accessor method functions
+(defclass %leaf-method-function (funcallable-standard-object)
+  ((%fmf :initarg :fmf :reader fmf))
+  (:metaclass funcallable-standard-class))
 ) ; with-mutual-defclass
 
 ;;; Enough classes now exist that we can use the "real" but still
