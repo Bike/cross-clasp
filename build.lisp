@@ -4,6 +4,8 @@
   '("lsp/foundation.lisp"
     "clos/hierarchy.lisp"
     "clos/method-function.lisp"
+    "clos/method-combination.lisp"
+    "clos/standard-method-combinations.lisp"
     "clos/outcome.lisp"
     "clos/applicable-methods.lisp"
     "clos/satiate.lisp"

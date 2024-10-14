@@ -223,11 +223,6 @@
 ;;; Enough classes now exist that we can use the "real" but still
 ;;; early defclass macro (does not invoke generics, etc.).
 
-(defclass method-combination (metaobject)
-  ((name :initarg :name :accessor method-combination-name)
-   (compiler :initarg :compiler :accessor method-combination-compiler)
-   (options :initarg :options :accessor method-combination-options)))
-
 ;;; Used in discriminating function computation.
 (defclass effective-accessor-method (method)
   ((%original :initarg :original :reader effective-accessor-method-original)

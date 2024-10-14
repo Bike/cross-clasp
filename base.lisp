@@ -177,6 +177,7 @@
     core:setf-find-class
     core::get-sysprop (setf core::get-sysprop)
     core::write-object core:write-addr
+    mp:make-lock mp:get-lock mp:giveup-lock
     mp:make-shared-mutex
     core:get-thread-local-write-to-string-output-stream-string
     core:thread-local-write-to-string-output-stream
@@ -230,6 +231,10 @@
                        core::defconstant-eqx core::defconstant-equal
                        core::while core::until
                        clos::with-early-accessors
+                       clos::define-method-combination
+                       clos::define-simple-method-combination
+                       clos::define-complex-method-combination
+                       mp:with-lock
                        mp::atomic mp::define-atomic-expander
                        mp::define-simple-atomic-expander mp::cas
                        mp::atomic-update-explicit mp::atomic-update

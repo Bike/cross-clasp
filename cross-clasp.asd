@@ -14,6 +14,8 @@
                 :depends-on ("clos-method-combination" "packages"))
                (:file "clos-generics"
                 :depends-on ("clos-discriminate" "packages"))
+               (:file "kernel/clos/define-method-combination"
+                :depends-on ("packages"))
                (:file "base" :depends-on ("environment" "packages"))
                (:file "clos-dump"
                 :depends-on ("clos-generics" "environment" "packages"))

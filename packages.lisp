@@ -83,6 +83,7 @@
 (defpackage #:cross-clasp.clasp.clos
   (:use #:cl)
   (:local-nicknames (#:core #:cross-clasp.clasp.core))
+  (:shadow #:define-method-combination)
   (:export #:standard-instance-access
            #:funcallable-standard-instance-access)
   (:export #:set-funcallable-instance-function))
