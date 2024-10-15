@@ -140,7 +140,7 @@
     ext:specialp
     core:function-name
     core::coerce-to-function core::coerce-fdesignator
-    core::fixnump
+    core::fixnump core:single-float-p
     core:num-op-acosh core:num-op-asinh
     core:num-op-atanh
     core:num-op-acos core:num-op-asin core:num-op-atan
@@ -167,7 +167,8 @@
     core:allocate-raw-instance core:allocate-raw-funcallable-instance
     core:class-stamp-for-instances
     core:make-rack core:rack-ref (setf core:rack-ref)
-    core:instance-ref
+    core::cas-rack core::atomic-rack-read
+    core:instance-ref core:instance-stamp core:instance-class
     clos::standard-instance-access
     (setf clos::standard-instance-access)
     clos::funcallable-standard-instance-access
@@ -179,6 +180,7 @@
     core::write-object core:write-addr
     mp:make-lock mp:get-lock mp:giveup-lock
     mp:make-shared-mutex
+    core::process-lambda-list
     core:get-thread-local-write-to-string-output-stream-string
     core:thread-local-write-to-string-output-stream
     core:fmt core::gdb core::mkdir core::file-kind
@@ -191,7 +193,7 @@
     core:debugger-frame-locals
     core:unix-get-local-time-zone core:unix-daylight-saving-time
     gc:thread-local-unwind-counter gc:bytes-allocated
-    core:unbound))
+    core:sl-boundp core:unbound))
 
 (defun install-environment (&optional (client m:*client*)
                               (rte *build-rte*)
