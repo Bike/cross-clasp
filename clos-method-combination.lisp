@@ -54,9 +54,9 @@
     (compute-standard-effective-method generic methods)))
 
 (defmacro with-effective-method-parameters ((&rest spreadable) &body body)
-  `(symbol-macrolet ((.emf-params. (,@spreadable))) ,@body))
+  `(symbol-macrolet ((+emf-params+ (,@spreadable))) ,@body))
 
-(defun emf-params (env) (cross-clasp:build-macroexpand-1 '.emf-params. env))
+(defun emf-params (env) (cross-clasp:build-macroexpand-1 '+emf-params+ env))
 
 ;;; This is only present during build. So we skip details. In particular,
 ;;; we don't make an actual method object for make-method, because we know

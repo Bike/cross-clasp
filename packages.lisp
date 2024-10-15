@@ -58,7 +58,7 @@
   (:export #:make-source-pos-info
            #:source-pos-info-lineno #:source-pos-info-column
            #:source-pos-info-file-handle)
-  (:export #:unbound))
+  (:export #:sl-boundp #:unbound))
 
 (defpackage #:cross-clasp.clasp.gctools
   (:use #:cl)

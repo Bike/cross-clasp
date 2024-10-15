@@ -155,7 +155,8 @@
     :accessor %generic-function-argument-precedence-order)
    (method-class
     :initarg :method-class
-    :initform (find-class 'standard-method))
+    :initform (find-class 'standard-method)
+    :reader generic-function-method-class)
    (methods :initform nil :reader generic-function-methods
             :accessor %generic-function-methods)
    (a-p-o-function :initform nil :accessor generic-function-a-p-o-function)
