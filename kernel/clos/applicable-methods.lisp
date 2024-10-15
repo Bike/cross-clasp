@@ -52,6 +52,27 @@
              classes)
             t)))
 
+;;; used in miss.lisp
+(defun compute-applicable-methods-using-specializers (generic-function specializers)
+  (sort-applicable-methods
+   generic-function
+   (applicable-method-list-using-specializers generic-function specializers)
+   specializers))
+
+(defun applicable-method-list-using-specializers (gf argspecs)
+  (flet ((applicable-method-p (method)
+           (loop for spec in (method-specializers method)
+                 for argspec in argspecs
+                 always (cond ((eql-specializer-p argspec)
+                               (specializer-accepts-p spec (eql-specializer-object argspec)))
+                              ;; if the method has an eql specializer and we don't
+                              ;; the method isn't applicable.
+                              ((eql-specializer-p spec) nil)
+                              (t (core:subclassp argspec spec))))))
+    (loop for method in (generic-function-methods gf)
+          when (applicable-method-p method)
+            collect method)))
+
 (defun sort-applicable-methods (gf methods args-specializers)
   ;; Reorder args-specializers to match APO.
   (let ((f (generic-function-a-p-o-function gf)))

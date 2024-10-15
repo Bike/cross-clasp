@@ -192,6 +192,13 @@
            `(setf (car ,(class-cell-form sname class)) ,(first arguments)))
           (t (error "BUG: Slot location ~a is not a fixnum or cons" location)))))
 
+(defun class-cell-form (slot-name class)
+  `(load-time-value
+    (slot-definition-location
+     (or (find ',slot-name (class-slots ,class) :key #'slot-definition-name)
+         (error "Probably a BUG: slot ~a in ~a stopped existing between compile and load"
+                ',slot-name ,class)))))
+
 (defmethod expand-apply-method ((method standard-method)
                                 method-arguments arguments env)
   ;; should be (&optional ((&rest next-methods))) but ecclesia is stupid

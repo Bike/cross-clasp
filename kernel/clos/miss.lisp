@@ -218,8 +218,9 @@
         finally (return
                   (loop for speclist in (specializers-combinate combo)
                         for key = (coerce speclist 'simple-vector)
-                        for methods = (compute-applicable-methods-using-specializers
-                                       generic-function speclist)
+                        for omethods = (compute-applicable-methods-using-specializers
+                                        generic-function speclist)
+                        for methods = (final-methods omethods speclist)
                         for outcome = (outcome
                                        generic-function call-history
                                        method-combination methods
@@ -232,6 +233,16 @@
                         ;; outcomes we are generating as we go.
                           and do (push new-entry call-history)
                         finally (return new-entries)))))
+
+;;; Given a list of lists of specializers, expand out all combinations.
+;;; So for example, ((a b) (c) (d e)) => ((a c d) (b c d) (a c e) (b c e))
+;;; in some arbitrary order.
+(defun specializers-combinate (list)
+  (if (null list)
+      '(nil)
+      (loop with next = (specializers-combinate (rest list))
+            for elem in (first list)
+            nconc (loop for rest in next collect (cons elem rest)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -376,6 +387,11 @@
             :methods methods :form em
             :function (effective-method-function
                        em (gf-arg-info generic-function)))))))
+
+(defun no-required-method (gf group-name &rest args)
+  (error "No applicable methods in required group ~a for generic function ~a~@
+          Given arguments: ~a"
+         group-name (generic-function-name gf) args))
 
 ;;; This is used by effective-method-function
 ;;; to squeeze out a bit more performance by avoiding &va-rest when possible,
