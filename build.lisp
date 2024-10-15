@@ -4,6 +4,7 @@
   '("lsp/foundation.lisp"
     "clos/hierarchy.lisp"
     "clos/method-function.lisp"
+    "clos/eql-specializer.lisp"
     "clos/method-combination.lisp"
     "clos/standard-method-combinations.lisp"
     "clos/applicable-methods.lisp"

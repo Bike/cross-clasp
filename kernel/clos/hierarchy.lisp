@@ -238,9 +238,6 @@
 (defclass core:clbind-cxx-class (std-class) ())
 (defclass core:derivable-cxx-class (std-class) ())
 
-(defclass eql-specializer (specializer)
-  ((object :initarg :object :reader eql-specializer-object)))
-
 ;;; maybe also needs trimming?
 (defclass structure-class (std-class)
   ;; Note that we don't need some of the class-slots, e.g. initargs, so we
