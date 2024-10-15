@@ -55,11 +55,11 @@
       (let ((*avoid-compiling* t))
         (compile nil form))))
 
-(defun emf-default (form &optional (arg-info '(t)))
-  (let ((restp (car arg-info)) (vars (cdr arg-info)))
+(defun emf-default (form arg-info)
+  (let ((rest (first (last arg-info))) (vars (butlast arg-info)))
     (emf-maybe-compile
-     `(lambda (,@vars ,@(when restp '(&rest emf-more)))
-        (with-effective-method-parameters (,@vars ,(if restp 'emf-more nil))
+     `(lambda (,@vars ,@(when rest `(&rest ,rest)))
+        (with-effective-method-parameters (,@arg-info)
           ,form)))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -69,8 +69,7 @@
       (consp (cdr form))
       (null (cddr form)))))
 
-(defun emf-from-contf (contf method next-methods
-                       &optional (arg-info '(t)))
+(defun emf-from-contf (contf method next-methods arg-info)
   (let ((next (if (null next-methods)
                   (make-%no-next-method-continuation method)
                   (emf-call-method
@@ -79,7 +78,7 @@
     (lambda (&rest .method-args.)
       (apply contf next .method-args.))))
 
-(defun emf-call-method (method rest &optional (arg-info '(t)))
+(defun emf-call-method (method rest arg-info)
   (cond ((eq (class-of (method-function method))
              (load-time-value (find-class '%leaf-method-function)))
          ;; leaf method functions are valid EMFs.
@@ -96,15 +95,14 @@
         ;; Could be a nonstandard method with its own EXPAND-APPLY-METHOD.
         (t (emf-default `(call-method ,method ,@rest) arg-info))))
 
-(defun effective-method-function (form &optional (arg-info '(t)))
+(defun effective-method-function (form &optional (arg-info '(emf-more)))
   ;; emf-default is always valid, but let's pick off a few cases
   ;; so that we can avoid using the compiler, which is slow.
   (if (consp form)
       (case (first form)
         ;; Note that MAKE-METHOD is not valid outside of a CALL-METHOD,
         ;; so form shouldn't be a MAKE-METHOD form.
-        ((call-method) (emf-call-method (second form) (cddr form)
-                                        arg-info))
+        ((call-method) (emf-call-method (second form) (cddr form) arg-info))
         (otherwise (emf-default form arg-info)))
       (emf-default form arg-info)))
 

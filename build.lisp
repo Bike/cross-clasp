@@ -9,6 +9,7 @@
     "clos/applicable-methods.lisp"
     "clos/effective-method.lisp"
     "clos/outcome.lisp"
+    "clos/miss.lisp"
     "clos/satiate.lisp"
     "clos/slot-value.lisp"
     ;;"lsp/export.lisp"

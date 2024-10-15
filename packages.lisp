@@ -27,9 +27,9 @@
   (:export #:function-name)
   (:export #:allocate-standard-instance #:allocate-raw-instance
            #:allocate-raw-funcallable-instance
-           #:class-stamp-for-instances
-           #:class-new-stamp #:instance-sig-set
-           #:make-rack #:rack-ref #:instance-rack)
+           #:class-stamp-for-instances #:class-new-stamp
+           #:instance-sig-set #:instance-stamp
+           #:make-rack #:rack-ref #:instance-rack #:instance-class)
   (:export #:setf-find-class)
   (:export #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
@@ -41,7 +41,7 @@
   (:export #:noprint-p #:noinform-p)
   (:export #:file-scope #:file-scope-pathname)
   (:export #:interpret)
-  (:export #:sequence-out-of-bounds)
+  (:export #:wrong-number-of-arguments #:sequence-out-of-bounds)
   (:export #:set-breakstep #:unset-breakstep #:breakstepping-p
            #:invoke-internal-debugger #:debugger-disabled-p)
   (:export #:call-with-frame #:primitive-print-backtrace
