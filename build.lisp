@@ -10,6 +10,7 @@
     "clos/effective-method.lisp"
     "clos/outcome.lisp"
     "clos/satiate.lisp"
+    "clos/slot-value.lisp"
     ;;"lsp/export.lisp"
     "lsp/assert.lisp"
     "lsp/arraylib.lisp"
