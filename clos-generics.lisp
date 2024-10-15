@@ -156,7 +156,7 @@
                    :class (cross-clasp:find-compiler-class
                            'standard-generic-function))))
            (mfsname (format nil "~a~@[-~a~]-(~{~a~^ ~})-METHOD"
-                            (symbol-name name) qualifiers
+                            (prin1-to-string name) qualifiers
                             (mapcar #'symbol-name specializers)))
            (mfname (intern mfsname "CROSS-CLASP.CLASP.CLOS"))
            (cname (gensym "CONTINUATION"))
