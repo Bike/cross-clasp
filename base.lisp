@@ -195,6 +195,12 @@
     gc:thread-local-unwind-counter gc:bytes-allocated
     core:sl-boundp core:unbound))
 
+(defparameter *copied-variables*
+  '(;;Eclector expects these to be globally bound
+    eclector.reader::*quasiquotation-state*
+    eclector.reader::*quasiquotation-depth*
+    eclector.reader::*consing-dot-allowed-p*))
+
 (defun install-environment (&optional (client m:*client*)
                               (rte *build-rte*)
                               (ce *build-ce*))
@@ -204,6 +210,8 @@
   (clostrum:make-variable client rte '*features* (features))
   (loop for vname in '(core::*condition-restarts* core::*restart-clusters*)
         do (clostrum:make-variable client rte vname))
+  (loop for vname in *copied-variables*
+        do (clostrum:make-variable client rte vname (symbol-value vname)))
   (loop for fname in '(core::symbol-constantp (setf core::symbol-constantp)
                        core::*make-special
                        core::find-declarations core:process-declarations
