@@ -185,15 +185,24 @@
     core:thread-local-write-to-string-output-stream
     core:fmt core::gdb core::mkdir core::file-kind
     core:invoke-internal-debugger
+    core:call-with-frame
     core:debugger-frame-up core:debugger-frame-down
     core:debugger-frame-fname core:debugger-frame-source-position
     core:debugger-frame-function-description core:debugger-frame-lang
     core:debugger-frame-closure core:debugger-frame-xep-p
     core:debugger-frame-args-available-p core:debugger-frame-args
     core:debugger-frame-locals
+    core:function-description-docstring core:function-description-column
+    core:function-description-lineno core:function-description-source-pathname
+    core:function-description-lambda-list
+    core:make-source-pos-info
+    core:source-pos-info-column core:source-pos-info-lineno
+    core:source-pos-info-file-handle
+    core:file-scope core:file-scope-pathname
     core:unix-get-local-time-zone core:unix-daylight-saving-time
     gc:thread-local-unwind-counter gc:bytes-allocated
-    core:sl-boundp core:unbound))
+    core:sl-boundp core:unbound
+    core:vaslistp core:list-from-vaslist))
 
 (defparameter *copied-variables*
   '(;;Eclector expects these to be globally bound
