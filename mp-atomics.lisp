@@ -380,7 +380,7 @@ are no bindings (in which case the global, thread-shared value is used."
 (define-simple-atomic-expander core:rack-ref (rack index)
   core::atomic-rack-read core::atomic-rack-write core::cas-rack)
 
-(define-atomic-expander cross-clasp.clasp.clos:standard-instance-access
+(define-atomic-expander clos:standard-instance-access
     (instance location)
     (&rest keys)
   "The requirements of the normal STANDARD-INSTANCE-ACCESS writer
@@ -391,10 +391,33 @@ consequences are not defined."
   (apply #'get-atomic-expansion
          `(core:rack-ref (core:instance-rack ,instance) ,location)
          keys))
-(define-atomic-expander cross-clasp.clasp.clos:funcallable-standard-instance-access
+(define-atomic-expander clos:funcallable-standard-instance-access
     (instance location) (&rest keys)
   "See STANDARD-INSTANCE-ACCESS for requirements."
   (apply #'get-atomic-expansion
          `(core:rack-ref (core:instance-rack ,instance) ,location)
          keys))
-;;; Further CLOS stuff for slot-value iiiiin some other file.
+
+(define-atomic-expander slot-value (object slot-name) (&rest keys)
+  (let ((gobject (gensym "OBJECT")) (gsname (gensym "SLOT-NAME"))
+        (gslotd (gensym "SLOTD")) (gclass (gensym "CLASS")))
+    (multiple-value-bind (vars vals cmpv newv read write cas)
+        (apply #'get-atomic-expansion
+               `(clos:slot-value-using-class ,gclass ,gobject ,gslotd)
+               keys)
+      (values (list* gobject gsname gclass gslotd vars)
+              (list* object slot-name `(class-of ,gobject)
+                     `(find ,gsname (class-slots ,gclass)
+                            :key #'slot-definition-name))
+              cmpv newv
+              `(if ,gslotd
+                   ,read
+                   (slot-missing ,gclass ,gobject ,gsname 'slot-value))
+              `(if ,gslotd
+                   ,write
+                   (progn (slot-missing ,gclass ,gobject ,gsname 'setf ,newv)
+                          ,newv))
+              `(if ,gslotd
+                   ,cas
+                   (slot-missing ,gclass ,gobject ,gsname
+                                 'cas (list ,cmpv ,newv)))))))

@@ -64,9 +64,19 @@
   (:use #:cl)
   (:export #:thread-local-unwind-counter #:bytes-allocated))
 
-(defpackage #:cross-clasp.clasp.mp
+(defpackage #:cross-clasp.clasp.clos
   (:use #:cl)
   (:local-nicknames (#:core #:cross-clasp.clasp.core))
+  (:shadow #:define-method-combination)
+  (:export #:slot-value-using-class)
+  (:export #:standard-instance-access
+           #:funcallable-standard-instance-access)
+  (:export #:set-funcallable-instance-function))
+
+(defpackage #:cross-clasp.clasp.mp
+  (:use #:cl)
+  (:local-nicknames (#:core #:cross-clasp.clasp.core)
+                    (#:clos #:cross-clasp.clasp.clos))
   (:export #:make-lock #:get-lock #:giveup-lock)
   (:export #:make-shared-mutex
            #:shared-lock #:write-lock
@@ -79,14 +89,6 @@
            #:process-name #:process-active-p
            #:interrupt-process #:process-suspend #:process-resume)
   (:export #:get-atomic-expansion #:define-atomic-expander))
-
-(defpackage #:cross-clasp.clasp.clos
-  (:use #:cl)
-  (:local-nicknames (#:core #:cross-clasp.clasp.core))
-  (:shadow #:define-method-combination)
-  (:export #:standard-instance-access
-           #:funcallable-standard-instance-access)
-  (:export #:set-funcallable-instance-function))
 
 (defpackage #:cross-clasp.clasp.sequence
   (:use #:cl)
