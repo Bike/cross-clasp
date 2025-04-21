@@ -225,7 +225,7 @@
 ;;; early defclass macro (does not invoke generics, etc.).
 
 ;;; Used in discriminating function computation.
-(defclass effective-accessor-method (method)
+(defclass effective-accessor-method (std-method)
   ((%original :initarg :original :reader effective-accessor-method-original)
    (%location :initarg :location :reader effective-accessor-method-location)))
 (defclass effective-reader-method (effective-accessor-method) ())
