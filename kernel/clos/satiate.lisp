@@ -37,21 +37,61 @@
 
 ;;; Minimum needed to call generic functions.
 ;;; May be an overestimate since debugging my way down to a
-;;; truly minimum set sounds atrocious.
+;;; truly minimum set sounds like a terrible time.
 (satiate generic-function-methods (standard-generic-function))
 (satiate generic-function-a-p-o-function (standard-generic-function))
+(satiate generic-function-lambda-list (standard-generic-function))
+(satiate generic-function-method-combination (standard-generic-function))
+(satiate generic-function-specializer-profile (standard-generic-function))
 
 (satiate method-specializers (standard-method)
          (standard-reader-method)
          (standard-writer-method))
+(satiate accessor-method-slot-definition
+         (standard-reader-method) (standard-writer-method))
+(satiate effective-accessor-method-location
+         (effective-reader-method) (effective-writer-method))
 
+(satiate slot-definition-name
+         (standard-direct-slot-definition) (standard-effective-slot-definition))
+
+(satiate stamp-for-instances
+         (standard-class) (funcallable-standard-class)
+         (built-in-class))
 (satiate class-precedence-list
+         (standard-class) (funcallable-standard-class))
+(satiate class-slots
          (standard-class) (funcallable-standard-class))
 
 (satiate eql-specializer-p
          (eql-specializer) (standard-class) (funcallable-standard-class))
-(satiate compute-applicable-methods-using-classes
-         (standard-generic-function t))
 (satiate specializer-accepts-p
          (standard-class t) (funcallable-standard-class t)
          (eql-specializer t))
+(satiate compute-applicable-methods-using-classes
+         (standard-generic-function t))
+(satiate compute-applicable-methods (standard-generic-function t))
+
+(satiate method-combination-compiler (method-combination))
+(satiate method-combination-options (method-combination))
+
+(satiate perform-outcome
+         (optimized-slot-reader t) (optimized-slot-writer t)
+         (effective-method-outcome t))
+(satiate outcome-methods
+         (optimized-slot-reader) (optimized-slot-writer) (effective-method-outcome))
+(satiate optimized-slot-accessor-index
+         (optimized-slot-reader) (optimized-slot-writer))
+(satiate optimized-slot-accessor-slot-name
+         (optimized-slot-reader) (optimized-slot-writer))
+(satiate optimized-slot-accessor-class
+         (optimized-slot-reader) (optimized-slot-writer))
+(satiate effective-method-outcome-form (effective-method-outcome))
+(satiate effective-method-outcome-function (effective-method-outcome))
+
+#|
+(satiate expand-apply-method
+         (standard-method t t t)
+         (effective-reader-method t t t)
+         (effective-writer-method t t t))
+|#
