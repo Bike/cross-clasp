@@ -13,6 +13,7 @@
     "clos/slot-value.lisp"
     "clos/effective-accessor.lisp"
     "clos/miss.lisp"
+    "clos/misc.lisp"
     "clos/satiate.lisp"
     ;;"lsp/export.lisp"
     "lsp/assert.lisp"

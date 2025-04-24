@@ -27,22 +27,3 @@
 (eval-when (:compile-toplevel)
   (defun install-method-combination (name function)
     (setf (gethash name *method-combinations*) function)))
-#+(or)
-(defun make-method-combination (name compiler options)
-  (early-make-instance method-combination
-                       :name name
-                       :compiler compiler
-                       :options options))
-#+(or)
-(defgeneric find-method-combination (generic-function
-                                     method-combination-type-name
-                                     method-combination-options))
-#+(or)
-(defmethod find-method-combination ((gf standard-generic-function)
-                                    name options)
-  (declare (ignore gf))
-  (make-method-combination name
-			   (or (search-method-combination name)
-                               (error "~A does not name a method combination"
-                                      name))
-			   options))
