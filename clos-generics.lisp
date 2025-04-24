@@ -30,11 +30,19 @@
         finally (return (values methods apo declarations doc
                                 mc gfclass mclass))))
 
+(defun build-mc-form (method-combination)
+  `(early-make-instance method-combination
+                        :name ',(name method-combination)
+                        :compiler (search-method-combination
+                                   ',(name method-combination))
+                        :options ',(options method-combination)))
+
 (defun build-gf-form (compiler-generic)
   `(early-make-instance
     ,(name (gf-class compiler-generic))
     :lambda-list ',(lambda-list compiler-generic)
-    :method-combination nil ; installed later
+    :method-combination ,(build-mc-form
+                          (gf-method-combination compiler-generic))
     :argument-precedence-order ',(apo compiler-generic)
     :method-class (find-class
                    ',(name (method-class compiler-generic)))

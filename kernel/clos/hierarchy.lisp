@@ -18,9 +18,23 @@
   ()
   (:metaclass built-in-class))
 
+;; Needed for e.g. method on make-instance.
+(defclass symbol () () (:metaclass built-in-class))
+
 (defclass standard-object (t) ())
 
 (defclass metaobject () ())
+
+(defclass method-combination (metaobject)
+  ((name :initarg :name :accessor method-combination-name)
+   ;; The "compiler" is somewhat misleadingly named; it's the function that
+   ;; outputs the effective method form.
+   ;; The "compiler" functions take two arguments, plus the lambda-list from
+   ;; the define-method-combination. The first argument is the generic function
+   ;; (used for the :generic-function option of D-M-C), the second is the sorted
+   ;; list of applicable methods, and the rest are the method combination options.
+   (compiler :initarg :compiler :accessor method-combination-compiler)
+   (options :initarg :options :accessor method-combination-options)))
 
 (defclass specializer (metaobject)
   ;; The number of specializer slots is fixed in instance.h.
