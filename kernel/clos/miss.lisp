@@ -168,7 +168,11 @@
                 (let* ((key-length
                          (length (generic-function-specializer-profile
                                   generic-function)))
-                       (key (coerce (subseq argument-classes 0 key-length) 'vector)))
+                       (key
+                         (concatenate 'vector
+                                      (subseq argument-classes 0 key-length))
+                         ;; broken because deftype breaks on atomic specs
+                         #+(or)(coerce (subseq argument-classes 0 key-length) 'vector)))
                   (if (find key call-history :key #'car :test #'specializer-key-match)
                       ;; another thread has already added this entry
                       nil

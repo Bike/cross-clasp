@@ -47,10 +47,16 @@
 (satiate method-specializers (standard-method)
          (standard-reader-method)
          (standard-writer-method))
+(satiate method-qualifiers (standard-method)
+         (standard-reader-method)
+         (standard-writer-method))
+(satiate method-function (standard-method))
 (satiate accessor-method-slot-definition
          (standard-reader-method) (standard-writer-method))
 (satiate effective-accessor-method-location
          (effective-reader-method) (effective-writer-method))
+
+(satiate contf (%contf-method-function))
 
 (satiate slot-definition-name
          (standard-direct-slot-definition) (standard-effective-slot-definition))
@@ -64,10 +70,11 @@
          (standard-class) (funcallable-standard-class))
 
 (satiate eql-specializer-p
-         (eql-specializer) (standard-class) (funcallable-standard-class))
+         (eql-specializer) (standard-class) (funcallable-standard-class)
+         (built-in-class))
 (satiate specializer-accepts-p
          (standard-class t) (funcallable-standard-class t)
-         (eql-specializer t))
+         (built-in-class t) (eql-specializer t))
 (satiate compute-applicable-methods-using-classes
          (standard-generic-function t))
 (satiate compute-applicable-methods (standard-generic-function t))
@@ -88,6 +95,8 @@
          (optimized-slot-reader) (optimized-slot-writer))
 (satiate effective-method-outcome-form (effective-method-outcome))
 (satiate effective-method-outcome-function (effective-method-outcome))
+
+(satiate compute-effective-method (standard-generic-function t t))
 
 #|
 (satiate expand-apply-method
