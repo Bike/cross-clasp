@@ -195,6 +195,7 @@
                    (declare (ignorable #'call-next-method))
                    (apply (lambda ,(reconstruct-lambda-list
                                     required optional rest keys aokp aux keysp)
+                            (declare (ignorable ,@required))
                             ,@decls
                             ,@body)
                           ,argsname)))))
