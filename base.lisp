@@ -160,7 +160,7 @@
     core::fill-array-with-elt
     core::base-string-p core::base-string-concatenate
     core::search-string
-    core:hash-table-pairs core:hash-eql
+    core:hash-table-pairs core:hash-equal
     core::coerce-to-package core::package-hash-tables
     core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class

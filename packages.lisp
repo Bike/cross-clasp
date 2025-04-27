@@ -8,7 +8,7 @@
   (:export #:lambda-name)
   (:export #:parse-bytespec)
   (:export #:put-f #:rem-f)
-  (:export #:hash-table-pairs #:hash-eql)
+  (:export #:hash-table-pairs #:hash-equal)
   (:export #:fmt)
   (:export #:name-of-class #:instance-ref)
   (:export #:proper-list-p)
