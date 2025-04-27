@@ -18,6 +18,10 @@
   ((%form :initarg :form :reader effective-method-outcome-form)
    (%function :initarg :function :reader effective-method-outcome-function)))
 
+(defgeneric outcome-p (object))
+(defmethod outcome-p ((o outcome)) t)
+(defmethod outcome-p ((o t)) nil)
+
 ;;; the makers can use early-make-instance since these classes aren't
 ;;; extensible.
 (defun make-optimized-slot-reader (&key methods index slot-name class)

@@ -12,6 +12,7 @@
     "clos/outcome.lisp"
     "clos/slot-value.lisp"
     "clos/effective-accessor.lisp"
+    "clos/interpreted-discriminator.lisp"
     "clos/miss.lisp"
     "clos/misc.lisp"
     "clos/satiate.lisp"

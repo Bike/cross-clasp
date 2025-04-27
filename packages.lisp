@@ -1,6 +1,7 @@
 (defpackage #:cross-clasp.clasp.core
   (:use #:cl)
-  (:export #:+type-header-value-map+ #:header-stamp)
+  (:export #:+type-header-value-map+ #:header-stamp
+           #:stamps-adjacent-p)
   (:export #:vaslistp #:vaslist-length #:vaslist-pop
            #:list-from-vaslist)
   (:export #:operator-shadowed-p #:process-declarations)
@@ -30,6 +31,7 @@
            #:class-stamp-for-instances #:class-new-stamp
            #:instance-sig-set #:instance-stamp
            #:make-rack #:rack-ref #:instance-rack #:instance-class)
+  (:export #:gfbytecode-simple-fun/make)
   (:export #:setf-find-class)
   (:export #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
@@ -90,6 +92,10 @@
            #:interrupt-process #:process-suspend #:process-resume)
   (:export #:get-atomic-expansion #:define-atomic-expander))
 
+(defpackage #:cross-clasp.clasp.llvm-sys
+  (:use #:cl)
+  (:export #:tag-tests))
+
 (defpackage #:cross-clasp.clasp.sequence
   (:use #:cl)
   (:export #:make-sequence-iterator #:with-sequence-iterator #:dosequence))
@@ -123,6 +129,7 @@
                     (#:clos #:cross-clasp.clasp.clos)
                     (#:gc #:cross-clasp.clasp.gctools)
                     (#:mp #:cross-clasp.clasp.mp)
+                    (#:llvm-sys #:cross-clasp.clasp.llvm-sys)
                     (#:ext #:cross-clasp.clasp.ext))
   (:shadow #:proclaim #:constantp)
   (:export #:client)

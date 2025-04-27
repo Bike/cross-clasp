@@ -83,6 +83,7 @@
         (core (find-package '#:cross-clasp.clasp.core))
         (gctools (find-package '#:cross-clasp.clasp.gctools))
         (mp (find-package '#:cross-clasp.clasp.mp))
+        (llvm-sys (find-package '#:cross-clasp.clasp.llvm-sys))
         (clos (find-package '#:cross-clasp.clasp.clos))
         (seq (find-package '#:cross-clasp.clasp.sequence))
         (ext (find-package '#:cross-clasp.clasp.ext))
@@ -99,6 +100,8 @@
           (clostrum:find-package client environment "GCTOOLS") gctools)
     (setf (clostrum:package-name client environment mp) "MP"
           (clostrum:find-package client environment "MP") mp)
+    (setf (clostrum:package-name client environment llvm-sys) "LLVM-SYS"
+          (clostrum:find-package client environment "LLVM-SYS") llvm-sys)
     (setf (clostrum:package-name client environment clos) "CLOS"
           (clostrum:find-package client environment "CLOS") clos)
     (setf (clostrum:package-name client environment seq) "SEQUENCE"
@@ -137,6 +140,7 @@
 (defparameter *noted-functions*
   '(core::generalp core:header-stamp
     core::derivable-stamp core::rack-stamp core::wrapped-stamp
+    core:stamps-adjacent-p llvm-sys:tag-tests
     ext:specialp
     core:function-name
     core::coerce-to-function core::coerce-fdesignator

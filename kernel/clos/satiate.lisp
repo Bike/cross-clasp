@@ -42,6 +42,7 @@
 (satiate generic-function-a-p-o-function (standard-generic-function))
 (satiate generic-function-lambda-list (standard-generic-function))
 (satiate generic-function-method-combination (standard-generic-function))
+(satiate generic-function-call-history (standard-generic-function))
 (satiate generic-function-specializer-profile (standard-generic-function))
 
 (satiate method-specializers (standard-method)
@@ -104,3 +105,23 @@
          (effective-reader-method t t t)
          (effective-writer-method t t t))
 |#
+
+(satiate c++-class-p (built-in-class)
+         (standard-class) (funcallable-standard-class))
+
+(satiate dtree-op-name (dtree-op))
+(satiate dtree-op-arguments (dtree-op))
+(satiate dtree-op-long-arguments (dtree-op))
+(satiate dtree-op-label-argument-indices (dtree-op))
+
+(satiate dtree-index (dtree-test) (bc-instruction) (bc-register-arg))
+(satiate (setf dtree-index) (t bc-label-arg))
+(satiate dtree-next (dtree-skip))
+
+(satiate bc-instruction-name (bc-instruction))
+(satiate bc-instruction-code (bc-instruction))
+(satiate bc-lip (bc-instruction) (bc-label-arg))
+(satiate bc-constant-arg-value (bc-constant-arg))
+(satiate bc-constant-ref-ref (bc-constant-ref))
+(satiate bc-label-arg-delta (bc-label-arg))
+(satiate (setf bc-label-arg-delta) (t bc-label-arg))
