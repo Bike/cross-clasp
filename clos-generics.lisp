@@ -38,15 +38,20 @@
                         :options ',(options method-combination)))
 
 (defun build-gf-form (compiler-generic)
-  `(early-make-instance
-    ,(name (gf-class compiler-generic))
-    :lambda-list ',(lambda-list compiler-generic)
-    :method-combination ,(build-mc-form
-                          (gf-method-combination compiler-generic))
-    :argument-precedence-order ',(apo compiler-generic)
-    :method-class (find-class
-                   ',(name (method-class compiler-generic)))
-    :declarations ',(declarations compiler-generic)))
+  `(let ((gf (early-make-instance
+              ,(name (gf-class compiler-generic))
+              :lambda-list ',(lambda-list compiler-generic)
+              :method-combination ,(build-mc-form
+                                    (gf-method-combination compiler-generic))
+              :argument-precedence-order ',(apo compiler-generic)
+              :method-class (find-class
+                             ',(name (method-class compiler-generic)))
+              :declarations ',(declarations compiler-generic))))
+     (set-funcallable-instance-function
+      ;; this is invalidated-discriminator-closure, but that's defined later.
+      ;; miss is defined in miss.lisp.
+      gf (lambda (&rest args) (apply #'miss gf args)))
+     gf))
 
 (defmacro early-defgeneric (name lambda-list &rest options)
   (multiple-value-bind (methods apo declarations doc

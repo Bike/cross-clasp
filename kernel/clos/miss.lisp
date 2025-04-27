@@ -31,6 +31,9 @@
       (bytecode-interpreted-discriminator generic-function)
       (invalidated-discriminator-closure generic-function)))
 
+(defun invalidated-discriminator-closure (generic-function)
+  (lambda (&rest args) (apply #'miss generic-function args)))
+
 (defun update-call-history (generic-function arguments)
   (let ((gfclass (class-of generic-function))
         outcome updatedp)
