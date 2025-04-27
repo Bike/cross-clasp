@@ -1,5 +1,14 @@
 (in-package "CLOS")
 
+;;; needed for compute-effective-method
+(defmethod method-qualifiers ((method effective-accessor-method))
+  (with-early-accessors (effective-accessor-method)
+    (method-qualifiers (effective-accessor-method-original method))))
+;;; for compute-outcome
+(defmethod accessor-method-slot-definition ((method effective-accessor-method))
+  (with-early-accessors (effective-accessor-method)
+    (accessor-method-slot-definition (effective-accessor-method-original method))))
+
 (defun make-effective-reader-method (method location function)
   (early-make-instance effective-reader-method
                        :original method :location location
@@ -48,9 +57,9 @@
 (defun intern-effective-reader (method location)
   ;; We could write things in terms of slot-value but that would require some
   ;; nontrivial macro work to get CAS of slot-value. FIXME
-  (with-early-accessors (direct-slot-definition)
+  (with-early-accessors (standard-direct-slot-definition)
     (loop with direct-slotd = (accessor-method-slot-definition method)
-          with table = (mp:atomic (%effective-readers method))
+          with table = (mp:atomic (%effective-readers direct-slotd))
           for existing = (cdr (assoc location table))
           when existing
             return existing

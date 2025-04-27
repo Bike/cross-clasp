@@ -49,17 +49,20 @@
          (standard-reader-method)
          (standard-writer-method))
 (satiate method-qualifiers (standard-method)
-         (standard-reader-method)
-         (standard-writer-method))
+         (standard-reader-method) (standard-writer-method)
+         (effective-reader-method) (effective-writer-method))
 (satiate method-function (standard-method))
 (satiate accessor-method-slot-definition
-         (standard-reader-method) (standard-writer-method))
+         (standard-reader-method) (standard-writer-method)
+         (effective-reader-method) (effective-writer-method))
 (satiate effective-accessor-method-location
          (effective-reader-method) (effective-writer-method))
 
 (satiate contf (%contf-method-function))
 
 (satiate slot-definition-name
+         (standard-direct-slot-definition) (standard-effective-slot-definition))
+(satiate slot-definition-location
          (standard-direct-slot-definition) (standard-effective-slot-definition))
 
 (satiate stamp-for-instances

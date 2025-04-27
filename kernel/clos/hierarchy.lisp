@@ -93,7 +93,8 @@
   
 (defclass slot-definition (metaobject) ())
 (defclass direct-slot-definition (slot-definition)
-  ((%effective-readers :initform nil :reader %effective-readers)
+  (;; see effective-accessor.lisp
+   (%effective-readers :initform nil :reader %effective-readers)
    (%effective-writers :initform nil :reader %effective-writers)))
 (defclass effective-slot-definition (slot-definition) ())
 (defclass standard-slot-definition (slot-definition)
@@ -112,12 +113,12 @@
    ;; direct slots, as an extension.
    (location :initarg :location :initform nil :reader slot-definition-location
              :accessor %slot-definition-location)))
-(defclass standard-effective-slot-definition (standard-slot-definition) ())
+(defclass standard-effective-slot-definition (standard-slot-definition
+                                              effective-slot-definition)
+  ())
 (defclass standard-direct-slot-definition (standard-slot-definition
                                            direct-slot-definition)
-  (;; see effective-accessor.lisp
-   (%effective-readers :initform nil :reader %direct-slotd-effective-readers)
-   (%effective-writers :initform nil :reader %direct-slotd-effective-writers)))
+  ())
 
 (defclass funcallable-standard-class (std-class) ())
 
