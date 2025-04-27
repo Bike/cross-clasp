@@ -11,14 +11,16 @@
       (setf (core:rack-ref (core:instance-rack instance) location) val)
       (setf (car location) val)))
 
+;; FIND is not defined yet so we use this.
+(defun %find-slot (class slot-name)
+  (loop for prospect in (class-slots class)
+        for prospect-name = (slot-definition-name prospect)
+        when (eql prospect-name slot-name)
+          return prospect))
+
 (defun slot-value (object slot-name)
   (let* ((class (class-of object))
-         (slotd
-           ;; FIND not defined yet.
-           (loop for prospect in (class-slots class)
-                 for prospect-name = (slot-definition-name prospect)
-                 when (eql prospect-name slot-name)
-                   return prospect)))
+         (slotd (%find-slot class slot-name)))
     (if slotd
         (slot-value-using-class class object slotd)
         ;; Only the primary value of SLOT-MISSING is returned.
@@ -26,16 +28,27 @@
 
 (defun (setf slot-value) (value object slot-name)
   (let* ((class (class-of object))
-         (slotd
-           (loop for prospect in (class-slots class)
-                 for prospect-name = (slot-definition-name prospect)
-                 when (eql prospect-name slot-name)
-                   return prospect)))
+         (slotd (%find-slot class slot-name)))
     (if slotd
         (setf (slot-value-using-class class object slotd) value)
         (slot-missing class object slot-name 'setf value)))
   ;; 7.7.12: value of slot-missing is ignored for setf.
   value)
+
+(defun slot-boundp (object slot-name)
+  (let* ((class (class-of object))
+         (slotd (%find-slot class slot-name)))
+    (if slotd
+        (slot-boundp-using-class class object slotd)
+        (values (slot-missing class object slot-name 'slot-boundp)))))
+
+(defun slot-makunbound (object slot-name)
+  (let* ((class (class-of object))
+         (slotd (%find-slot class slot-name)))
+    (if slotd
+        (slot-makunbound-using-class class object slotd)
+        (slot-missing class object slot-name 'slot-makunbound)))
+  object)
 
 (defgeneric slot-value-using-class (class object slot-definition))
 (defgeneric (setf slot-value-using-class) (value class object slot-definition))
