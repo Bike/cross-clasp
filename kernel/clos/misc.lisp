@@ -33,3 +33,9 @@
 (defgeneric function-keywords (method))
 (defmethod function-keywords ((method standard-method))
   (values (method-keywords method) (method-allows-other-keys-p method)))
+
+;;; generic-function-name
+
+(defgeneric generic-function-name (generic-function))
+(defmethod generic-function-name ((gf standard-generic-function))
+  (core:function-name gf))

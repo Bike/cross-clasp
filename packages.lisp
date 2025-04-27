@@ -25,7 +25,7 @@
            #:cdr-atomic #:rplacd-atomic #:cas-cdr
            #:atomic-symbol-value #:atomic-set-symbol-value #:cas-symbol-value
            #:atomic-symbol-plist #:atomic-set-symbol-plist #:cas-symbol-plist)
-  (:export #:function-name)
+  (:export #:function-name #:setf-function-name)
   (:export #:allocate-standard-instance #:allocate-raw-instance
            #:allocate-raw-funcallable-instance
            #:class-stamp-for-instances #:class-new-stamp
