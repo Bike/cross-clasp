@@ -46,6 +46,7 @@
               :argument-precedence-order ',(apo compiler-generic)
               :method-class (find-class
                              ',(name (method-class compiler-generic)))
+              specializer-profile ',(specializer-profile compiler-generic)
               :declarations ',(declarations compiler-generic))))
      (core:setf-function-name gf ',(name compiler-generic))
      (set-funcallable-instance-function
@@ -211,6 +212,18 @@
            ,@(unless gfp
                `((setf (fdefinition ',name) ,gfg)))
            (with-early-accessors (standard-generic-function)
+             ;; If we specialized anything, update the specializer profile.
+             ,@(loop with tc = (cross-clasp:find-compiler-class 't)
+                     for spec in (specializers method)
+                     for i from 0
+                     unless (eq spec tc)
+                       collect `(aref sp ,i) into body
+                       and collect t into body
+                     finally (return
+                               (if (null body)
+                                   nil
+                                   `((let ((sp (generic-function-specializer-profile ,gfg)))
+                                       (setf ,@body))))))
              (push ,(build-method-form method)
                    (%generic-function-methods ,gfg))))))))
 
@@ -333,10 +346,7 @@
     `(with-early-accessors (standard-generic-function)
        (let* ((,gfv (fdefinition ',name))
               (,chv ,ch-form))
-         (setf (generic-function-call-history ,gfv) ,chv
-               ;; the SP has been updated by defmethods, so set again.
-               (generic-function-specializer-profile ,gfv)
-               ,(specializer-profile gfun))
+         (setf (generic-function-call-history ,gfv) ,chv)
          (set-funcallable-instance-function
           ,gfv
           ,(generate-discriminator gfun gfv call-history))

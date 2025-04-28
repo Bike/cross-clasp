@@ -141,7 +141,7 @@
    ;; the element is a list of their eql specializer objects.
    ;; Otherwise (i.e. the parameter is specialized with non eql
    ;; specializers) the element is T.
-   (specializer-profile :initform nil
+   (specializer-profile :initform nil :initarg specializer-profile
                         :accessor generic-function-specializer-profile)
    ;; An alist of (specializer-key . outcome) representing previously
    ;; seen calls to this function. A specializer-key is a vector of

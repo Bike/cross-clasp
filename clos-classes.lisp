@@ -590,6 +590,13 @@
                    ,@(when defgf
                        `((setf (fdefinition ',name) ,gfv)))
                    (with-early-accessors (standard-generic-function)
+                     ,(etypecase method
+                        (compiler-reader
+                         `(setf (aref (generic-function-specializer-profile ,gfv) 0)
+                                t))
+                        (compiler-writer
+                         `(setf (aref (generic-function-specializer-profile ,gfv) 1)
+                                t)))
                      (push ,(build-method-form method)
                            (%generic-function-methods ,gfv))))))
 
