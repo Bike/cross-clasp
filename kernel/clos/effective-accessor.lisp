@@ -76,7 +76,7 @@
                    (setf table new-table))))))
 
 (defun intern-effective-writer (method location)
-  (with-early-accessors (direct-slot-definition)
+  (with-early-accessors (standard-direct-slot-definition)
     (loop with direct-slotd = (accessor-method-slot-definition method)
           for table = (mp:atomic (%effective-writers direct-slotd))
           for existing = (cdr (assoc location table))

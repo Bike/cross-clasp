@@ -91,6 +91,7 @@
                  (early-initialize-instance ,mclass ,object
                    :original ',original
                    :location ',(location object))
-                 (with-early-accessors (std-class direct-slot-definition)
-                   (push ,object (,cache (elt (class-direct-slots ,class)
-                                              ,dslotpos)))))))))
+                 (with-early-accessors (std-class standard-direct-slot-definition)
+                   (push (cons ',(location object) ,object)
+                         (,cache (elt (class-direct-slots ,class)
+                                      ,dslotpos)))))))))
