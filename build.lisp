@@ -14,6 +14,7 @@
     "clos/effective-accessor.lisp"
     "clos/interpreted-discriminator.lisp"
     "clos/miss.lisp"
+    "clos/print.lisp"
     "clos/misc.lisp"
     "clos/satiate.lisp"
     ;;"lsp/export.lisp"

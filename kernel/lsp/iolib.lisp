@@ -333,8 +333,3 @@ the one defined in the ANSI standard. *print-base* is 10, *print-array* is t,
            (print-unreadable-object-contents object stream type identity body)
            (write-char #\> stream))))
   nil)
-
-(defmacro print-unreadable-object ((object stream &key type identity) &body body)
-  `(%print-unreadable-object ,object ,stream ,type ,identity
-                             ,(when body
-                                `(lambda () ,@body))))
