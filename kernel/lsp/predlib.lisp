@@ -869,7 +869,7 @@ if not possible."
 ;;----------------------------------------------------------------------
 ;; CLOS classes and structures.
 ;;
-#+clos(defun register-class (class)
+(defun register-class (class)
   (declare (notinline class-name))
   (or (find-registered-tag class)
       ;; We do not need to register classes which belong to the core type

@@ -46,7 +46,7 @@
        (lambda (object)
          (declare (core:lambda-name
                    effective-instance-reader))
-         (let ((val (si:instance-ref object location)))
+         (let ((val (standard-instance-access object location)))
            (if (cleavir-primop:eq val (core:unbound))
                (slot-unbound (class-of object) object slot-name)
                val))))))

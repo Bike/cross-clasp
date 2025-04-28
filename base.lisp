@@ -141,8 +141,9 @@
   '(core::generalp core:header-stamp
     core::derivable-stamp core::rack-stamp core::wrapped-stamp
     core:stamps-adjacent-p llvm-sys:tag-tests
+    core:gfbytecode-simple-fun/make
     ext:specialp
-    core:function-name core:setf-function-name
+    core:function-name core:setf-function-name core::valid-function-name-p
     core::coerce-to-function core::coerce-fdesignator
     core::fixnump core:single-float-p
     core:num-op-acosh core:num-op-asinh

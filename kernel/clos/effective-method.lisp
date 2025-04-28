@@ -162,7 +162,7 @@
          (valuef
            (cond ((core:fixnump location)
                   ;; instance location- easy
-                  `(core:instance-ref ,(first arguments) ',location))
+                  `(standard-instance-access ,(first arguments) ',location))
                  ((consp location)
                   ;; class location. we need to find the new cell at load time.
                   `(car ,(class-cell-form sname
@@ -184,7 +184,7 @@
                 (accessor-method-slot-definition method)))
         (class (second (method-specializers method))))
     (cond ((core:fixnump location)
-           `(setf (core:instance-ref ,(second arguments) ,location)
+           `(setf (standard-instance-access ,(second arguments) ,location)
                   ,(first arguments)))
           ((consp location)
            ;; class location
