@@ -7,7 +7,7 @@
 
 (defmacro when (condition &body forms)
   `(if ,condition (progn ,@forms) nil))
-(defmacro unless (condition body forms)
+(defmacro unless (condition &body forms)
   `(if ,condition nil (progn ,@forms)))
 
 (defun expand-while-until (test body jmp-op)
