@@ -537,8 +537,7 @@
 (defun literalify-arguments (instr literals coallesce-indexes)
   (loop named literalify
         with long-arg = nil
-        for cur = (cdr instr) then (cdr cur)
-        for annotated-arg = (car cur)
+        for annotated-arg in (cdr instr)
         collect (typecase annotated-arg
                   (bc-constant-arg
                    (let* ((arg (bc-constant-arg-value annotated-arg))
@@ -555,8 +554,7 @@
                   (bc-register-arg annotated-arg)
                   (t (error "Illegal arg ~a" annotated-arg)))
           into new-args
-        when (null (cdr cur))
-          do (return-from literalify (values new-args long-arg))))
+        finally (return-from literalify (values new-args long-arg))))
 
 ;;; Move constants into a literal vector and replace them with references
 ;;; Return a vector of nil/T, one for each instruction if the instruction is long
