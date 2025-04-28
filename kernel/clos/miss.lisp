@@ -11,6 +11,10 @@
     (when updatedp (force-discriminator generic-function))
     (perform-outcome outcome arguments)))
 
+;;; stupid aliases used by funcallableInstance.cc
+(defun dispatch-miss-va (gf vaslist) (apply #'miss gf vaslist))
+(defun dispatch-miss (gf &rest args) (apply #'miss gf args))
+
 (defun force-discriminator (generic-function)
   (set-funcallable-instance-function generic-function
                                      (calculate-std-discriminating-function
