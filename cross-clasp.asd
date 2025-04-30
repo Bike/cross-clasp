@@ -6,17 +6,14 @@
                (:file "condition-system-macros" :depends-on ("packages"))
                (:file "mp-macros" :depends-on ("macrology" "packages"))
                (:file "mp-atomics" :depends-on ("packages"))
-               (:file "clos-cpl" :depends-on ("packages"))
-               (:file "clos-classes" :depends-on ("packages"))
-               (:file "clos-method-combination"
-                :depends-on ("clos-classes" "packages"))
-               (:file "clos-discriminate"
-                :depends-on ("clos-method-combination" "packages"))
-               (:file "clos-generics"
-                :depends-on ("clos-discriminate" "packages"))
+               (:module "clos" :depends-on ("packages")
+                :components ((:file "cpl")
+                             (:file "classes")
+                             (:file "method-combination" :depends-on ("classes"))
+                             (:file "discriminate" :depends-on ("method-combination"))
+                             (:file "generics" :depends-on ("discriminate"))
+                             (:file "dump" :depends-on ("generics"))))
                (:file "kernel/clos/define-method-combination"
                 :depends-on ("packages"))
                (:file "base" :depends-on ("environment" "packages"))
-               (:file "clos-dump"
-                :depends-on ("clos-generics" "environment" "packages"))
                (:file "build" :depends-on ("packages"))))
