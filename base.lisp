@@ -280,6 +280,7 @@
                                (defclass . clos::early-defclass)
                                (defgeneric . clos::early-defgeneric)
                                (defmethod . clos::early-defmethod)
+                               (defstruct . clos::early-defstruct)
                                (call-method . clos::%call-method)
                                (handler-bind . %handler-bind)
                                (restart-case . %restart-case)

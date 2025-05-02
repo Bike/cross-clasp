@@ -128,7 +128,7 @@
     :function ,(second (method-function method))))
 
 (defun direct-slot-form (class slot)
-  (let ((pos (position slot (direct-slots class))))
+  (let ((pos (position slot (mop:class-direct-slots class))))
     (assert pos)
     `(with-early-accessors (std-class)
        (nth ,pos (class-direct-slots (find-class ',(name class)))))))
@@ -250,7 +250,7 @@
 (defun applicable-method-p (method classes)
   (loop for spec in (specializers method)
         for class in classes
-        always (member spec (class-precedence-list class))))
+        always (member spec (mop:class-precedence-list class))))
 
 (defun method< (method1 method2 gspecs apof)
   (loop for spec1 in (funcall apof (specializers method1))
@@ -261,7 +261,7 @@
              ((>) (return nil)))))
 
 (defun specializer< (s1 s2 gspec)
-  (let ((cpl (class-precedence-list gspec)))
+  (let ((cpl (mop:class-precedence-list gspec)))
     (cond ((eq s1 s2) '=)
           ((member s1 (member s2 cpl)) '>)
           ((member s2 (member s1 cpl)) '<)
@@ -301,7 +301,7 @@
 (defmethod final-method ((method compiler-reader) classes)
   (let* ((direct (slot method))
          (class (first classes))
-         (effloc (location (find (name direct) (slots class) :key #'name))))
+         (effloc (location (find (name direct) (mop:class-slots class) :key #'name))))
     (or (find effloc (effective-readers direct) :key #'location)
       (let ((final (make-instance 'effective-reader
                      :gf (gf method) :lambda-list (lambda-list method)
@@ -313,7 +313,7 @@
 (defmethod final-method ((method compiler-writer) classes)
   (let* ((direct (slot method))
          (class (second classes))
-         (effloc (location (find (name direct) (slots class) :key #'name))))
+         (effloc (location (find (name direct) (mop:class-slots class) :key #'name))))
     (or (find effloc (effective-writers direct) :key #'location)
       (let ((final (make-instance 'effective-writer
                      :gf (gf method) :lambda-list (lambda-list method)

@@ -1,15 +1,25 @@
 (in-package #:cross-clasp.clasp.clos)
 
+;; These aren't actual host classes. That's because working around MOP's requirements
+;; for class initialization is more trouble than it's worth.
+;; (We never want to make instances of instances of COMPILER-CLASS, but that doesn't
+;;  really help since MOP doesn't much contemplate such a thing.)
+;; We do use MOP accessors so that e.g. anatomicl has an easier time dealing with
+;; what we have.
+;; Possibly we could inherit from CLASS instead of STANDARD-CLASS, but then
+;; a) we'd need to put in all these slots ourselves anyway, and
+;; b) nobody ever does that so hosts may get stupid.
 (defclass compiler-class ()
-  ((%name :initarg :name :reader name)
-   (%supers :initarg :supers :reader direct-superclasses)
-   (%subs :initform nil :accessor direct-subclasses)
-   (%class-precedence-list :accessor class-precedence-list)
-   (%direct-slots :initarg :direct-slots :reader direct-slots)
-   (%slots :accessor slots)
+  ((%name :initarg :name :accessor class-name :reader name)
+   (%supers :initarg :supers :reader mop:class-direct-superclasses)
+   (%subs :initform nil :accessor direct-subclasses :reader mop:class-direct-subclasses)
+   (%class-precedence-list :accessor class-precedence-list
+                           :reader mop:class-precedence-list)
+   (%direct-slots :initarg :direct-slots :reader mop:class-direct-slots)
+   (%slots :accessor slots :reader mop:class-slots)
    (%direct-default-initargs :initarg :direct-default-initargs
-                             :reader direct-default-initargs)
-   (%default-initargs :accessor default-initargs)
+                             :reader mop:class-direct-default-initargs)
+   (%default-initargs :accessor default-initargs :reader mop:class-default-initargs)
    (%metaclass :initarg :metaclass :reader metaclass)))
 
 (defmethod print-object ((o compiler-class) stream)
@@ -243,7 +253,7 @@
          (direct-slots
            (loop with result = nil
                  for class in cpl
-                 do (loop for slotd in (reverse (direct-slots class))
+                 do (loop for slotd in (reverse (mop:class-direct-slots class))
                           for name = (name slotd)
                           for existing = (assoc name result)
                           when existing
@@ -261,7 +271,7 @@
   ;; just append with duplicates removed.
   (loop with seen = ()
         for class in cpl
-        for inits = (direct-default-initargs class)
+        for inits = (mop:class-direct-default-initargs class)
         nconc (loop for (k v) on inits by #'cddr
                     unless (member k seen)
                       do (push k seen)
@@ -272,7 +282,7 @@
   (slot-boundp class '%class-precedence-list))
 
 (defun finalize-inheritance (class)
-  (let* ((supers (direct-superclasses class))
+  (let* ((supers (mop:class-direct-superclasses class))
          (_ (loop for sup in supers
                   unless (finalizedp sup)
                     do (finalize-inheritance sup)))
@@ -327,7 +337,7 @@
 (defun expand-early-allocate-instance (class)
   (let ((funcallablep (find (cross-clasp:find-compiler-class
                              'funcallable-standard-object)
-                            (class-precedence-list class))))
+                            (mop:class-precedence-list class))))
     `(let* ((class (find-class ',(name class)))
             (slotds (with-early-accessors (std-class)
                       (class-slots class)))
@@ -352,15 +362,15 @@
 (defmacro earlier-allocate-instance (class-name)
   `(core:allocate-standard-instance
     (find-class ',class-name)
-    ,(length (slots (cross-clasp:find-compiler-class class-name)))))
+    ,(length (mop:class-slots (cross-clasp:find-compiler-class class-name)))))
 
 (defmacro early-initialize-instance (class-name object &rest initargs)
   (let* ((class (cross-clasp:find-compiler-class class-name))
          ;; FIXME: This won't actually work since it can trip the
          ;; duplicate initargs thing below, but I don't care right now.
-         (initargs (append initargs (default-initargs class)))
+         (initargs (append initargs (mop:class-default-initargs class)))
          (sia (primitive-accessor class))
-         (slots (slots class))
+         (slots (mop:class-slots class))
          (o (gensym "OBJECT")))
     `(let ((,o ,object))
        (setf
@@ -394,7 +404,7 @@
 ;; returns a bunch of bindings for macrolet.
 (defun early-accessors (class)
   (loop with sia = (primitive-accessor class)
-        for slotd in (slots class)
+        for slotd in (mop:class-slots class)
         for loc = (location slotd)
         ;; for accessors we just use all possible readers, even if
         ;; there's no corresponding writers.
@@ -459,32 +469,32 @@
       ,(name (metaclass class)) ,var
       :name ',(name class)
       :direct-superclasses (list ,@(loop for super
-                                           in (direct-superclasses class)
+                                           in (mop:class-direct-superclasses class)
                                          for sname = (name super)
                                          collect `(find-class ',sname)))
-      :direct-slots (list ,@(loop for slot in (direct-slots class)
+      :direct-slots (list ,@(loop for slot in (mop:class-direct-slots class)
                                   collect (build-direct-slot-form
                                            slot)))
       ;; since default-initargs is set separately there can be
       ;; duplicate initfunctions, but I do not care.
       :direct-default-initargs ,(canonicalized-default-initargs-form
-                                 (direct-default-initargs class)))
+                                 (mop:class-direct-default-initargs class)))
      (with-early-accessors (std-class)
        (setf (%class-slots ,var)
-             (list ,@(loop for slot in (slots class)
+             (list ,@(loop for slot in (mop:class-slots class)
                            collect (build-slot-form slot)))
              (%class-precedence-list ,var)
-             (list ,@(loop for s in (class-precedence-list class)
+             (list ,@(loop for s in (mop:class-precedence-list class)
                            collect `(find-class ',(name s))))
              (%class-default-initargs ,var)
              ,(canonicalized-default-initargs-form
-               (default-initargs class))
+               (mop:class-default-initargs class))
              (%class-direct-subclasses ,var)
-             (list ,@(loop for sub in (direct-subclasses class)
+             (list ,@(loop for sub in (mop:class-direct-subclasses class)
                            for sname = (name sub)
                            collect `(find-class ',sname)))
              (%class-finalized-p ,var) t
-             (class-size ,var) ,(length (slots class))))
+             (class-size ,var) ,(length (mop:class-slots class))))
      ,var))
 
 ;;; FIXME? These are pretty verbose because make-%leaf-method-function
@@ -519,7 +529,7 @@
                                          #'cross-clasp:find-compiler-class))
   (loop with rll = (list (name class))
         with wll = (list 'new (name class))
-        for slot in (direct-slots class)
+        for slot in (mop:class-direct-slots class)
         nconc (loop for reader in (readers slot)
                     for egf = (cross-clasp:gf-info reader)
                     for gf = (or egf
@@ -690,7 +700,7 @@
                              (core:setf-find-class
                               (core:allocate-standard-instance
                                (find-class ',(name metaclass))
-                               ,(length (slots metaclass)))
+                               ,(length (mop:class-slots metaclass)))
                               ',name)
                              ',name)))
          ;; Now we fill in all the classes. We can use the compile-time

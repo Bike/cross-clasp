@@ -68,7 +68,8 @@
 
 (defpackage #:cross-clasp.clasp.clos
   (:use #:cl)
-  (:local-nicknames (#:core #:cross-clasp.clasp.core))
+  (:local-nicknames (#:core #:cross-clasp.clasp.core)
+                    (#:mop #:closer-mop))
   (:shadow #:define-method-combination)
   (:export #:slot-value-using-class)
   (:export #:standard-instance-access

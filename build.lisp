@@ -25,7 +25,7 @@
     "lsp/predlib.lisp"
     "lsp/listlib.lisp"
     "lsp/mislib.lisp"
-    "lsp/defstruct.lisp"
+    ;;"lsp/defstruct.lisp"
     "lsp/seqmacros.lisp"
     "lsp/seq.lisp"
     "lsp/seqlib.lisp"

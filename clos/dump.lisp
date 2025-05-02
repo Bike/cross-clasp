@@ -83,7 +83,7 @@
            ;; because we need to look up the slotd in its class, and the
            ;; slotd doesn't know what its class is.
            (dslot (slot original))
-           (dslotpos (position dslot (direct-slots class))))
+           (dslotpos (position dslot (mop:class-direct-slots class))))
       (assert dslotpos () "Slot ~s is not present in its class ~s"
               (name dslot) (name class))
       (values `(early-allocate-instance ,mclass)

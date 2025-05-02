@@ -26,6 +26,10 @@
   ;; So we don't finalize here.
   (core:allocate-raw-instance class (make-rack-for-class class)))
 
+(defmethod allocate-instance ((class structure-class) &rest initargs)
+  (declare (ignore initargs))
+  (core:allocate-raw-instance class (make-rack-for-class class)))
+
 (defun uninitialized-funcallable-instance-closure (funcallable-instance)
   (lambda (&rest args)
     (declare (core:lambda-name uninitialized-funcallable-instance))

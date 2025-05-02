@@ -19,7 +19,7 @@
                                 (class-name next-class)))
                        (unless (member next-class class-list :test 'eql)
                          (let ((more-classes
-                                 (direct-superclasses next-class)))
+                                 (mop:class-direct-superclasses next-class)))
                            (setf class-list (list* next-class class-list)
                                  precedence-lists (list* (list* next-class more-classes)
                                                          precedence-lists)
@@ -44,7 +44,7 @@
 	     (if (or (null cpl) (endp free-list) (endp (rest free-list)))
 		 (first free-list)
 		 (dolist (i cpl nil)
-		   (dolist (j (direct-superclasses i))
+		   (dolist (j (mop:class-direct-superclasses i))
 		     (when (member j free-list :test 'eql)
 		       (return-from next-element j))))))
 	   (delete-class (class precedence-lists)

@@ -1,5 +1,6 @@
 (asdf:defsystem #:cross-clasp
-  :depends-on (:maclina :extrinsicl :extrinsicl/maclina :clostrum-basic)
+  :depends-on (:maclina :closer-mop :extrinsicl :extrinsicl/maclina :anatomicl
+                        :clostrum-basic)
   :components ((:file "packages")
                (:file "environment" :depends-on ("packages"))
                (:file "macrology" :depends-on ("packages"))
@@ -13,7 +14,11 @@
                              (:file "discriminate" :depends-on ("method-combination"))
                              (:file "generics" :depends-on ("discriminate"))
                              (:file "dump" :depends-on ("generics"))))
+               (:file "defstruct" :depends-on ("clos"))
                (:file "kernel/clos/define-method-combination"
                 :depends-on ("packages"))
-               (:file "base" :depends-on ("environment" "packages"))
+               (:file "base" :depends-on ("environment" "clos" "defstruct"
+                                                        "condition-system-macros"
+                                                        "mp-macros" "mp-atomics"
+                                                        "packages"))
                (:file "build" :depends-on ("packages"))))

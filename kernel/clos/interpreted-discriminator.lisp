@@ -386,6 +386,7 @@
 (defmethod c++-class-p ((class built-in-class)) t)
 (defmethod c++-class-p ((class standard-class)) nil)
 (defmethod c++-class-p ((class funcallable-standard-class)) nil)
+(defmethod c++-class-p ((class structure-class)) nil)
 
 (defun differentiate-specializers (paths)
   (loop with eqls = nil
