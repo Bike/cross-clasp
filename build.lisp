@@ -39,6 +39,7 @@
     ;; macros
     "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"
+    "lsp/format.lisp"
     #+(or)"lsp/loop2.lisp"))
 
 (defun default-output-directory ()
