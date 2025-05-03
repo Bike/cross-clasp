@@ -727,13 +727,3 @@
                                     do (core:instance-sig-set s))
                               (loop for s in (class-direct-slots class)
                                     do (core:instance-sig-set s)))))))))
-
-;;; Define, in the compiler, some basic classes that we need to
-;;; compile much of anything in CLOS.
-#+(or)
-(defun install-basic-hierarchy ()
-  ;; metaclass is unset because those classes don't yet exist.
-  (setf (cross-clasp:find-compiler-class 't)
-        (make-instance 'compiler-class
-          :name 't :supers () :direct-slots ()))
-  (finalize-inheritance (cross-clasp:find-compiler-class 't)))
