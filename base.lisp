@@ -152,6 +152,7 @@
     core:num-op-acosh core:num-op-asinh
     core:num-op-atanh
     core:num-op-acos core:num-op-asin core:num-op-atan
+    core::float-to-digits
     core::member1
     core::sequence-start-end
     core:vref (setf core:vref)
@@ -168,6 +169,7 @@
     core::fill-array-with-elt
     core::base-string-p core::base-string-concatenate
     core::search-string
+    core::printing-char-p
     core:hash-table-pairs core:hash-equal
     core::coerce-to-package core::package-hash-tables
     core:allocate-standard-instance core:class-new-stamp
@@ -187,7 +189,10 @@
     core::get-sysprop (setf core::get-sysprop)
     core::write-object core:write-addr
     mp:make-lock mp:get-lock mp:giveup-lock
-    mp:make-shared-mutex
+    mp:make-shared-mutex mp:suspend-loop
+    mp:abort-process mp:enqueue-interrupt
+    core::check-pending-interrupts
+    core::signal-code-alist
     core::process-lambda-list
     core:get-thread-local-write-to-string-output-stream-string
     core:thread-local-write-to-string-output-stream
@@ -210,7 +215,8 @@
     core:unix-get-local-time-zone core:unix-daylight-saving-time
     gc:thread-local-unwind-counter gc:bytes-allocated
     core:sl-boundp core:unbound
-    core:vaslistp core:list-from-vaslist))
+    core:vaslistp core:list-from-vaslist
+    ext:quit))
 
 (defparameter *copied-variables*
   '(;;Eclector expects these to be globally bound
@@ -225,7 +231,8 @@
   (extrinsicl:install-cl client rte)
   (extrinsicl.maclina:install-eval client rte)
   (clostrum:make-variable client rte '*features* (features))
-  (loop for vname in '(core::*condition-restarts* core::*restart-clusters*)
+  (loop for vname in '(core::*condition-restarts* core::*restart-clusters*
+                       core::*interrupts-enabled* core::*allow-with-interrupts*)
         do (clostrum:make-variable client rte vname))
   (loop for vname in *copied-variables*
         do (clostrum:make-variable client rte vname (symbol-value vname)))
