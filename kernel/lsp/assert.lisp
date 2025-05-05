@@ -81,7 +81,7 @@ until FORM returns a non-NIL value.  Returns NIL. DATUM and ARGs designate the
  error to signal."
   `(while (not ,test-form)
      (setf (values ,@places)
-           ;; Defined later in clos/conditions.lisp
+           ;; Defined in clos/conditions.lisp
            (assert-failure ',test-form ',places (list ,@places)
                            ;; If DATUM is provided, it must be for a
                            ;; condition; NIL is not acceptable.

@@ -157,3 +157,12 @@
                                (apply #'(lambda ,lambda-list ,@body)
                                       ,temp-var))))))))
 
+
+(defmacro %assert (test-form &optional places (datum nil datump) &rest arguments)
+  `(core::while (not ,test-form)
+     (setf (values ,@places)
+           ;; Defined in clos/conditions.lisp
+           (core::assert-failure ',test-form ',places (list ,@places)
+                                 ;; If DATUM is provided, it must be for a
+                                 ;; condition; NIL is not acceptable.
+                                 ,(if datump datum nil) ,@arguments))))

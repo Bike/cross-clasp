@@ -194,7 +194,7 @@
        (error "BUG in ADD-ENTRY: Not a node: ~a" node)))))
 
 (defun basic-tree (call-history specializer-profile)
-  ;;(assert (not (null call-history)))
+  (assert (not (null call-history)))
   (let ((last-specialized (position nil specializer-profile :from-end t :test-not #'eq))
         (first-specialized (position-if #'identity specializer-profile)))
     (when (null last-specialized)
@@ -251,7 +251,7 @@
          (error "BUG in BC-ADD-ENTRY: Not a node: ~a" node))))))
 
 (defun bc-basic-tree (call-history specializer-profile)
-  ;; (assert (not (null call-history)))
+  (assert (not (null call-history)))
   (let ((last-specialized (position nil specializer-profile :from-end t :test-not #'eq))
         (first-specialized (position-if #'identity specializer-profile)))
     (let ((specializer-indices (when (and (integerp first-specialized) (integerp last-specialized))

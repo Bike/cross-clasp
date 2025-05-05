@@ -863,7 +863,7 @@ being joined ended abnormally or was not started."))
           (return (list (nth (1- i) candidates))))))))
 
 (defun check-chosen-symbol (chosen-symbol candidates)
-  #+(or)(assert (member chosen-symbol candidates) (chosen-symbol)
+  (assert (member chosen-symbol candidates) (chosen-symbol)
           "~s is not one of the symbols that can resolve the conflict.
 The conflict resolver must be one of ~s" chosen-symbol candidates))
 
@@ -895,7 +895,7 @@ The conflict resolver must be one of ~s" chosen-symbol candidates))
 (defun accessibility-conflict (operation troublemaker new package)
   (let ((name (symbol-name new)))
     (multiple-value-bind (old status) (find-symbol name package)
-      #+(or)(assert (and old (not (eq old new))))
+      (assert (and old (not (eq old new))))
       (let ((candidates (list new old)))
         (ecase status
           ((:inherited)
