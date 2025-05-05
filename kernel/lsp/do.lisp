@@ -76,6 +76,8 @@
             (loop for var in vars
                   if (symbolp var)
                     collect `(,var nil) into inits
+                  else if (and (consp var) (null (cdr var)))
+                         collect `(,(first var) nil) into inits
                   else if (and (consp var) (consp (cdr var)) (null (cddr var)))
                          collect `(,(first var) ,(second var)) into inits
                   else if (and (consp var) (consp (cdr var)) (consp (cddr var))
