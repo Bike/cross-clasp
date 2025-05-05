@@ -288,6 +288,7 @@
                                (call-method . clos::%call-method)
                                (handler-bind . %handler-bind)
                                (assert . %assert)
+                               (check-type . %check-type)
                                (restart-case . %restart-case)
                                (restart-bind . %restart-bind)
                                (with-condition-restarts . %with-condition-restarts))

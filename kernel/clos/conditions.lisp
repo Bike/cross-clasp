@@ -524,7 +524,7 @@ a break level if the value of *BREAK-ON-WARNINGS* is non-NIL.  Otherwise,
 returns with NIL."
   (let ((condition
 	  (coerce-to-condition datum arguments 'SIMPLE-WARNING 'WARN)))
-    ;;(check-type condition warning "a warning condition")
+    (check-type condition warning "a warning condition")
     ;; FIXME? We could use %signal, but then with-condition-restarts wouldn't
     ;; happen correctly.
     (restart-case (signal condition)
@@ -1441,9 +1441,9 @@ If the process is alive/running, the interrupt is placed on the PROCESS's pendin
 DATUM and ARGUMENTS are designators for an interrupt of default type SIMPLE-INTERACTIVE-INTERRUPT. If DATUM is not specified, a SIMPLE-INTERACTIVE-INTERRUPT with default message is created.
 The interrupt will be SIGNALed in the process at some time when it calls SIGNAL-PENDING-INTERRUPTS and interrupts are not blocked (by WITHOUT-INTERRUPTS). This can happen implicitly at implementation-defined times, or when the process is blocking on grabbing a lock, waiting on a condition variable, sleeping, or waiting for input.
 Interrupts are implicitly blocked while signaling an interrupt, and while unwind-protect cleanups are executed. They can be reenabled temporarily with WITH-INTERRUPTS."
-  ;;(check-type process mp:process)
+  (check-type process mp:process)
   (let ((condition (designated-interrupt datum datump arguments)))
-    ;;(check-type condition mp:interrupt "an interrupt")
+    (check-type condition mp:interrupt "an interrupt")
     (mp:enqueue-interrupt process condition)))
 
 (defun mp:signal-pending-interrupts ()
@@ -1466,8 +1466,8 @@ Interrupts are implicitly blocked while signaling an interrupt, and while unwind
 
 ;;; for backward compatibility (e.g. bordeaux)
 (defun mp:interrupt-process (process function)
-  ;;(check-type process mp:process)
-  ;;(check-type function function)
+  (check-type process mp:process)
+  (check-type function function)
   (mp:interrupt process 'mp:call-interrupt :function function))
 
 (defun mp:process-kill (process)

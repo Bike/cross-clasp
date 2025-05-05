@@ -166,3 +166,14 @@
                                  ;; If DATUM is provided, it must be for a
                                  ;; condition; NIL is not acceptable.
                                  ,(if datump datum nil) ,@arguments))))
+
+(defmacro %check-type (place type &optional type-string)
+  (when (and (consp type) (eq 'quote (car type)))
+    (error "Quoted type specifier in ~s: ~s"
+           'check-type type))
+  (let ((aux (gensym)))
+    `(let ((,aux ,place))
+       (unless (typep ,aux ',type)
+         ;; defined in lsp/assert.lisp
+	 (setf ,place (core::do-check-type ,aux ',type ',type-string ',place)))
+       nil)))
