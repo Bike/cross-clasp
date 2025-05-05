@@ -259,6 +259,7 @@
                        clos::define-simple-method-combination
                        clos::define-complex-method-combination
                        mp:with-lock
+                       mp:without-interrupts mp:with-interrupts
                        mp::atomic mp::define-atomic-expander
                        mp::define-simple-atomic-expander mp::cas
                        mp::atomic-update-explicit mp::atomic-update

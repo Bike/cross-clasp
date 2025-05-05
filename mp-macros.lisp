@@ -7,20 +7,20 @@
          (macrolet ((allow-with-interrupts (&body allow-forms)
                       (list* 'let
                              (list (list 'core::*allow-with-interrupts*
-                                         ,outer-allow-with-interrupts))
+                                         ',outer-allow-with-interrupts))
                              allow-forms))
                     (with-restored-interrupts (&body with-forms)
                       (list* 'let
                              (list (list 'core::*interrupts-enabled*
-                                         ,outer-interrupts-enabled))
+                                         ',outer-interrupts-enabled))
                              with-forms))
                     (with-local-interrupts (&body with-forms)
                       (list 'let*
                             (list (list 'core::*allow-with-interrupts*
-                                        ,outer-allow-with-interrupts)
+                                        ',outer-allow-with-interrupts)
                                   (list 'core::*interrupts-enabled*
-                                        ,outer-allow-with-interrupts))
-                            (list 'when ,outer-allow-with-interrupts
+                                        ',outer-allow-with-interrupts))
+                            (list 'when ',outer-allow-with-interrupts
                                   (core::check-pending-interrupts))
                             (list* 'locally with-forms))))
            (let* ((,outer-interrupts-enabled core::*interrupts-enabled*)
