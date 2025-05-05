@@ -135,7 +135,7 @@
 
 (defun parse-slot-specifier (slot-specifier)
   (etypecase slot-specifier
-    (symbol (values slot-specifier nil nil nil nil nil t nil))
+    (symbol (values slot-specifier nil nil nil nil nil t :instance nil))
     (cons (loop with name = (first slot-specifier)
                 with initargs = ()
                 with initform
@@ -143,6 +143,7 @@
                 with readers = ()
                 with writers = ()
                 with type = t with typep = nil
+                with allocation = :instance with allocationp = nil
                 with location = nil
                 for (key value) on (rest slot-specifier) by #'cddr
                 do (ecase key
@@ -170,24 +171,32 @@
                       (if typep
                           (error "duplicate type")
                           (setf type value typep t)))
+                     ((:allocation)
+                      (cond (allocationp (error "duplicate allocation"))
+                            ((and (eq value :class) location)
+                             (error "~s ~s and ~s are incompatible"
+                                    :class :allocation :location))
+                            (t (setf allocation value allocationp t))))
                      ((:location)
                       (check-type value (integer 0) "a slot location")
-                      (if location
-                          (error "duplicate location")
-                          (setf location value))))
+                      (cond (location (error "duplicate location"))
+                            ((eq allocation :class)
+                             (error "~s ~s and ~s are incompatible"
+                                    :class :allocation :location))
+                            (t (setf location value)))))
                 finally (return (values name
                                         initform initformp initargs
                                         readers writers type
-                                        location))))))
+                                        allocation location))))))
 
 (defun make-direct-slotd (slot-specifier)
   (multiple-value-bind (name initform initformp initargs
-                        readers writers type location)
+                        readers writers type allocation location)
       (parse-slot-specifier slot-specifier)
     (make-instance 'direct-slotd
       :name name :initform initform :initformp initformp
       :initargs initargs :readers readers :writers writers
-      :type type :location location)))
+      :type type :allocation allocation :location location)))
 
 (defun parse-class-options (options)
   (loop with metaclass with documentation
@@ -235,6 +244,14 @@
                        (t (error "Location mismatch for ~s"
                                  (name (first slotds)))))
                  (setf locp t))
+      ;; Verify allocation
+      (loop with allocation = (allocation (first slotds))
+            for slotd in (rest slotds)
+            for alloc = (allocation slotd)
+            when alloc
+              do (unless (eq alloc allocation)
+                   (error "Allocation mismatch for ~s"
+                          (name (first slotds)))))
       ;; Make the slotd
       (make-instance 'effective-slotd
         :name (name (first slotds)) :initform initform :initformp initformp
@@ -244,7 +261,10 @@
                             for type = (stype slotd)
                             unless (eq type 't) ; who care
                               collect type))
-        :location location))))
+        :allocation (allocation (first slotds))
+        :location (ecase (allocation (first slotds))
+                    (:instance location)
+                    (:class nil))))))
 
 (defun compute-slots (cpl)
   (let* (;; An alist from slot names to lists of direct slotds
@@ -436,6 +456,7 @@
     :readers ',(readers slotd)
     :writers ',(writers slotd)
     :type ',(stype slotd)
+    :allocation ',(allocation slotd)
     :location ',(location slotd)))
 
 (defun build-slot-form (compiler-slotd)
@@ -454,7 +475,12 @@
     :readers ',(readers compiler-slotd)
     :writers ',(writers compiler-slotd)
     :type ',(stype compiler-slotd)
-    :location ',(location compiler-slotd)))
+    :allocation ',(allocation compiler-slotd)
+    :location ,(ecase (allocation compiler-slotd)
+                 (:instance `',(location compiler-slotd))
+                 (:class `(list ,(if (initformp compiler-slotd)
+                                     (initform compiler-slotd)
+                                     '(core:unbound)))))))
 
 (defun canonicalized-default-initargs-form (default-initargs)
   `(list
