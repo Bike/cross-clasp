@@ -15,8 +15,16 @@
            #:do-not-funcall-special-operator #:wrong-number-of-arguments
            #:odd-keywords #:unrecognized-keyword-argument-error
            #:simple-parse-error #:simple-reader-error)
-  (:export #:check-pending-interrupts #:sigint #:terminal-interrupt
+  (:export #:check-pending-interrupts #:terminal-interrupt
            #:signal-code-alist)
+  ;; Clasp usually only defines these if the underlying OS has the given signal.
+  ;; Defining them unconditionally shouldn't be a problem, though. They'll just
+  ;; never actually be signaled.
+  (:export #:sigabrt #:sigalrm #:sigbus #:sigchld #:sigcont #:sigemt #:sigfpe
+           #:sighup #:sigill #:sigint #:sigio #:sigkill #:sigpipe #:sigpoll
+           #:sigprof #:sigpwr #:sigquit #:sigsegv #:sigstop #:sigtstp #:sigsys
+           #:sigterm #:sigtrap #:sigttin #:sigttou #:sigurg #:sigusr1 #:sigusr2
+           #:sigvtalrm #:sigxcpu #:sigxfsz #:sigwinch)
   (:export #:lambda-name)
   (:export #:parse-bytespec)
   (:export #:put-f #:rem-f)
