@@ -6,7 +6,7 @@
 
 (defun parse-defgeneric-options (options)
   (loop with apo with mc with doc with gfclass with mclass
-        for (name . value) on options
+        for (name . value) in options
         if (eq name :method)
           collect value into methods
         if (eq name 'declare)
