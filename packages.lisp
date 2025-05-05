@@ -5,7 +5,18 @@
   (:export #:vaslistp #:vaslist-length #:vaslist-pop
            #:list-from-vaslist)
   (:export #:operator-shadowed-p #:process-declarations)
-  (:export #:simple-program-error)
+  (:export #:simple-program-error
+           #:out-of-extent-unwind #:no-catch-tag
+           #:simple-stream-error #:closed-stream
+           #:simple-file-error #:file-does-not-exist #:file-exists
+           #:simple-package-error #:import-name-conflict #:export-name-conflict
+           #:use-package-name-conflict #:unintern-name-conflict
+           #:package-lock-violation
+           #:do-not-funcall-special-operator #:wrong-number-of-arguments
+           #:odd-keywords #:unrecognized-keyword-argument-error
+           #:simple-parse-error #:simple-reader-error)
+  (:export #:check-pending-interrupts #:sigint #:terminal-interrupt
+           #:signal-code-alist)
   (:export #:lambda-name)
   (:export #:parse-bytespec)
   (:export #:put-f #:rem-f)
@@ -89,8 +100,14 @@
   (:export #:with-lock #:with-rwlock
            #:without-interrupts #:with-interrupts)
   (:export #:*current-process* #:all-processes
-           #:process-name #:process-active-p
-           #:interrupt-process #:process-suspend #:process-resume)
+           #:process #:process-name #:process-active-p
+           #:interrupt-process #:process-suspend #:process-resume
+           #:suspend-loop #:abort-process #:process-kill #:process-cancel)
+  (:export #:interrupt #:service-interrupt #:enqueue-interrupt
+           #:signal-pending-interrupts #:signal-interrupt #:raise
+           #:interactive-interrupt #:simple-interrupt #:simple-interactive-interrupt
+           #:cancellation-interrupt #:call-interrupt #:call-interrupt-function
+           #:suspension-interrupt #:posix-interrupt)
   (:export #:get-atomic-expansion #:define-atomic-expander))
 
 (defpackage #:cross-clasp.clasp.llvm-sys
@@ -100,6 +117,12 @@
 (defpackage #:cross-clasp.clasp.sequence
   (:use #:cl)
   (:export #:make-sequence-iterator #:with-sequence-iterator #:dosequence))
+
+(defpackage #:cross-clasp.clasp.debug
+  (:use #:cl)
+  (:export #:with-truncated-stack)
+  (:export #:step-form #:step-into #:step-over)
+  (:export #:frame-arguments))
 
 (defpackage #:cross-clasp.clasp.ext
   (:use #:cl)
@@ -120,8 +143,21 @@
   (:export #:add-package-local-nickname #:add-implementation-package
            #:lock-package)
   (:export #:*ed-functions*)
-  (:export #:*invoke-debugger-hook*)
-  (:export #:tpl-frame #:tpl-argument #:tpl-arguments))
+  (:export #:*invoke-debugger-hook*
+           #:restart-associated-conditions
+           #:restart-function #:restart-report-function
+           #:restart-interactive-function #:restart-test-function)
+  (:export #:segmentation-violation
+           #:interactive-interrupt
+           #:stack-overflow #:stack-overflow-size #:stack-overflow-type
+           #:storage-exhausted #:bus-error
+           #:name-conflict #:name-conflict-candidates #:resolve-conflict
+           #:undefined-class #:assert-error
+           #:charater-coding-error #:encoding-error #:decoding-error
+           #:character-encoding-error #:character-decoding-error
+           #:stream-encoding-error #:stream-decoding-error)
+  (:export #:tpl-frame #:tpl-argument #:tpl-arguments)
+  (:export #:quit))
 
 (defpackage #:cross-clasp
   (:use #:cl)

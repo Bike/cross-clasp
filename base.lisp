@@ -86,6 +86,7 @@
         (llvm-sys (find-package '#:cross-clasp.clasp.llvm-sys))
         (clos (find-package '#:cross-clasp.clasp.clos))
         (seq (find-package '#:cross-clasp.clasp.sequence))
+        (debug (find-package '#:cross-clasp.clasp.debug))
         (ext (find-package '#:cross-clasp.clasp.ext))
         (kw (find-package "KEYWORD")))
     (setf (clostrum:package-name client environment cl) "COMMON-LISP"
@@ -106,6 +107,8 @@
           (clostrum:find-package client environment "CLOS") clos)
     (setf (clostrum:package-name client environment seq) "SEQUENCE"
           (clostrum:find-package client environment "SEQUENCE") seq)
+    (setf (clostrum:package-name client environment debug) "CLASP-DEBUG"
+          (clostrum:find-package client environment "CLASP-DEBUG") debug)
     (setf (clostrum:package-name client environment ext) "EXT"
           (clostrum:find-package client environment "EXT") ext)
     (setf (clostrum:package-name client environment kw) "KEYWORD"
