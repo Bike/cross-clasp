@@ -54,6 +54,11 @@
                            object stream))))))
 
 (defmacro early-defstruct (name-and-options &rest slots &environment env)
-  (anatomicl:expand-defstruct maclina.machine:*client*
-                              (anatomicl:parse-defstruct name-and-options slots)
-                              env))
+  (let (;; Make sure accessors etc. are interned in the cross reader *package*,
+        ;; rather than the host *package*.
+        (*package* (maclina.machine:symbol-value maclina.machine:*client*
+                                                 cross-clasp::*build-rte*
+                                                 '*package*)))
+    (anatomicl:expand-defstruct maclina.machine:*client*
+                                (anatomicl:parse-defstruct name-and-options slots)
+                                env)))
