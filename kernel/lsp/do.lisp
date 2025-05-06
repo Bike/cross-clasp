@@ -54,15 +54,15 @@
       (process-declarations body nil)
     (when (and (integerp count-form) (>= count-form 0))
       (setq declarations
-            (cons `(type (integer 0 ,count-form) ,var) declarations))
-      `(block nil
-         (let ((%dotimes-var ,count-form)
-               (,var 0))
-           (declare ,@declarations)
-           (while (< ,var %dotimes-var)
-             ,@body
-             (setq ,var (1+ ,var)))
-           ,result-form)))))
+            (cons `(type (integer 0 ,count-form) ,var) declarations)))
+    `(block nil
+       (let ((%dotimes-var ,count-form)
+             (,var 0))
+         (declare ,@declarations)
+         (while (< ,var %dotimes-var)
+           ,@body
+           (setq ,var (1+ ,var)))
+         ,result-form))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun expand-do/do* (op vars test result body)
