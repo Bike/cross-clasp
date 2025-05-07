@@ -79,40 +79,24 @@
 
 (defun install-packages (&optional (client m:*client*)
                            (environment *build-rte*))
-  (let ((cl (find-package '#:common-lisp))
-        (core (find-package '#:cross-clasp.clasp.core))
-        (gctools (find-package '#:cross-clasp.clasp.gctools))
-        (mp (find-package '#:cross-clasp.clasp.mp))
-        (llvm-sys (find-package '#:cross-clasp.clasp.llvm-sys))
-        (clos (find-package '#:cross-clasp.clasp.clos))
-        (seq (find-package '#:cross-clasp.clasp.sequence))
-        (debug (find-package '#:cross-clasp.clasp.debug))
-        (ext (find-package '#:cross-clasp.clasp.ext))
-        (kw (find-package "KEYWORD")))
-    (setf (clostrum:package-name client environment cl) "COMMON-LISP"
-          (clostrum:find-package client environment "COMMON-LISP") cl
-          (clostrum:find-package client environment "CL") cl)
-    (setf (clostrum:package-name client environment core) "CORE"
-          (clostrum:find-package client environment "CORE") core
-          (clostrum:find-package client environment "SYS") core
-          (clostrum:find-package client environment "SYSTEM") core
-          (clostrum:find-package client environment "SI") core)
-    (setf (clostrum:package-name client environment gctools) "GCTOOLS"
-          (clostrum:find-package client environment "GCTOOLS") gctools)
-    (setf (clostrum:package-name client environment mp) "MP"
-          (clostrum:find-package client environment "MP") mp)
-    (setf (clostrum:package-name client environment llvm-sys) "LLVM-SYS"
-          (clostrum:find-package client environment "LLVM-SYS") llvm-sys)
-    (setf (clostrum:package-name client environment clos) "CLOS"
-          (clostrum:find-package client environment "CLOS") clos)
-    (setf (clostrum:package-name client environment seq) "SEQUENCE"
-          (clostrum:find-package client environment "SEQUENCE") seq)
-    (setf (clostrum:package-name client environment debug) "CLASP-DEBUG"
-          (clostrum:find-package client environment "CLASP-DEBUG") debug)
-    (setf (clostrum:package-name client environment ext) "EXT"
-          (clostrum:find-package client environment "EXT") ext)
-    (setf (clostrum:package-name client environment kw) "KEYWORD"
-          (clostrum:find-package client environment "KEYWORD") kw)))
+  (macrolet ((defpack (name hostname &rest nicknames)
+               `(let ((package (find-package ',hostname)))
+                  (setf (clostrum:package-name client environment package) ,name
+                        (clostrum:find-package client environment ,name) package
+                        ,@(loop for nick in nicknames
+                                collect `(clostrum:find-package client environment
+                                                                ,nick)
+                                collect 'package)))))
+    (defpack "COMMON-LISP" #:common-lisp "CL")
+    (defpack "CORE" #:cross-clasp.clasp.core "SYS" "SYSTEM" "SI")
+    (defpack "GCTOOLS" #:cross-clasp.clasp.gctools)
+    (defpack "MP" #:cross-clasp.clasp.mp)
+    (defpack "LLVM-SYS" #:cross-clasp.clasp.llvm-sys)
+    (defpack "CLOS" #:cross-clasp.clasp.clos)
+    (defpack "SEQUENCE" #:cross-clasp.clasp.sequence)
+    (defpack "CLASP-DEBUG" #:cross-clasp.clasp.debug)
+    (defpack "EXT" #:cross-clasp.clasp.ext)
+    (defpack "KEYWORD" #:keyword)))
 
 ;;; FIXME: defconstant should really be in common macros.
 (defun core::symbol-constantp (name)
