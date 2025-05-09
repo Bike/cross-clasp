@@ -26,6 +26,7 @@
     "lsp/arraylib.lisp"
     "lsp/predlib.lisp"
     "clos/streams.lisp"
+    "lsp/pprint.lisp"
     "lsp/listlib.lisp"
     "lsp/mislib.lisp"
     ;;"lsp/defstruct.lisp"
@@ -41,6 +42,7 @@
     "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"
     "lsp/format.lisp"
+    "lsp/format-pprint.lisp"
     #+(or)"lsp/loop2.lisp"))
 
 (defun default-output-directory ()
