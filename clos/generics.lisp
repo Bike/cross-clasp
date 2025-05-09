@@ -107,9 +107,18 @@
 ;;; This is used after getting the specializers out.
 (defun reconstruct-lambda-list (required optional rest keys aokp aux keyp)
   `(,@required
-    ,@(when optional '(&optional)) ,@optional
+    ,@(when optional '(&optional)) ,@(loop for opt in optional
+                                           for (var default -p) = opt
+                                           collect (if -p
+                                                       opt
+                                                       (list var default)))
     ,@(when rest `(&rest ,rest))
-    ,@(when keyp '(&key)) ,@keys ,@(when aokp '(&allow-other-keys))
+    ,@(when keyp '(&key)) ,@(loop for key in keys
+                                  for ((keyword var) default -p) = key
+                                  collect (if -p
+                                              key
+                                              (list (list keyword var) default)))
+    ,@(when aokp '(&allow-other-keys))
     ,@(when aux `(&aux ,@aux))))
 
 (defun specializer-form (specializer)
