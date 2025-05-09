@@ -40,14 +40,14 @@
          (declare (core:lambda-name
                    effective-class-reader))
          (let ((val (car location)))
-           (if (cleavir-primop:eq val (core:unbound))
+           (if (eq val (core:unbound))
                (slot-unbound (class-of object) object slot-name)
                val)))
        (lambda (object)
          (declare (core:lambda-name
                    effective-instance-reader))
          (let ((val (standard-instance-access object location)))
-           (if (cleavir-primop:eq val (core:unbound))
+           (if (eq val (core:unbound))
                (slot-unbound (class-of object) object slot-name)
                val))))))
 
