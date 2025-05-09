@@ -94,6 +94,7 @@
     (defpack "LLVM-SYS" #:cross-clasp.clasp.llvm-sys)
     (defpack "CLOS" #:cross-clasp.clasp.clos)
     (defpack "SEQUENCE" #:cross-clasp.clasp.sequence)
+    (defpack "GRAY" #:cross-clasp.clasp.gray)
     (defpack "CLASP-DEBUG" #:cross-clasp.clasp.debug)
     (defpack "EXT" #:cross-clasp.clasp.ext)
     (defpack "KEYWORD" #:keyword)))

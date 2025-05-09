@@ -165,7 +165,40 @@
            #:character-encoding-error #:character-decoding-error
            #:stream-encoding-error #:stream-decoding-error)
   (:export #:tpl-frame #:tpl-argument #:tpl-arguments)
+  (:export #:ansi-stream)
+  (:export #:*module-provider-functions*)
   (:export #:quit))
+
+(defpackage #:cross-clasp.clasp.gray
+  (:use #:cl)
+  (:shadow #:streamp #:open-stream-p #:input-stream-p #:output-stream-p)
+  (:shadow #:pathname #:truename)
+  (:shadow #:stream-external-format #:stream-element-type)
+  (:shadow #:close)
+  (:import-from #:cross-clasp.clasp.ext #:ansi-stream)
+  (:export #:fundamental-stream
+           #:fundamental-input-stream #:fundamental-output-stream
+           #:fundamental-character-stream #:fundamental-binary-stream
+           #:fundamental-character-input-stream #:fundamental-character-output-stream
+           #:fundamental-binary-input-stream #:fundamental-binary-output-stream)
+  (:export #:streamp #:input-stream-p #:output-stream-p
+           #:open-stream-p #:stream-interactive-p)
+  (:export #:stream-write-sequence #:stream-read-sequence)
+  (:export #:stream-write-char #:stream-unread-char
+           #:stream-peek-char #:stream-read-char
+           #:stream-write-string #:stream-read-line
+           #:stream-read-char-no-hang #:stream-terpri #:stream-fresh-line)
+  (:export #:stream-write-byte #:stream-read-byte)
+  (:export #:stream-clear-input #:stream-clear-output #:stream-listen
+           #:stream-finish-output #:stream-force-output)
+  (:export #:stream-element-type #:stream-external-format
+           #:stream-file-length #:stream-file-string-length)
+  (:export #:pathname #:truename #:stream-file-descriptor)
+  (:export #:close)
+  (:export #:stream-input-line #:stream-input-column
+           #:stream-line-number #:stream-start-line-p
+           #:stream-line-length #:stream-line-column
+           #:stream-file-position #:stream-advance-to-column))
 
 (defpackage #:cross-clasp
   (:use #:cl)
