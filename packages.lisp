@@ -81,6 +81,12 @@
   (:export #:make-source-pos-info
            #:source-pos-info-lineno #:source-pos-info-column
            #:source-pos-info-file-handle)
+  (:export #:load-source)
+  (:export #:command-line-load-eval-sequence
+           #:rc-file-name #:no-rc-p #:noinform-p
+           #:is-interactive-lisp #:load-extensions #:startup-type
+           #:*extension-systems* #:*initialize-hooks* #:*terminate-hooks*)
+  (:export #:*use-interpreter-for-eval*)
   (:export #:sl-boundp #:unbound))
 
 (defpackage #:cross-clasp.clasp.gctools
@@ -169,6 +175,9 @@
   (:export #:tpl-frame #:tpl-argument #:tpl-arguments)
   (:export #:ansi-stream)
   (:export #:*module-provider-functions*)
+  (:export #:getenv)
+  (:export #:*toplevel-hook*)
+  (:export #:start-autocompilation)
   (:export #:quit))
 
 (defpackage #:cross-clasp.clasp.gray
