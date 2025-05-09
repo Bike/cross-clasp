@@ -69,7 +69,7 @@
     (write-string spaces stream :end n)))
 
 (defun format-relative-tab (stream colrel colinc)
-  (if (#-(or ecl clasp) pp:pretty-stream-p #+(or ecl clasp) sys::pretty-stream-p stream)
+  (if (sys::pretty-stream-p stream)
       (pprint-tab :line-relative colrel colinc stream)
       (let* ((cur (stream-output-column stream))
              (spaces (if (and cur (plusp colinc))
@@ -78,7 +78,7 @@
         (output-spaces stream spaces))))
 
 (defun format-absolute-tab (stream colnum colinc)
-  (if (#-(or ecl clasp) pp:pretty-stream-p #+(or ecl clasp) sys::pretty-stream-p stream)
+  (if (sys::pretty-stream-p stream)
       (pprint-tab :line colnum colinc stream)
       (let ((cur (stream-output-column stream)))
         (cond ((null cur)
