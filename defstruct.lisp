@@ -5,9 +5,15 @@
   (declare (ignore errorp environment))
   (cross-clasp:find-compiler-class symbol))
 
-(defmethod anatomicl:structure-class-name ((client cross-clasp:client)) 'structure-class)
+(defmethod anatomicl:structure-class-name ((client cross-clasp:client))
+  ;; This is only really used to validate included structures,
+  ;; and only in the host! So we need it to be this.
+  'compiler-class)
 (defmethod anatomicl:structure-object-name ((client cross-clasp:client))
   'structure-object)
+
+(defmethod anatomicl:structure-slot-definition-read-only ((slotd compiler-slotd))
+  (null (writers slotd)))
 
 ;; We want to override anatomicl's usual method, which expands into an anatomicl function.
 ;; We also skip the CHECK-TYPE since the expansion's nontrivial I guess, FIXME

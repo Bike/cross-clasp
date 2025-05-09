@@ -22,19 +22,23 @@
    (%default-initargs :accessor default-initargs :reader mop:class-default-initargs)
    (%metaclass :initarg :metaclass :reader metaclass)))
 
+;;; Needed for Anatomicl
+(defmethod closer-mop:class-finalized-p ((class compiler-class)) t)
+
 (defmethod print-object ((o compiler-class) stream)
   (print-unreadable-object (o stream :type t)
     (write (name o) :stream stream))
   o)
 
 (defclass compiler-slotd ()
-  ((%name :initarg :name :reader name)
+  ((%name :initarg :name :reader name :reader closer-mop:slot-definition-name)
    (%initform :initarg :initform :reader initform)
    (%initformp :initarg :initformp :reader initformp :type boolean)
    (%initargs :initarg :initargs :initform () :reader initargs)
    (%readers :initarg :readers :initform () :reader readers)
    (%writers :initarg :writers :initform () :reader writers)
-   (%type :initarg :type :initform t :reader stype)
+   (%type :initarg :type :initform t :reader stype
+          :reader closer-mop:slot-definition-type)
    (%allocation :initarg :allocation :initform :instance :reader allocation)
    (%location :initarg :location :initform nil :reader location)))
 (defclass direct-slotd (compiler-slotd)

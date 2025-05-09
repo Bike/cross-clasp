@@ -60,6 +60,8 @@
   (:export #:*echo-repl-tpl-read*)
   (:export #:signal-servicing)
   (:export #:noprint-p #:noinform-p)
+  (:export #:quasiquote #:*quasiquote*
+           #:unquote #:unquote-nsplice #:unquote-splice)
   (:export #:file-scope #:file-scope-pathname)
   (:export #:interpret)
   (:export #:wrong-number-of-arguments #:sequence-out-of-bounds)
