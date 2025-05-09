@@ -180,9 +180,21 @@
                    :class (cross-clasp:find-compiler-class
                            'standard-generic-function))))
            (mfsname (format nil "~a~@[-~a~]-(~{~a~^ ~})-METHOD"
-                            (prin1-to-string name) qualifiers
+                            (princ-to-string name) qualifiers
                             (mapcar #'symbol-name specializers)))
-           (mfname (intern mfsname "CROSS-CLASP.CLASP.CLOS"))
+           (package
+             ;; We can't define stuff in the CL package
+             ;; so we just substitute CLOS for it. But we don't always want
+             ;; to use CLOS since we define methods from other packages and
+             ;; CLOS is locked.
+             (let ((s (etypecase name
+                        (symbol (symbol-package name))
+                        ((cons (eql setf) (cons symbol null))
+                         (symbol-package (second name))))))
+               (if (eq s (load-time-value (find-package "CL") t))
+                   (find-package "CROSS-CLASP.CLASP.CLOS")
+                   s)))
+           (mfname (intern mfsname package))
            (cname (gensym "CONTINUATION"))
            (argsname (gensym "METHOD-ARGS"))
            (method (make-instance 'compiler-method
