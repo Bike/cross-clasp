@@ -133,3 +133,5 @@
 ;;#+(or) ; really inconvenient when debugging, but important later
 (defun invoke-debugger (cond)
   (core:invoke-internal-debugger cond))
+
+(defvar ext:*module-provider-functions* nil) ; from init.lisp

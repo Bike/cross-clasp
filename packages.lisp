@@ -151,7 +151,7 @@
   (:export #:array-index)
   (:export #:interactive-interrupt)
   (:export #:add-package-local-nickname #:add-implementation-package
-           #:lock-package)
+           #:lock-package #:unlock-package #:package-locked-p)
   (:export #:*ed-functions*)
   (:export #:*invoke-debugger-hook*
            #:restart-associated-conditions

@@ -266,3 +266,12 @@
 (defclass structure-object (t)
   ()
   (:metaclass structure-class))
+
+;;; needed for gray streams
+(defclass stream (t)
+  ()
+  (:metaclass built-in-class))
+
+(defclass ext:ansi-stream (stream)
+  ()
+  (:metaclass built-in-class))

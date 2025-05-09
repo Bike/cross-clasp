@@ -25,6 +25,7 @@
     "lsp/assert.lisp"
     "lsp/arraylib.lisp"
     "lsp/predlib.lisp"
+    "clos/streams.lisp"
     "lsp/listlib.lisp"
     "lsp/mislib.lisp"
     ;;"lsp/defstruct.lisp"
@@ -36,7 +37,6 @@
     "lsp/numlib.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
-    #+(or)"lsp/top.lisp"
     ;; macros
     "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"
