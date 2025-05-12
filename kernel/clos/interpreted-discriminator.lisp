@@ -545,7 +545,7 @@
                           (seen-index-value (gethash arg coallesce-indexes)))
                      (if (null seen-index-value)
                          (let* ((index (vector-push-extend arg literals))
-                               (index-value (make-bc-constant-ref :ref index)))
+                                (index-value (make-bc-constant-ref :ref index)))
                            (setf (gethash arg coallesce-indexes) index-value)
                            (when (> index +longify-trigger+)
                              (setf long-arg t))
@@ -568,7 +568,6 @@
          (new-program (loop for instr in compiled
                             for index from 0
                             for annotated-op = (first instr)
-                            for op = (bc-instruction-code annotated-op)
                             collect (multiple-value-bind (new-args long-arg)
                                         (literalify-arguments instr literals coallesce-indexes)
                                       (if long-arg
@@ -661,11 +660,10 @@
                (bc-register-arg (arg (dtree-index arg)))
                (t (error "Illegal arg type ~a" arg))))))
 
-(defun bytecodeify (instructions longs labels bytecode)
+(defun bytecodeify (instructions longs bytecode)
   (let* ((ip (length bytecode))
          (saw-long nil)
          (new-instructions (loop for instr in instructions
-                                 for index from 0
                                  for long across longs
                                  for annotated-op = (car instr)
                                  for op = (bc-instruction-code annotated-op)
@@ -852,7 +850,7 @@
               (entry-points (make-array 16 :adjustable t :fill-pointer 0)))
           (update-label-deltas instructions labels longs)
           (multiple-value-bind (entry-ip new-instructions saw-long)
-              (bytecodeify instructions longs labels bytecode)
+              (bytecodeify instructions longs bytecode)
             (declare (ignorable saw-long))
             (vector-push-extend entry-ip entry-points)
             (values (copy-seq bytecode) (copy-seq entry-points) (copy-seq literals) specialized-length

@@ -72,8 +72,6 @@
   (unless (eq cached-keywords t) ;; meaning we have &allow-other-keys
     (loop with aok = nil ; keep processing after aok to check for oddness/nonsymbols
           with aok-seen-p = nil
-          with method-keys = nil
-          with method-keys-p = nil
           with unknown-keys
           for cur on initargs by #'cddr
           for name = (first cur)
