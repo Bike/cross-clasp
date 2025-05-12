@@ -228,7 +228,7 @@
   (declare (ignore ce))
   (extrinsicl:install-cl client rte)
   (extrinsicl.maclina:install-eval client rte)
-  (clostrum:make-variable client rte '*features* (features))
+  (clostrum:make-parameter client rte '*features* (features))
   (loop for vname in '(core::*condition-restarts* core::*restart-clusters*
                        core::*interrupts-enabled* core::*allow-with-interrupts*
                        core:*quasiquote*
