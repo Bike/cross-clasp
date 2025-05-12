@@ -120,12 +120,17 @@
            #:process #:process-name #:process-active-p
            #:interrupt-process #:process-suspend #:process-resume
            #:suspend-loop #:abort-process #:process-kill #:process-cancel)
+  (:export #:process-error #:process-error-process
+           #:process-join-error #:process-join-error-original-condition
+           #:process-join-error-aborted
+           #:push-default-special-binding)
   (:export #:interrupt #:service-interrupt #:enqueue-interrupt
            #:signal-pending-interrupts #:signal-interrupt #:raise
            #:interactive-interrupt #:simple-interrupt #:simple-interactive-interrupt
            #:cancellation-interrupt #:call-interrupt #:call-interrupt-function
            #:suspension-interrupt #:posix-interrupt)
-  (:export #:get-atomic-expansion #:define-atomic-expander))
+  (:export #:get-atomic-expansion #:define-atomic-expander
+           #:not-atomic #:not-atomic-place))
 
 (defpackage #:cross-clasp.clasp.llvm-sys
   (:use #:cl)
