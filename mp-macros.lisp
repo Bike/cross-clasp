@@ -21,7 +21,7 @@
                                   (list 'core::*interrupts-enabled*
                                         ',outer-allow-with-interrupts))
                             (list 'when ',outer-allow-with-interrupts
-                                  (core::check-pending-interrupts))
+                                  '(core::check-pending-interrupts))
                             (list* 'locally with-forms))))
            (let* ((,outer-interrupts-enabled core::*interrupts-enabled*)
                   (core::*interrupts-enabled* nil)
