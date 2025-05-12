@@ -177,6 +177,11 @@
     mp:make-lock mp:get-lock mp:giveup-lock
     mp:make-shared-mutex mp:suspend-loop
     mp:abort-process mp:enqueue-interrupt
+    mp:process-name mp:process-resume mp:all-processes
+    mp:process-active-p
+    mp:make-condition-variable
+    mp:condition-variable-signal mp:condition-variable-wait
+    mp:push-default-special-binding
     core::check-pending-interrupts
     core::signal-code-alist
     core::process-lambda-list
@@ -235,7 +240,8 @@
                        ext:*invoke-debugger-hook* ext:*toplevel-hook*
                        core:*initialize-hooks* core:*terminate-hooks*
                        core:*extension-systems*
-                       core::*circle-counter* core::*circle-stack*)
+                       core::*circle-counter* core::*circle-stack*
+                       mp:*current-process*)
         do (clostrum:make-variable client rte vname))
   (loop for vname in *copied-variables*
         do (clostrum:make-variable client rte vname (symbol-value vname)))
