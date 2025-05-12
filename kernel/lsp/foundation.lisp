@@ -15,13 +15,6 @@
 (defun constantly (object)
   (lambda (&rest arguments) (declare (ignore arguments)) object))
 
-(defun simple-program-error (e1 &rest args)
-  (apply 'error e1 args))
-
-(defun simple-reader-error (stream e1 &rest args)
-  (declare (ignore stream))
-  (apply 'error e1 args))
-
 (defmacro return (&optional value)
   `(return-from nil ,value))
 

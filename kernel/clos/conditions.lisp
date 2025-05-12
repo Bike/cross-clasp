@@ -696,6 +696,10 @@ This is due to either a problem in foreign code (e.g., C++), or a bug in Clasp i
 
 (define-condition core:simple-program-error (simple-condition program-error) ())
 
+(defun core:simple-program-error (format-control &rest format-arguments)
+  (error 'core:simple-program-error
+         :format-control format-control :format-arguments format-arguments))
+
 (define-condition control-error (error) ())
 
 (define-condition core:simple-control-error (simple-condition control-error) ())
@@ -1136,6 +1140,11 @@ The conflict resolver must be one of ~s" chosen-symbol candidates))
 (define-condition reader-error (parse-error stream-error) ())
 
 (define-condition core:simple-reader-error (simple-condition reader-error) ())
+
+(defun core:simple-reader-error (stream format-control &rest format-arguments)
+  (error 'core:simple-reader-error
+         :stream stream :format-control format-control
+         :format-arguments format-arguments))
 
 (define-condition format-error (simple-error)
   ((format-control :initarg :complaint)
