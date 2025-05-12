@@ -87,7 +87,8 @@
            #:is-interactive-lisp #:load-extensions #:startup-type
            #:*extension-systems* #:*initialize-hooks* #:*terminate-hooks*)
   (:export #:*use-interpreter-for-eval*)
-  (:export #:sl-boundp #:unbound))
+  (:export #:sl-boundp #:unbound)
+  (:export #:quit))
 
 (defpackage #:cross-clasp.clasp.gctools
   (:use #:cl)
@@ -178,6 +179,7 @@
   (:export #:getenv)
   (:export #:*toplevel-hook*)
   (:export #:start-autocompilation)
+  (:import-from #:cross-clasp.clasp.core #:quit)
   (:export #:quit))
 
 (defpackage #:cross-clasp.clasp.gray
@@ -216,6 +218,7 @@
   (:local-nicknames (#:m #:maclina.machine)
                     (#:core #:cross-clasp.clasp.core)
                     (#:clos #:cross-clasp.clasp.clos)
+                    (#:gray #:cross-clasp.clasp.gray)
                     (#:gc #:cross-clasp.clasp.gctools)
                     (#:mp #:cross-clasp.clasp.mp)
                     (#:llvm-sys #:cross-clasp.clasp.llvm-sys)

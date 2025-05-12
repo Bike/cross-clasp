@@ -157,6 +157,7 @@
     core::printing-char-p
     core:hash-table-pairs core:hash-equal
     core::coerce-to-package core::package-hash-tables
+    ext:lock-package ext:unlock-package ext:package-locked-p
     core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class
     core:allocate-raw-instance core:allocate-raw-funcallable-instance
@@ -172,13 +173,23 @@
     core:instance-rack core:instance-sig-set
     core:setf-find-class
     core::get-sysprop (setf core::get-sysprop)
-    core::write-object core:write-addr
+    core::write-object core:write-addr core::write-ugly-object
     mp:make-lock mp:get-lock mp:giveup-lock
     mp:make-shared-mutex mp:suspend-loop
     mp:abort-process mp:enqueue-interrupt
     core::check-pending-interrupts
     core::signal-code-alist
     core::process-lambda-list
+    gray::%open-stream-p gray::%input-stream-p gray::%output-stream-p
+    gray::%stream-interactive-p gray::%close
+    gray::%stream-input-line gray::%stream-input-column gray::%stream-start-line-p
+    gray::%stream-line-number gray::%stream-line-column
+    gray::%truename gray::%pathname
+    gray::%stream-element-type gray::%stream-set-element-type
+    gray::%stream-external-format gray::%stream-set-external-format
+    gray::%stream-file-descriptor gray::%stream-advance-to-column
+    core::stream-output-column
+    core::make-string-output-stream-from-string
     core:get-thread-local-write-to-string-output-stream-string
     core:thread-local-write-to-string-output-stream
     core:fmt core::gdb core::mkdir core::file-kind
@@ -197,11 +208,13 @@
     core:source-pos-info-column core:source-pos-info-lineno
     core:source-pos-info-file-handle
     core:file-scope core:file-scope-pathname
-    core:unix-get-local-time-zone core:unix-daylight-saving-time
+    core:unix-get-local-time-zone core:unix-daylight-saving-time core::getenv
     gc:thread-local-unwind-counter gc:bytes-allocated
     core:sl-boundp core:unbound
     core:vaslistp core:list-from-vaslist
-    ext:quit))
+    core:startup-type core:is-interactive-lisp core:noinform-p core:noprint-p
+    core:rc-file-name core:no-rc-p core:debugger-disabled-p
+    core:quit core::exit))
 
 (defparameter *copied-variables*
   '(;;Eclector expects these to be globally bound
@@ -218,7 +231,11 @@
   (clostrum:make-variable client rte '*features* (features))
   (loop for vname in '(core::*condition-restarts* core::*restart-clusters*
                        core::*interrupts-enabled* core::*allow-with-interrupts*
-                       core:*quasiquote*)
+                       core:*quasiquote*
+                       ext:*invoke-debugger-hook* ext:*toplevel-hook*
+                       core:*initialize-hooks* core:*terminate-hooks*
+                       core:*extension-systems*
+                       core::*circle-counter* core::*circle-stack*)
         do (clostrum:make-variable client rte vname))
   (loop for vname in *copied-variables*
         do (clostrum:make-variable client rte vname (symbol-value vname)))
