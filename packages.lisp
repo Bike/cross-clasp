@@ -170,7 +170,7 @@
            #:storage-exhausted #:bus-error
            #:name-conflict #:name-conflict-candidates #:resolve-conflict
            #:undefined-class #:assert-error
-           #:charater-coding-error #:encoding-error #:decoding-error
+           #:character-coding-error #:encoding-error #:decoding-error
            #:character-encoding-error #:character-decoding-error
            #:stream-encoding-error #:stream-decoding-error)
   (:export #:tpl-frame #:tpl-argument #:tpl-arguments)
