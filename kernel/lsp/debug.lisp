@@ -1,3 +1,5 @@
+(in-package "CORE")
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package "CLASP-DEBUG")
     (make-package "CLASP-DEBUG" :use '("CL")))
