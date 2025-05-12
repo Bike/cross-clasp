@@ -28,8 +28,6 @@
 (defmacro cons-car (list) `(car (the cons ,list)))
 (defmacro cons-cdr (list) `(cdr (the cons ,list)))
 
-(defvar *bytecodes-compiler* nil)
-
 ;;
 ;;   "Return true if OBJECT is the same as some tail of LIST, otherwise false."
 ;;
@@ -116,13 +114,6 @@
 
 (defun invoke-unix-debugger ()
   (gdb "invoking unix debugger"))
-
-
-(defun signal-type-error (datum expected-type)
-  (error 'type-error :datum datum :expected-type expected-type))
-
-(defun warn (x &rest args)
-  (core:fmt t "WARN: {} {}%N" x args))
 
 (defun (setf documentation) (doc object doc-type)
   (declare (ignore object doc-type))

@@ -17,7 +17,7 @@
 
 
 (defun error-not-a-sequence (value)
-  (signal-type-error value 'sequence))
+  (error 'type-error :datum value :expected-type 'sequence))
 
 (defun error-sequence-index (sequence index)
   (error 'simple-type-error

@@ -188,7 +188,7 @@ Returns the specified bit in SIMPLE-BIT-ARRAY."
                      ,vectorname (%displacement ,vectorname))
                (if (core:data-vector-p ,vectorname) (go done) (go loop))
              done))
-           (t (signal-type-error ,vectorname 'array)))
+           (t (error 'type-error :datum ,vectorname :expected-type 'array)))
      ,@body))
 
 ;;; (equal (array-dimensions a1) (array-dimensions a2)), but without consing
