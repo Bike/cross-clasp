@@ -71,3 +71,12 @@
 (defmethod slot-makunbound-using-class (class object slotd)
   (setf (standard-location-access object (slot-definition-location slotd))
         (core:unbound)))
+
+(defgeneric slot-missing (class object slot-name operation &optional new-value))
+(defmethod slot-missing ((class t) object slot-name operation &optional new-value)
+  (declare (ignore operation new-value class))
+  (error "~a is not a slot of ~a" slot-name object))
+
+(defgeneric slot-unbound (class instance slot-name))
+(defmethod slot-unbound ((class t) instance slot-name)
+  (error 'unbound-slot :instance instance :name slot-name))
