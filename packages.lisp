@@ -151,18 +151,20 @@
   (:export #:byte2 #:byte4 #:byte8 #:byte16 #:byte32 #:byte64
            #:integer2 #:integer4 #:integer8 #:integer16
            #:integer32 #:integer64)
-  (:export #:specialp)
+  (:export #:specialp #:symbol-macro)
   (:export #:check-arguments-type)
   (:export #:ansi-stream)
   (:export #:+process-standard-output+)
   (:export #:constant-form-value)
   (:export #:with-current-source-form)
+  (:export #:type-expander)
   (:export #:parse-define-setf-expander #:setf-expander)
   (:export #:parse-deftype)
   (:export #:parse-macro #:parse-compiler-macro)
   (:export #:array-index)
   (:export #:interactive-interrupt)
   (:export #:add-package-local-nickname #:add-implementation-package
+           #:package-implemented-by-list
            #:lock-package #:unlock-package #:package-locked-p)
   (:export #:*ed-functions*)
   (:export #:*invoke-debugger-hook*

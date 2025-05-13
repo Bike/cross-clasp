@@ -2,11 +2,6 @@
 
 ;;; based on the stupidly named export.lisp in clasp sources
 
-(defmacro when (condition &body forms)
-  `(if ,condition (progn ,@forms) nil))
-(defmacro unless (condition &body forms)
-  `(if ,condition nil (progn ,@forms)))
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun expand-while-until (test body jmp-op)
     (let ((label (gensym))

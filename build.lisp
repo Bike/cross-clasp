@@ -43,6 +43,8 @@
     #+(or)"lsp/defpackage.lisp"
     "lsp/format.lisp"
     "lsp/format-pprint.lisp"
+    "lsp/defmacro.lisp"
+    "lsp/evalmacros.lisp"
     "lsp/top.lisp"
     "lsp/top-hook.lisp"
     #+(or)"lsp/loop2.lisp"))

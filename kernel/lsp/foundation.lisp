@@ -15,9 +15,6 @@
 (defun constantly (object)
   (lambda (&rest arguments) (declare (ignore arguments)) object))
 
-(defmacro return (&optional value)
-  `(return-from nil ,value))
-
 (defmacro cons-car (list) `(car (the cons ,list)))
 (defmacro cons-cdr (list) `(cdr (the cons ,list)))
 
@@ -119,3 +116,5 @@
   (core:invoke-internal-debugger cond))
 
 (defvar ext:*module-provider-functions* nil) ; from init.lisp
+
+(defvar *defun-inline-hook* nil)
