@@ -287,7 +287,8 @@
                  finally (return result))))
     (loop for (_ . direct-slotds) in direct-slots
           for i from 0
-          collect (compute-effective-slot direct-slotds i))))
+          ;; now make the slotds most specific first.
+          collect (compute-effective-slot (reverse direct-slotds) i))))
 
 (defun compute-default-initargs (cpl)
   ;; We didn't do the canonicalization stuff out of laziness and
