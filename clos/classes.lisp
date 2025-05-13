@@ -17,13 +17,24 @@
                            :reader mop:class-precedence-list)
    (%direct-slots :initarg :direct-slots :reader mop:class-direct-slots)
    (%slots :accessor slots :reader mop:class-slots)
+   ;; These two are not like MOP - they are literal plists.
    (%direct-default-initargs :initarg :direct-default-initargs
-                             :reader mop:class-direct-default-initargs)
-   (%default-initargs :accessor default-initargs :reader mop:class-default-initargs)
+                             :reader direct-default-initargs)
+   (%default-initargs :accessor default-initargs)
    (%metaclass :initarg :metaclass :reader metaclass)))
 
 ;;; Needed for Anatomicl
 (defmethod closer-mop:class-finalized-p ((class compiler-class)) t)
+
+(defun fake-initfunction ()
+  (error "Somehow called a cross-clasp fake initfunction!"))
+
+(defmethod closer-mop:class-direct-default-initargs ((class compiler-class))
+  (loop for (key form) on (direct-default-initargs class) by #'cddr
+        collect (list key form #'fake-initfunction)))
+(defmethod closer-mop:class-default-initargs ((class compiler-class))
+  (loop for (key form) on (default-initargs class) by #'cddr
+        collect (list key form #'fake-initfunction)))
 
 (defmethod print-object ((o compiler-class) stream)
   (print-unreadable-object (o stream :type t)
@@ -296,7 +307,7 @@
   ;; just append with duplicates removed.
   (loop with seen = ()
         for class in cpl
-        for inits = (mop:class-direct-default-initargs class)
+        for inits = (direct-default-initargs class)
         nconc (loop for (k v) on inits by #'cddr
                     unless (member k seen)
                       do (push k seen)
@@ -391,9 +402,6 @@
 
 (defmacro early-initialize-instance (class-name object &rest initargs)
   (let* ((class (cross-clasp:find-compiler-class class-name))
-         ;; FIXME: This won't actually work since it can trip the
-         ;; duplicate initargs thing below, but I don't care right now.
-         (initargs (append initargs (mop:class-default-initargs class)))
          (sia (primitive-accessor class))
          (slots (mop:class-slots class))
          (o (gensym "OBJECT")))
@@ -413,6 +421,16 @@
                 finally (unless (null invalid-keys)
                           (error "Unrecognized or duplicate initargs: ~s"
                                  invalid-keys)))
+        ;; FIXME: Doesn't detect initargs that genuinely correspond to no slot.
+        ;; Oh well!
+        ,@(loop for (key form) in (default-initargs class)
+                for slotd = (loop for slotd in slots
+                                  when (member key (initargs slotd))
+                                    return slotd)
+                when slotd
+                  collect `(,sia ,o ,(location slotd))
+                  and collect form
+                  and do (setf slots (remove slotd slots)))
         ;; Initialize other slots with initforms, if they have em.
         ,@(loop for slotd in slots
                 when (initformp slotd)
@@ -509,7 +527,7 @@
       ;; since default-initargs is set separately there can be
       ;; duplicate initfunctions, but I do not care.
       :direct-default-initargs ,(canonicalized-default-initargs-form
-                                 (mop:class-direct-default-initargs class)))
+                                 (direct-default-initargs class)))
      (with-early-accessors (std-class)
        (setf (%class-slots ,var)
              (list ,@(loop for slot in (mop:class-slots class)
@@ -519,7 +537,7 @@
                            collect `(find-class ',(name s))))
              (%class-default-initargs ,var)
              ,(canonicalized-default-initargs-form
-               (mop:class-default-initargs class))
+               (default-initargs class))
              (%class-direct-subclasses ,var)
              (list ,@(loop for sub in (mop:class-direct-subclasses class)
                            for sname = (name sub)

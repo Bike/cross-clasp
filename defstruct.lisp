@@ -37,6 +37,7 @@
 (defun parse->slotd (anaslotd)
   ;; accessors are handled elsewhere
   `(,(anatomicl::slot-name anaslotd)
+    :initarg ,(anatomicl::keywordify (anatomicl::slot-name anaslotd))
     ,@(when (anatomicl::slot-initform-p anaslotd)
         `(:initform ,(anatomicl::slot-initform anaslotd)))
     ,(if (anatomicl::slot-read-only anaslotd) ':reader ':accessor)
@@ -52,6 +53,11 @@
          (,(or (anatomicl::defstruct-included-structure-name desc)
              'structure-object))
        (,@(mapcar #'parse->slotd layout))
+       (:default-initargs ,@(loop for slotd in layout
+                                  when (anatomicl::slot-initform-p slotd)
+                                    collect (anatomicl::keywordify
+                                             (anatomicl::slot-name slotd))
+                                    and collect (anatomicl::slot-initform slotd)))
        (:metaclass structure-class))
      ,@(when (anatomicl::defstruct-print-object desc)
          (list `(defmethod print-object ((object ,(anatomicl::defstruct-name desc))
