@@ -9,15 +9,20 @@
 
 (defvar *reader-client* (make-instance 'reader-client))
 
+(define-condition substituting-package (warning)
+  ((%package-name :reader substituting-package :initarg :substituting))
+  (:report (lambda (condition stream)
+             (format stream "Unknown package ~s; substituting CORE"
+                     (substituting-package condition)))))
+
 (defmethod maclina.compile-file::find-package ((client reader-client) package-name)
   (or (clostrum:find-package m:*client* *build-rte* package-name)
-    (warn "Unknown package ~s; substituting CORE" package-name)
+    (warn 'substituting-package :substituting package-name)
     (cl:find-package "CROSS-CLASP.CLASP.CORE")))
 
 (defmethod maclina.compile-file::package-name ((client client) env package)
   (or (clostrum:package-name client env package)
-    (warn "Unknown package ~s; substituting CORE"
-          (cl:package-name package))
+    (warn 'substituting-package :substituting package)
     "CORE"))
 
 (defun cross-compile-file (input-file &rest keys)
