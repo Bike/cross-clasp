@@ -154,7 +154,8 @@
   (:export #:specialp #:symbol-macro)
   (:export #:check-arguments-type)
   (:export #:ansi-stream)
-  (:export #:+process-standard-output+)
+  (:export #:+process-standard-input+ #:+process-standard-output+
+           #:+process-error-output+ #:+process-terminal-io+)
   (:export #:constant-form-value)
   (:export #:with-current-source-form)
   (:export #:type-expander)

@@ -70,7 +70,7 @@
             (arg (if (rest args) (first args) `(first ,(first args))))
             (valuef
               (ecase (allocation method)
-                ((:instance) `(core:instance-ref arg ',(location method))))))
+                ((:instance) `(standard-instance-access arg ',(location method))))))
        `(let* ((arg ,arg)
                (value ,valuef))
           (if (eq value (core:unbound))
@@ -84,7 +84,7 @@
                        (t (second args)))))
        (ecase (allocation method)
          ((:instance)
-          `(setf (core:instance-ref ,obj ',(location method)) ,value)))))
+          `(setf (standard-instance-access ,obj ',(location method)) ,value)))))
     (compiler-accessor (error "Unreplaced accessor method: ~s" method))
     ((cons (eql make-method) (cons t null)) (second method))
     (compiler-method

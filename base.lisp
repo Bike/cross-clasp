@@ -135,8 +135,9 @@
     core::derivable-stamp core::rack-stamp core::wrapped-stamp
     core:stamps-adjacent-p llvm-sys:tag-tests
     core:gfbytecode-simple-fun/make
-    ext:specialp
-    core:function-name core:setf-function-name core::valid-function-name-p
+    ext:specialp core:operator-shadowed-p
+    core:function-name core:setf-function-name
+    core::valid-function-name-p core::function-block-name
     core::coerce-to-function core::coerce-fdesignator
     core::fixnump core:single-float-p
     core:num-op-acosh core:num-op-asinh
@@ -163,6 +164,7 @@
     core:hash-table-pairs core:hash-equal
     core::coerce-to-package core::package-hash-tables
     ext:lock-package ext:unlock-package ext:package-locked-p
+    ext:package-implemented-by-list
     core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class
     core:allocate-raw-instance core:allocate-raw-funcallable-instance
@@ -218,12 +220,14 @@
     core:source-pos-info-column core:source-pos-info-lineno
     core:source-pos-info-file-handle
     core:file-scope core:file-scope-pathname
-    core:unix-get-local-time-zone core:unix-daylight-saving-time core::getenv
+    core:unix-get-local-time-zone core:unix-daylight-saving-time ext:getenv
     gc:thread-local-unwind-counter gc:bytes-allocated
     core:sl-boundp core:unbound
     core:vaslistp core:list-from-vaslist
+    core:interpret core:load-source
     core:startup-type core:is-interactive-lisp core:noinform-p core:noprint-p
     core:rc-file-name core:no-rc-p core:debugger-disabled-p
+    core:command-line-load-eval-sequence
     core:quit core::exit))
 
 (defparameter *copied-variables*
@@ -239,6 +243,7 @@
   (extrinsicl:install-cl client rte)
   (extrinsicl.maclina:install-eval client rte)
   (clostrum:make-parameter client rte '*features* (features))
+  (clostrum:make-parameter client rte 'core::*current-source-pos-info* nil)
   (loop for vname in '(core::*condition-restarts* core::*restart-clusters*
                        core::*interrupts-enabled* core::*allow-with-interrupts*
                        core:*quasiquote*
@@ -246,7 +251,10 @@
                        core:*initialize-hooks* core:*terminate-hooks*
                        core:*extension-systems*
                        core::*circle-counter* core::*circle-stack*
-                       mp:*current-process*)
+                       mp:*current-process*
+                       core:+type-header-value-map+
+                       ext:+process-standard-input+ ext:+process-standard-output+
+                       ext:+process-error-output+ ext:+process-terminal-io+)
         do (clostrum:make-variable client rte vname))
   (loop for vname in *copied-variables*
         do (clostrum:make-variable client rte vname (symbol-value vname)))

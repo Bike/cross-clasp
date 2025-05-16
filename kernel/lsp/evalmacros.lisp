@@ -31,7 +31,7 @@
 
 (defun (setf compiler-macro-function) (cmf name &optional environment)
   (declare (ignore environment))
-  (check-package-lock (:function-block-name name)
+  (check-package-lock (function-block-name name)
                       'define-compiler-macro)
   ;; Basically ETYPECASE.
   (if (functionp cmf)
