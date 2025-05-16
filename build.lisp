@@ -38,6 +38,8 @@
     "lsp/numlib.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
+    "lsp/shiftf-rotatef.lisp"
+    "lsp/setf.lisp"
     ;; macros
     "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"

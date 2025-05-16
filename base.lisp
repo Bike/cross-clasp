@@ -71,6 +71,11 @@
 (defun ext:add-implementation-package (implementors &optional package)
   (declare (ignore implementors package)))
 
+(defmethod common-macro-definitions::wrap-in-setf-setf-expander
+    ((client client) name function environment)
+  (declare (ignore environment))
+  `(setf (ext:setf-expander ',name) ,function))
+
 (defmethod common-macro-definitions:get-setf-expansion
     ((client client) place &optional environment)
   (let ((env (or environment *build-rte*)))
