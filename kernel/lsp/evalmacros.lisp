@@ -95,7 +95,7 @@ last FORM.  If not, simply returns NIL."
          ,@decls
          ,@arg-check
          ,@body))))
-#+(or)
+
 (defmacro defvar (var &optional (form nil form-sp) doc-string)
   "Syntax: (defvar name [form [doc]])
 Declares the variable named by NAME as a special variable.  If the variable
@@ -117,7 +117,7 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
         (variable-source-info-saver var *current-source-pos-info*))
     ,@(si::expand-set-documentation var 'variable doc-string)
     ',var))
-#+(or)
+
 (defmacro defparameter (var form &optional doc-string)
   "Syntax: (defparameter name form [doc])
 Declares the global variable named by NAME as a special variable and assigns
@@ -134,7 +134,7 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
      ',var))
 
 ;; export as extension?
-#+(or)
+
 (defmacro defconstant-eqx (var form test &optional doc-string)
   "Like DEFCONSTANT, but doesn't fire if the form is equal under TEST to an
 existing value."
