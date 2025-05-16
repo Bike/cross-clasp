@@ -26,11 +26,10 @@
     "CORE"))
 
 (defun cross-compile-file (input-file &rest keys)
-  (let ((maclina.compile-file::*primitive* t))
-    (apply #'maclina.compile-file:compile-file input-file
-           :environment *build-rte*
-           :reader-client *reader-client*
-           keys)))
+  (apply #'maclina.compile-file:compile-file input-file
+         :environment *build-rte*
+         :reader-client *reader-client*
+         keys))
 
 (defmethod clostrum-sys:variable-cell :around ((client client)
                                                environment symbol)
