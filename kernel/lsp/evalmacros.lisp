@@ -108,13 +108,9 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
     ,@(when form-sp
 	  `((UNLESS (BOUNDP ',var)
 	      (SETQ ,var ,form))))
-    ,@(when (and *current-source-pos-info*
-                 ;; KLUDGE so that we can bootstrap this.
-                 ;; The function is defined in clos/print.lisp.
-                 ;; FIXME: Special case source pos infos in the literal
-                 ;; compiler, maybe?
-                 (fboundp 'variable-source-info-saver))
-        (variable-source-info-saver var *current-source-pos-info*))
+    ,@(when *current-source-pos-info*
+        `((setf (gethash ',var *variable-source-infos*)
+                ',*current-source-pos-info*)))
     ,@(si::expand-set-documentation var 'variable doc-string)
     ',var))
 
@@ -127,9 +123,9 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
      (eval-when (:compile-toplevel :load-toplevel :execute)
        (SYS:*MAKE-SPECIAL ',var))
      (SETQ ,var ,form)
-    ,@(when (and *current-source-pos-info*
-                 (fboundp 'variable-source-info-saver))
-        (variable-source-info-saver var *current-source-pos-info*))
+     ,@(when *current-source-pos-info*
+         `((setf (gethash ',var *variable-source-infos*)
+                 ',*current-source-pos-info*)))
      ,@(si::expand-set-documentation var 'variable doc-string)
      ',var))
 
@@ -150,9 +146,9 @@ existing value."
                   (error "Cannot redefine special variable ~a as constant" ',var))
                  (t (set ',var ,value)
                     (setf (symbol-constantp ',var) t)))))
-       ,@(when (and *current-source-pos-info*
-                    (fboundp 'variable-source-info-saver))
-           (variable-source-info-saver var *current-source-pos-info*))
+       ,@(when *current-source-pos-info*
+           `((setf (gethash ',var *variable-source-infos*)
+                   ',*current-source-pos-info*)))
        ,@(si::expand-set-documentation var 'variable doc-string)
        ',var)))
 
@@ -375,9 +371,9 @@ values of the last FORM.  If no FORM is given, returns NIL."
                     #'(lambda (form env)
                         (declare (ignore form env))
                         ',expansion)))
-            ,@(when (and *current-source-pos-info*
-                         (fboundp 'variable-source-info-saver))
-                (variable-source-info-saver symbol *current-source-pos-info*))
+            ,@(when *current-source-pos-info*
+                `((setf (gethash ',symbol *variable-source-infos*)
+                        ',*current-source-pos-info*)))
             ',symbol))))
 
 (defmacro nth-value (n expr)
