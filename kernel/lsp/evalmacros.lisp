@@ -35,7 +35,7 @@
                       'define-compiler-macro)
   ;; Basically ETYPECASE.
   (if (functionp cmf)
-      (funcall #'(setf gethash) cmf name *compiler-macros*)
+      (setf (gethash name *compiler-macros*) cmf)
       (if (null cmf)
           (progn (remhash name *compiler-macros*) nil)
           (error 'type-error :datum cmf :expected-type '(or function null)))))
@@ -65,7 +65,7 @@
 (defun (setf ext:symbol-macro) (expander name &optional env)
   (when env
     (error "Non-NIL environment passed to (setf ext:symbol-macro)"))
-  (funcall #'(setf get-sysprop) expander name 'ext:symbol-macro))
+  (setf (get-sysprop name 'ext:symbol-macro) expander))
 
 (let () ; non-top-level so as to avoid trashing build macros.
 
@@ -82,9 +82,7 @@ last FORM.  If not, simply returns NIL."
 
 (defmacro defmacro (name lambda-list &body body &environment env)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (funcall #'(setf macro-function)
-              #',(ext:parse-macro name lambda-list body env)
-              ',name)
+     (setf (macro-function ',name) #',(ext:parse-macro name lambda-list body env))
      ',name))
 
 (defmacro destructuring-bind (vl list &body body)
@@ -151,7 +149,7 @@ existing value."
                  ((ext:specialp ',var)
                   (error "Cannot redefine special variable ~a as constant" ',var))
                  (t (set ',var ,value)
-                    (funcall #'(setf symbol-constantp) t ',var)))))
+                    (setf (symbol-constantp ',var) t)))))
        ,@(when (and *current-source-pos-info*
                     (fboundp 'variable-source-info-saver))
            (variable-source-info-saver var *current-source-pos-info*))
@@ -184,7 +182,7 @@ VARIABLE doc and can be retrieved by (DOCUMENTATION 'SYMBOL 'VARIABLE)."
             ;; this function won't be ready for a while, but it's okay as there's no
             ;; compiler to run :compile-toplevel forms anyway.
             (cmp::register-global-function-def 'defun ',name))
-          (funcall #'(setf fdefinition) ,global-function ',name)
+          (setf (fdefinition ',name) ,global-function)
           ,@(and *defun-inline-hook*
                  (list (funcall *defun-inline-hook* name global-function env)))
           ',name))))
@@ -192,9 +190,8 @@ VARIABLE doc and can be retrieved by (DOCUMENTATION 'SYMBOL 'VARIABLE)."
 (defmacro define-compiler-macro (name vl &rest body &environment env)
   ;; CLHS doesn't actually say d-c-m has compile time effects, but it's nice to match defmacro  
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (funcall #'(setf compiler-macro-function)
-              (function ,(ext:parse-compiler-macro name vl body env))
-              ',name)
+     (setf (compiler-macro-function ',name)
+           (function ,(ext:parse-compiler-macro name vl body env)))
      ',name))
 
 (defmacro lambda (&rest body) `(function (lambda ,@body)))
@@ -374,11 +371,10 @@ values of the last FORM.  If no FORM is given, returns NIL."
 	(t
 	 `(progn
             (eval-when (:compile-toplevel :load-toplevel :execute)
-              (funcall #'(setf ext:symbol-macro)
-                       #'(lambda (form env)
-                           (declare (ignore form env))
-                           ',expansion)
-                       ',symbol))
+              (setf (ext:symbol-macro ',symbol)
+                    #'(lambda (form env)
+                        (declare (ignore form env))
+                        ',expansion)))
             ,@(when (and *current-source-pos-info*
                          (fboundp 'variable-source-info-saver))
                 (variable-source-info-saver symbol *current-source-pos-info*))

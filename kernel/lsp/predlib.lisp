@@ -71,7 +71,7 @@ Builds a new function which accepts any number of arguments but always outputs N
     (unless (symbolp name)
       (error "~s is not a valid type specifier" name))
     (create-type-name name)
-    (funcall #'(setf gethash) function name *type-expanders*)
+    (setf (gethash name *type-expanders*) function)
     (subtypep-clear-cache)
     function))
 
@@ -107,9 +107,8 @@ expansion function is called with no argument.
 The doc-string DOC, if supplied, is saved as a TYPE doc and can be retrieved
 by (documentation 'NAME 'type)."
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (funcall #'(setf ext:type-expander)
-              ,(ext:parse-deftype name lambda-list body env)
-              ',name)
+     (setf (ext:type-expander ',name)
+           ,(ext:parse-deftype name lambda-list body env))
      ',name))
 
 ;;; Some DEFTYPE definitions.
@@ -1281,7 +1280,7 @@ if not possible."
     (dolist (pair values)
       (let ((key (car pair))
 	    (value (cdr pair)))
-        (funcall #'(setf gethash) value key ht)))
+        (setf (gethash key ht) value)))
     ht))
 
 (defconstant-eqx +built-in-types+

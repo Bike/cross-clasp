@@ -37,7 +37,7 @@
 (defun (setf setf-expander) (expander symbol &optional environment)
   (unless (null environment)
     (error "(setf setf-expander) was passed a non-null environment"))
-  (funcall #'(setf gethash) expander symbol *setf-expanders*))
+  (setf (gethash symbol *setf-expanders*) expander))
 
 (in-package "SYSTEM")
 
@@ -117,17 +117,16 @@ SETF doc and can be retrieved by (documentation 'SYMBOL 'setf)."
       (let ((real-env-var (or env-var (gensym "ENV")))
             (wholesym (gensym "WHOLE")))
         `(eval-when (:compile-toplevel :load-toplevel :execute)
-           (funcall #'(setf ext:setf-expander)
-                    (lambda (,wholesym ,real-env-var)
-                      ,@(when doc (list doc))
-                      (declare (core:lambda-name ,access-fn)
-                               ,@(unless env-var `((ignore ,real-env-var))))
-                      (let ((,tempsvar (mapcar (lambda (f) (declare (ignore f)) (gensym))
-                                               (rest ,wholesym)))
-                            (,storesvar (list ,@(make-list nstores :initial-element '(gensym "STORE")))))
-                        (values ,tempsvar (rest ,wholesym) ,storesvar ,store-form-maker
-                                (list* ',access-fn ,tempsvar))))
-                    ',access-fn)
+           (setf (ext:setf-expander ',access-fn)
+                 (lambda (,wholesym ,real-env-var)
+                   ,@(when doc (list doc))
+                   (declare (core:lambda-name ,access-fn)
+                            ,@(unless env-var `((ignore ,real-env-var))))
+                   (let ((,tempsvar (mapcar (lambda (f) (declare (ignore f)) (gensym))
+                                            (rest ,wholesym)))
+                         (,storesvar (list ,@(make-list nstores :initial-element '(gensym "STORE")))))
+                     (values ,tempsvar (rest ,wholesym) ,storesvar ,store-form-maker
+                             (list* ',access-fn ,tempsvar)))))
            ',access-fn)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -158,9 +157,8 @@ expanded into
 The doc-string DOC, if supplied, is saved as a SETF doc and can be retrieved
 by (DOCUMENTATION 'SYMBOL 'SETF)."
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (funcall #'(setf ext:setf-expander)
-              ,(ext:parse-define-setf-expander access-fn lambda-list body env)
-              ',access-fn)
+     (setf (ext:setf-expander ',access-fn)
+           ,(ext:parse-define-setf-expander access-fn lambda-list body env))
      ',access-fn))
 ) ; let ()
 

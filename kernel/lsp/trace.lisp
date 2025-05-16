@@ -175,9 +175,7 @@ all functions."
 ;;; just broke the compiler and want to do some tracing to find the problem.
 (defun simple-trace (fname safe)
   (let ((oldf (fdefinition fname)))
-    (funcall #'(setf fdefinition)
-             (make-trace-closure fname oldf safe)
-             fname)
+    (setf (fdefinition fname) (make-trace-closure fname oldf safe))
     (add-to-trace-list fname oldf))
   (list fname))
 
@@ -357,7 +355,7 @@ all functions."
           ((traced-and-redefined-p record)
            (warn "The function ~S was traced, but redefined." fname))
           (t
-           (funcall #'(setf fdefinition) (trace-record-old-definition record) fname)))
+           (setf (fdefinition fname) (trace-record-old-definition record))))
     (delete-from-trace-list fname)
     (values)))
 
