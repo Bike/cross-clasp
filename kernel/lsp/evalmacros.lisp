@@ -111,7 +111,8 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
     ,@(when *current-source-pos-info*
         `((setf (gethash ',var *variable-source-infos*)
                 ',*current-source-pos-info*)))
-    ,@(si::expand-set-documentation var 'variable doc-string)
+    ,@(when doc-string
+        `((ext:annotate var 'documentation 'variable doc-string)))
     ',var))
 
 (defmacro defparameter (var form &optional doc-string)
@@ -126,7 +127,8 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
      ,@(when *current-source-pos-info*
          `((setf (gethash ',var *variable-source-infos*)
                  ',*current-source-pos-info*)))
-     ,@(si::expand-set-documentation var 'variable doc-string)
+    ,@(when doc-string
+        `((ext:annotate var 'documentation 'variable doc-string)))
      ',var))
 
 ;; export as extension?
@@ -149,7 +151,8 @@ existing value."
        ,@(when *current-source-pos-info*
            `((setf (gethash ',var *variable-source-infos*)
                    ',*current-source-pos-info*)))
-       ,@(si::expand-set-documentation var 'variable doc-string)
+       ,@(when doc-string
+           `((ext:annotate var 'documentation 'variable doc-string)))
        ',var)))
 
 (defmacro defconstant (var form &optional doc-string)

@@ -183,7 +183,7 @@
            #:stream-encoding-error #:stream-decoding-error)
   (:export #:tpl-frame #:tpl-argument #:tpl-arguments)
   (:export #:ansi-stream)
-  (:export #:*module-provider-functions*)
+  (:export #:annotate #:*module-provider-functions*)
   (:export #:getenv)
   (:export #:*toplevel-hook*)
   (:export #:start-autocompilation)
