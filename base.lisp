@@ -139,7 +139,9 @@
     core:function-name core:setf-function-name
     core::valid-function-name-p core::function-block-name
     core::coerce-to-function core::coerce-fdesignator
-    core::fixnump core:single-float-p
+    core::fixnump core:ratiop
+    core:short-float-p core:single-float-p
+    core:double-float-p core:long-float-p
     core:num-op-acosh core:num-op-asinh
     core:num-op-atanh
     core:num-op-acos core:num-op-asin core:num-op-atan

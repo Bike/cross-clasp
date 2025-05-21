@@ -32,7 +32,8 @@
   (:export #:fmt)
   (:export #:name-of-class #:instance-ref)
   (:export #:proper-list-p)
-  (:export #:single-float-p #:double-float-p)
+  (:export #:ratiop
+           #:short-float-p #:single-float-p #:double-float-p #:long-float-p)
   (:export #:data-vector-p #:replace-array #:vref
            #:make-simple-vector-t
            #:sbv-bit-and #:sbv-bit-ior #:sbv-bit-xor #:sbv-bit-eqv
