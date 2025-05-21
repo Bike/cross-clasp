@@ -111,12 +111,6 @@
 
 (defun class-name (x)
   (core:name-of-class x))
-;;#+(or) ; really inconvenient when debugging, but important later
-(defun invoke-debugger (cond)
-  (core:invoke-internal-debugger cond))
-
-;;; FIXME: Move into runtime?
-(defvar *variable-source-infos* (make-hash-table :test #'eq :thread-safe t))
 
 (defvar ext:*module-provider-functions* nil) ; from init.lisp
 
