@@ -423,7 +423,7 @@ Example:
 
 (defun cross-clasp.clasp.ext:parse-deftype (name lambda-list body &optional env)
   (declare (ignore env))
-  (expand-defmacro name lambda-list body 'type-expander))
+  (expand-defmacro name lambda-list body 'cross-clasp.clasp.ext::type-expander))
 
 (defun cross-clasp.clasp.ext:parse-define-setf-expander
     (name lambda-list body &optional env)
