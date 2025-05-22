@@ -67,6 +67,8 @@
     (error "Non-NIL environment passed to (setf ext:symbol-macro)"))
   (setf (get-sysprop name 'ext:symbol-macro) expander))
 
+(defvar *defun-inline-hook* nil)
+
 (let () ; non-top-level so as to avoid trashing build macros.
 
 (defmacro when (condition &body forms)

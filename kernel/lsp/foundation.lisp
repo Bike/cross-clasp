@@ -101,15 +101,6 @@
                     subtree)))))
     (sub tree)))
 
-
-(defun invoke-unix-debugger ()
-  (gdb "invoking unix debugger"))
-
 (defun (setf documentation) (doc object doc-type)
-  (declare (ignore object doc-type))
+  (declare (ignore doc object doc-type))
   doc)
-
-(defun class-name (x)
-  (core:name-of-class x))
-
-(defvar *defun-inline-hook* nil)

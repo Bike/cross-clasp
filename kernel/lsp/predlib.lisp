@@ -869,7 +869,6 @@ if not possible."
 ;; CLOS classes and structures.
 ;;
 (defun register-class (class)
-  (declare (notinline class-name))
   (or (find-registered-tag class)
       ;; We do not need to register classes which belong to the core type
       ;; system of LISP (ARRAY, NUMBER, etc).
