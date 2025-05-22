@@ -15,9 +15,6 @@
 (defun constantly (object)
   (lambda (&rest arguments) (declare (ignore arguments)) object))
 
-(defmacro cons-car (list) `(car (the cons ,list)))
-(defmacro cons-cdr (list) `(cdr (the cons ,list)))
-
 ;;
 ;;   "Return true if OBJECT is the same as some tail of LIST, otherwise false."
 ;;
@@ -102,5 +99,5 @@
     (sub tree)))
 
 (defun (setf documentation) (doc object doc-type)
-  (declare (ignore doc object doc-type))
+  (declare (ignore object doc-type))
   doc)

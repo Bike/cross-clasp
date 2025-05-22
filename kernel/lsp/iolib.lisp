@@ -351,8 +351,8 @@ the one defined in the ANSI standard. *print-base* is 10, *print-array* is t,
 *package* is \"CL-USER\", etc."
   (with-clean-symbols (%progv-list)
     `(let ((%progv-list +io-syntax-progv-list+))
-       (progv (si:cons-car %progv-list)
-	   (si:cons-cdr %progv-list)
+       (progv (car %progv-list)
+	   (cdr %progv-list)
 	 ,@body))))
 
 (defun print-unreadable-object-contents (object stream type identity body)

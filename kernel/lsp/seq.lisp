@@ -330,8 +330,8 @@ default value of INITIAL-ELEMENT depends on TYPE."
        (s-list seq-list (cdr s-list))
        (i-list iterator-list (cdr i-list)))
       ((null v-list) t)
-    (let ((sequence (cons-car s-list))
-          (iterator (cons-car i-list)))
+    (let ((sequence (car (the cons s-list)))
+          (iterator (car (the cons i-list))))
       (destructuring-bind (it limit from-end step endp elt)
           iterator
         (declare (type function step endp elt))
