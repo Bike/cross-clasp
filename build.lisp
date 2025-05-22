@@ -26,6 +26,7 @@
     "lsp/arraylib.lisp"
     "lsp/predlib.lisp"
     "lsp/cdr-5.lisp"
+    "lsp/module.lisp"
     "clos/streams.lisp"
     "lsp/pprint.lisp"
     "lsp/listlib.lisp"
@@ -39,7 +40,6 @@
     "lsp/numlib.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
-    "lsp/module.lisp"
     "lsp/shiftf-rotatef.lisp"
     "lsp/setf.lisp"
     ;; macros

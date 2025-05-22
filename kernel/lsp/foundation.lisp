@@ -112,6 +112,4 @@
 (defun class-name (x)
   (core:name-of-class x))
 
-(defvar ext:*module-provider-functions* nil) ; from init.lisp
-
 (defvar *defun-inline-hook* nil)
