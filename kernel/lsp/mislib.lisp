@@ -248,6 +248,17 @@ where CREATED is true only if we succeeded on creating all directories."
 	      (si::mkdir ps mode)))))
       (values pathname created))))
 
+(defun hash-table-iterator (hash-table)
+  (let ((pairs (core:hash-table-pairs hash-table))
+        (hash-index 0))
+    (function (lambda ()
+      (if (>= hash-index (length pairs))
+          nil
+          (let* ((key (elt pairs hash-index))
+                 (val (elt pairs (incf hash-index))))
+            (incf hash-index)
+            (values t key val)))))))
+
 (defmacro with-hash-table-iterator ((iterator package) &body body)
 "Syntax: (with-hash-table-iterator (iterator package) &body body)
 Loop over the elements of a hash table. ITERATOR is a lexically bound function

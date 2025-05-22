@@ -1118,6 +1118,9 @@ the sense of TEST."
                            (setf (elt newseq j) v1
                                  i1 (1+ i1))))))))))))
 
+(defun constantly (object)
+  (lambda (&rest arguments) (declare (ignore arguments)) object))
+
 (defun complement (f)
   "Args: (f)
 Returns a new function which first applies F to its arguments and then negates

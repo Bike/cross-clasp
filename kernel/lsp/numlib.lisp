@@ -15,6 +15,9 @@
 
 (in-package "SYSTEM")
 
+(defun 1- (num) (- num 1))
+(defun 1+ (num) (+ num 1))
+
 (eval-when (:compile-toplevel :execute)
   (defun binary-search (f min max)
     (do ((new (/ (+ min max) 2) (/ (+ min max) 2)))
