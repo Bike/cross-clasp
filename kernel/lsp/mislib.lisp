@@ -13,6 +13,15 @@
 
 (in-package "SYSTEM")
 
+(defconstant lambda-list-keywords
+  (if (boundp 'lambda-list-keywords)
+      (symbol-value 'lambda-list-keywords)
+      '(&ALLOW-OTHER-KEYS
+        &AUX &BODY &ENVIRONMENT &KEY
+        &OPTIONAL &REST
+        &VA-REST
+        &WHOLE)))
+
 ;;; This could be improved, e.g. getting the lambda expression of
 ;;; interpreted functions, but there are better introspection designs.
 ;;; For the second value we unconditionally return T, as the standard
