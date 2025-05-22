@@ -40,9 +40,13 @@
     "lsp/trace.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
+    "lsp/helpfile.lisp"
+    "lsp/describe.lisp"
+    "lsp/source-location.lisp"
+    "clos/inspect.lisp"
+    ;; macros
     "lsp/shiftf-rotatef.lisp"
     "lsp/setf.lisp"
-    ;; macros
     "lsp/do.lisp"
     #+(or)"lsp/defpackage.lisp"
     "lsp/format.lisp"

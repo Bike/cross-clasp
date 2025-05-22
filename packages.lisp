@@ -26,11 +26,13 @@
            #:sigterm #:sigtrap #:sigttin #:sigttou #:sigurg #:sigusr1 #:sigusr2
            #:sigvtalrm #:sigxcpu #:sigxfsz #:sigwinch)
   (:export #:lambda-name)
+  (:export #:general #:generalp)
   (:export #:parse-bytespec)
   (:export #:put-f #:rem-f)
   (:export #:hash-table-pairs #:hash-equal)
   (:export #:fmt)
-  (:export #:name-of-class #:instance-ref)
+  (:export #:name-of-class #:class-source-location #:cxx-method-source-location
+           #:instancep #:instance-ref)
   (:export #:proper-list-p)
   (:export #:ratiop
            #:short-float-p #:single-float-p #:double-float-p #:long-float-p)
@@ -45,7 +47,9 @@
            #:cdr-atomic #:rplacd-atomic #:cas-cdr
            #:atomic-symbol-value #:atomic-set-symbol-value #:cas-symbol-value
            #:atomic-symbol-plist #:atomic-set-symbol-plist #:cas-symbol-plist)
-  (:export #:function-name #:setf-function-name)
+  (:export #:function-name #:setf-function-name
+           #:function-docstring #:function-source-pos)
+  (:export #:single-dispatch-generic-function-p)
   (:export #:allocate-standard-instance #:allocate-raw-instance
            #:allocate-raw-funcallable-instance
            #:class-stamp-for-instances #:class-new-stamp
@@ -53,7 +57,7 @@
            #:make-rack #:rack-ref #:instance-rack #:instance-class)
   (:export #:gfbytecode-simple-fun/make)
   (:export #:setf-find-class)
-  (:export #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)
+  (:export #:cxx-object-p #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
   (:export #:thread-local-write-to-string-output-stream
            #:get-thread-local-write-to-string-output-stream-string
@@ -79,9 +83,11 @@
            #:function-description-source-pathname
            #:function-description-lineno #:function-description-column
            #:function-description-docstring)
+  (:export #:package-documentation)
+  (:export #:*variable-source-infos*)
   (:export #:make-source-pos-info
            #:source-pos-info-lineno #:source-pos-info-column
-           #:source-pos-info-file-handle)
+           #:source-pos-info-file-handle #:source-pos-info-filepos)
   (:export #:load-source)
   (:export #:command-line-load-eval-sequence
            #:rc-file-name #:no-rc-p #:noinform-p
@@ -158,7 +164,9 @@
   (:export #:+process-standard-input+ #:+process-standard-output+
            #:+process-error-output+ #:+process-terminal-io+)
   (:export #:constant-form-value)
-  (:export #:with-current-source-form)
+  (:export #:with-current-source-form
+           #:source-location #:source-location-pathname)
+  (:export #:function-lambda-list)
   (:export #:type-expander)
   (:export #:parse-define-setf-expander #:setf-expander)
   (:export #:parse-deftype)
@@ -169,7 +177,7 @@
            #:package-implemented-by-list
            #:lock-package #:unlock-package #:package-locked-p)
   (:export #:*ed-functions*)
-  (:export #:*invoke-debugger-hook*
+  (:export #:*invoke-debugger-hook* #:*inspector-hook*
            #:restart-associated-conditions
            #:restart-function #:restart-report-function
            #:restart-interactive-function #:restart-test-function)
