@@ -123,7 +123,9 @@
 
 (defun specializer-form (specializer)
   (etypecase specializer
-    (compiler-class `(find-class ',(name specializer)))))
+    (compiler-class `(find-class ',(name specializer)))
+    (eql-specializer `(intern-eql-specializer
+                       ',(mop:eql-specializer-object specializer)))))
 
 (defgeneric build-method-initargs (compiler-method)
   (:method-combination append))
@@ -158,6 +160,14 @@
     (symbol function-name)
     ((cons (eql setf) (cons symbol null)) (second function-name))))
 
+(defun parse-specializer (spec)
+  (etypecase spec
+    (symbol (cross-clasp:find-compiler-class spec))
+    ((cons (eql eql) (cons (cons (eql quote) (cons t null)) null))
+     (intern-eql-specializer (second (second spec))))
+    ((cons (eql eql) (cons t null))
+     (error "Can't handle evaluated EQL specializer: ~a" spec))))
+
 (defun expand-early-defmethod (name qualifiers lambda-list body)
   (multiple-value-bind (required specializers optional rest keys aokp aux keysp)
       (parse-method-lambda-list lambda-list)
@@ -180,8 +190,7 @@
                    :class (cross-clasp:find-compiler-class
                            'standard-generic-function))))
            (mfsname (format nil "~a~@[-~a~]-(~{~a~^ ~})-METHOD"
-                            (princ-to-string name) qualifiers
-                            (mapcar #'symbol-name specializers)))
+                            name qualifiers specializers))
            (package
              ;; We can't define stuff in the CL package
              ;; so we just substitute CLOS for it. But we don't always want
@@ -200,8 +209,7 @@
            (method (make-instance 'compiler-method
                      :gf generic-function
                      :lambda-list lambda-list
-                     :specializers (mapcar #'cross-clasp:find-compiler-class
-                                           specializers)
+                     :specializers (mapcar #'parse-specializer specializers)
                      :qualifiers qualifiers
                      :class (method-class generic-function)
                      :function-form `(contf (make-%contf-method-function #',mfname) #',mfname)))
@@ -237,9 +245,16 @@
              ,@(loop with tc = (cross-clasp:find-compiler-class 't)
                      for spec in (specializers method)
                      for i from 0
-                     unless (eq spec tc)
+                     if (typep spec 'eql-specializer)
                        collect `(aref sp ,i) into body
-                       and collect t into body
+                       and collect `(let ((e (aref sp ,i))
+                                          (o ',(mop:eql-specializer-object spec)))
+                                      (if (listp e) (cons o e) (list o)))
+                             into body
+                     else unless (eq spec tc)
+                            collect `(aref sp ,i) into body
+                     ;; FIXME: this won't work if there was already an eql spec
+                            and collect t into body
                      finally (return
                                (if (null body)
                                    nil

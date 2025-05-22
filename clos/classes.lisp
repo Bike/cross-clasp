@@ -1,5 +1,7 @@
 (in-package #:cross-clasp.clasp.clos)
 
+(defclass specializer () ())
+
 ;; These aren't actual host classes. That's because working around MOP's requirements
 ;; for class initialization is more trouble than it's worth.
 ;; (We never want to make instances of instances of COMPILER-CLASS, but that doesn't
@@ -9,7 +11,7 @@
 ;; Possibly we could inherit from CLASS instead of STANDARD-CLASS, but then
 ;; a) we'd need to put in all these slots ourselves anyway, and
 ;; b) nobody ever does that so hosts may get stupid.
-(defclass compiler-class ()
+(defclass compiler-class (specializer)
   ((%name :initarg :name :accessor class-name :reader name)
    (%supers :initarg :supers :reader mop:class-direct-superclasses)
    (%subs :initform nil :accessor direct-subclasses :reader mop:class-direct-subclasses)
@@ -40,6 +42,20 @@
   (print-unreadable-object (o stream :type t)
     (write (name o) :stream stream))
   o)
+
+(defclass eql-specializer (specializer)
+  ((%object :initarg :object :reader mop:eql-specializer-object)))
+
+(defvar *eql-specializers* (make-hash-table))
+(defun intern-eql-specializer (object)
+  ;; Not sure this function is actually required
+  ;; (versus making multiple eql specializers)
+  ;; but it's trivial so why not.
+  (multiple-value-bind (spec presentp) (gethash object *eql-specializers*)
+    (if presentp
+        spec
+        (setf (gethash object *eql-specializers*) (make-instance 'eql-specializer
+                                                    :object object)))))
 
 (defclass compiler-slotd ()
   ((%name :initarg :name :reader name :reader closer-mop:slot-definition-name)
