@@ -143,6 +143,9 @@
   (:use #:cl)
   (:export #:tag-tests))
 
+(defpackage #:cross-clasp.clasp.cmp
+  (:use #:cl))
+
 (defpackage #:cross-clasp.clasp.sequence
   (:use #:cl)
   (:export #:make-sequence-iterator #:with-sequence-iterator #:dosequence))
@@ -235,6 +238,7 @@
   (:local-nicknames (#:m #:maclina.machine)
                     (#:core #:cross-clasp.clasp.core)
                     (#:clos #:cross-clasp.clasp.clos)
+                    (#:cmp #:cross-clasp.clasp.cmp)
                     (#:gray #:cross-clasp.clasp.gray)
                     (#:gc #:cross-clasp.clasp.gctools)
                     (#:mp #:cross-clasp.clasp.mp)

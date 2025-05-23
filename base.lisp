@@ -4,12 +4,16 @@
 ;;; To paper over a lot of details: many macros, and then what functions
 ;;; are defined in C++ and thus available before any Lisp is loaded.
 
-(defmethod common-macro-definitions:defun-compile-time-action
-    ((client client) name lambda-list env)
-  (declare (ignore lambda-list))
-  (clostrum:note-function client (trucler:global-environment client env) name)
+(defmethod maclina.compile:debug-lambda-name ((client client) decls)
+  (loop for (declare . decs) in decls
+        for p = (assoc 'core:lambda-name decs)
+        when p return (second p)))
+
+(defun cmp::register-global-function-def (type name)
+  (declare (ignore type))
+  (clostrum:note-function m:*client* *build-rte* name)
   (signal 'maclina.compile:resolve-function :name name)
-  nil)
+  (values))
 
 (defun proclaim (proclamation)
   ;; FIXME: record types, etc
@@ -264,6 +268,7 @@
                        core::*make-special
                        core::find-declarations core:process-declarations
                        core::dm-too-many-arguments core::dm-too-few-arguments
+                       cmp::register-global-function-def
                        ext:parse-macro
                        ;; used in CLOS, not expected to actually exist
                        ;; in the target
@@ -311,7 +316,8 @@
                        clos::satiate)
         for m = (macro-function mname)
         do (setf (clostrum:macro-function client rte mname) m))
-  (loop for (mname . src) in '((defconstant . %defconstant)
+  (loop for (mname . src) in '((defun . core::%defun)
+                               (defconstant . %defconstant)
                                (defclass . clos::early-defclass)
                                (defgeneric . clos::early-defgeneric)
                                (defmethod . clos::early-defmethod)

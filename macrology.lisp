@@ -432,3 +432,17 @@ Example:
 
 (defmacro while (condition &body body) `(loop while ,condition do (progn ,@body)))
 (defmacro until (condition &body body) `(loop until ,condition do (progn ,@body)))
+
+(defmacro %defun (&whole whole name lambda-list &body body)
+  (multiple-value-bind (body decls doc)
+      (alexandria:parse-body body :documentation t :whole whole)
+    `(progn
+       (eval-when (:compile-toplevel)
+         (cross-clasp.clasp.cmp::register-global-function-def 'defun ',name))
+       (setf (fdefinition ',name)
+             (lambda ,lambda-list
+               (declare (lambda-name ,name))
+               ,@decls
+               ,@(when doc (list doc))
+               (block ,(function-block-name name) ,@body)))
+       ',name)))
