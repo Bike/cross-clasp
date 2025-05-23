@@ -139,7 +139,7 @@
       (make-array dimension)))
 
 (defun features ()
-  '(:clasp :threads :unicode :clos :ansi-cl :common-lisp))
+  '(:clasp :threads :unicode :clos :ansi-cl :common-lisp :bytecode))
 
 (defparameter *noted-functions*
   '(core::generalp core:header-stamp

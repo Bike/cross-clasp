@@ -43,6 +43,7 @@
     "lsp/source-location.lisp"
     "clos/inspect.lisp"
     ;; macros
+    "lsp/source-transformations.lisp"
     "lsp/shiftf-rotatef.lisp"
     "lsp/setf.lisp"
     "lsp/do.lisp"
