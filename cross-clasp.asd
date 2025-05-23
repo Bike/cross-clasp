@@ -1,6 +1,6 @@
 (asdf:defsystem #:cross-clasp
   :depends-on (:maclina :closer-mop :extrinsicl :extrinsicl/maclina :anatomicl
-                        :clostrum-basic)
+                        :ecclesia :clostrum-basic)
   :components ((:file "packages")
                (:file "environment" :depends-on ("packages"))
                (:file "macrology" :depends-on ("packages"))
