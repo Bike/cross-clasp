@@ -885,6 +885,7 @@
               print-function print-object
               initial-offset))))
 
+(let () ; don't clobber build definition
 (defmacro defstruct (name&opts &rest slots &environment env)
   "Syntax: (defstruct
          {name | (name {:conc-name | (:conc-name prefix-string) |
@@ -952,3 +953,4 @@ as a STRUCTURE doc and can be retrieved by (documentation 'NAME 'structure)."
          ,@(when copier `((:copier ,copier)))
          ,@(when documentation
              `((:documentation ,documentation)))))))
+) ; let ()
