@@ -139,9 +139,12 @@
     core::derivable-stamp core::rack-stamp core::wrapped-stamp
     core:stamps-adjacent-p llvm-sys:tag-tests
     core:gfbytecode-simple-fun/make
+    core:single-dispatch-generic-function-p
     ext:specialp core:operator-shadowed-p
     core:function-name core:setf-function-name
     core::valid-function-name-p core::function-block-name
+    core:function-docstring (setf core:function-docstring)
+    core:function-source-pos ext:function-lambda-list
     core::coerce-to-function core::coerce-fdesignator
     core::fixnump core:ratiop
     core:short-float-p core:single-float-p
@@ -153,6 +156,7 @@
     core::member1
     core::sequence-start-end
     core:vref (setf core:vref)
+    core::read-dense-specialized-array
     core::copy-subarray core:replace-array
     core:data-vector-p
     core:sbv-bit-and core:sbv-bit-ior
@@ -171,7 +175,13 @@
     core::coerce-to-package core::package-hash-tables
     ext:lock-package ext:unlock-package ext:package-locked-p
     ext:package-implemented-by-list
-    core:allocate-standard-instance core:class-new-stamp
+    core:package-documentation (setf core:package-documentation)
+    core::load-cxx-object core::patch-object core::make-record-patcher
+    core::record-field core::rem-record-field
+    core:cxx-object-p
+    core::make-sharp-equal-wrapper core::sharp-equal-wrapper-p
+    core::sharp-equal-wrapper-value (setf core::sharp-equal-wrapper-value)
+    core:instancep core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class
     core:allocate-raw-instance core:allocate-raw-funcallable-instance
     core:class-stamp-for-instances
@@ -224,7 +234,8 @@
     core:function-description-lambda-list
     core:make-source-pos-info
     core:source-pos-info-column core:source-pos-info-lineno
-    core:source-pos-info-file-handle
+    core:source-pos-info-file-handle core:source-pos-info-filepos
+    ext:annotate
     core:file-scope core:file-scope-pathname
     core:unix-get-local-time-zone core:unix-daylight-saving-time ext:getenv
     gc:thread-local-unwind-counter gc:bytes-allocated
@@ -252,8 +263,10 @@
   (clostrum:make-parameter client rte 'core::*current-source-pos-info* nil)
   (loop for vname in '(core::*condition-restarts* core::*restart-clusters*
                        core::*interrupts-enabled* core::*allow-with-interrupts*
-                       core:*quasiquote*
+                       core:*quasiquote* core::*sharp-equal-final-table*
+                       core:*variable-source-infos*
                        ext:*invoke-debugger-hook* ext:*toplevel-hook*
+                       ext:*inspector-hook* core::*documentation-pool*
                        core:*initialize-hooks* core:*terminate-hooks*
                        core:*extension-systems*
                        core::*circle-counter* core::*circle-stack*

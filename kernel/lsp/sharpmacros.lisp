@@ -52,9 +52,9 @@
                   (patch-object tree record)))
                ((typep tree 'structure-object)
                 (dotimes (i (clos::class-size (class-of tree)))
-                  (setf (standard-instance-access tree i)
+                  (setf (clos:standard-instance-access tree i)
                         (circle-subst circle-table
-                                      (standard-instance-access tree i)))))
+                                      (clos:standard-instance-access tree i)))))
                ;; For general objects go full MOP
                ((typep tree 'standard-object)
                 (let ((class (class-of tree)))
