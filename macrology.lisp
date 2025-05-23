@@ -136,3 +136,28 @@ Example:
                ,@(when doc (list doc))
                (block ,(function-block-name name) ,@body)))
        ',name)))
+
+(defmacro %defmacro (name lambda-list &body body &environment env)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (setf (macro-function ',name)
+           #',(cross-clasp.clasp.ext:parse-macro name lambda-list body env))
+     ',name))
+
+(defmacro %define-compiler-macro (name lambda-list &body body &environment env)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (setf (compiler-macro-function ',name)
+           #',(cross-clasp.clasp.ext:parse-compiler-macro name lambda-list body env))
+     ',name))
+
+(defmacro %deftype (name lambda-list &body body &environment env)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (setf (cross-clasp.clasp.ext:type-expander ',name)
+           #',(cross-clasp.clasp.ext:parse-deftype name lambda-list body env))
+     ',name))
+
+(defmacro %define-setf-expander (name lambda-list &body body &environment env)
+  `(eval-when (:compile-toplevel :load-toplevel :execute)
+     (setf (cross-clasp.clasp.ext:setf-expander ',name)
+           #',(cross-clasp.clasp.ext:parse-define-setf-expander
+               name lambda-list body env))
+     ',name))
