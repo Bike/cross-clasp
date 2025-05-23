@@ -46,16 +46,16 @@
     "lsp/shiftf-rotatef.lisp"
     "lsp/setf.lisp"
     "lsp/do.lisp"
-    #+(or)"lsp/defpackage.lisp"
+    "lsp/defpackage.lisp"
     "lsp/format.lisp"
     "lsp/format-pprint.lisp"
     "lsp/defmacro.lisp"
     "lsp/evalmacros.lisp"
     "lsp/defstruct.lisp"
+    "lsp/loop2.lisp"
     "lsp/sharpmacros.lisp"
     "lsp/top.lisp"
-    "lsp/top-hook.lisp"
-    #+(or)"lsp/loop2.lisp"))
+    "lsp/top-hook.lisp"))
 
 (defun default-output-directory ()
   (asdf:system-relative-pathname :cross-clasp "build/"))

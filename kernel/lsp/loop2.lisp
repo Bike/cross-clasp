@@ -246,7 +246,6 @@ constructed.
 
 
 (defstruct (loop-minimax
-	     #+(or ecl clasp) (:type vector)
 	     (:constructor make-loop-minimax-internal))
   answer-variable
   type
@@ -376,8 +375,7 @@ code to be loaded.
 
 
 (defstruct (loop-universe
-	     #+(or ecl clasp) (:type vector)
-	     #-(or ecl clasp)(:print-function print-loop-universe))
+	    (:print-function print-loop-universe))
   keywords					;hash table, value = (fn-name . extra-data).
   iteration-keywords				;hash table, value = (fn-name . extra-data).
   for-keywords					;hash table, value = (fn-name . extra-data).
@@ -389,7 +387,6 @@ code to be loaded.
   )
 
 
-#-(or ecl clasp)
 (defun print-loop-universe (u stream level)
   (declare (ignore level))
   (let ((str (case (loop-universe-ansi u)
@@ -719,13 +716,14 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 
 
 ;;;INTERFACE: Traditional, ANSI, Lucid.
+(let ()
 (defmacro loop-finish () 
   "Causes the iteration to terminate \"normally\", the same as implicit
 termination by an iteration driving clause, or by use of WHILE or
 UNTIL -- the epilogue code (if any) will be run, and any implicitly
 collected result will be returned as the value of the LOOP."
   '(go end-loop))
-
+)
 
 
 (defvar *ignores* nil)
@@ -1157,8 +1155,7 @@ collected result will be returned as the value of the LOOP."
 ;;;; Value Accumulation: List
 
 
-(defstruct (loop-collector
-	     #+(or ecl clasp) (:type vector))
+(defstruct (loop-collector)
   name
   class
   (history nil)
@@ -1545,7 +1542,6 @@ collected result will be returned as the value of the LOOP."
 
 
 (defstruct (loop-path
-            #+(or ecl clasp) (:type vector)
             (:copier nil)
             (:predicate nil))
   names
@@ -2052,5 +2048,7 @@ collected result will be returned as the value of the LOOP."
 	`(block nil (tagbody ,tag (progn ,@keywords-and-forms) (go ,tag))))))
 
 ;;;INTERFACE: ANSI
+(let ()
 (defmacro loop (&environment env &rest keywords-and-forms)
   (loop-standard-expansion keywords-and-forms env *loop-ansi-universe*))
+)
