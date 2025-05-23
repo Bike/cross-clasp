@@ -161,3 +161,21 @@ Example:
            #',(cross-clasp.clasp.ext:parse-define-setf-expander
                name lambda-list body env))
      ',name))
+
+(defmacro %defvar (name &optional (value nil valuep) doc)
+  `(progn
+     (declaim (special ,name))
+     ,@(when valuep
+         `((unless (boundp ',name)
+             (setf (symbol-value ',name) ,value))))
+     ,@(when doc
+         `((cross-clasp.clasp.ext:annotate ',name 'documentation 'variable ,doc)))
+     ',name))
+
+(defmacro %defparameter (name value &optional doc)
+  `(progn
+     (declaim (special ,name))
+     (setf (symbol-value ',name) ,value)
+     ,@(when doc
+         `((cross-clasp.clasp.ext:annotate ',name 'documentation 'variable ,doc)))
+     ',name))

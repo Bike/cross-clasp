@@ -334,6 +334,8 @@
                                (define-compiler-macro . core::%define-compiler-macro)
                                (deftype . core::%deftype)
                                (define-setf-expander . core::%define-setf-expander)
+                               (defvar . core::%defvar)
+                               (defparameter . core::%defparameter)
                                (defconstant . %defconstant)
                                (defclass . clos::early-defclass)
                                (defgeneric . clos::early-defgeneric)

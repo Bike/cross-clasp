@@ -1,8 +1,7 @@
 (in-package #:cross-clasp)
 
 (defparameter *files*
-  '("lsp/foundation.lisp"
-    "clos/method-combination-environment.lisp"
+  '("clos/method-combination-environment.lisp"
     "clos/standard-method-combinations.lisp"
     "clos/hierarchy.lisp"
     "clos/method-function.lisp"

@@ -114,7 +114,7 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
         `((setf (gethash ',var *variable-source-infos*)
                 ',*current-source-pos-info*)))
     ,@(when doc-string
-        `((ext:annotate var 'documentation 'variable doc-string)))
+        `((ext:annotate ',var 'documentation 'variable ,doc-string)))
     ',var))
 
 (defmacro defparameter (var form &optional doc-string)
@@ -130,7 +130,7 @@ as a VARIABLE doc and can be retrieved by (documentation 'NAME 'variable)."
          `((setf (gethash ',var *variable-source-infos*)
                  ',*current-source-pos-info*)))
     ,@(when doc-string
-        `((ext:annotate var 'documentation 'variable doc-string)))
+        `((ext:annotate ',var 'documentation 'variable ,doc-string)))
      ',var))
 
 ;; export as extension?
@@ -154,7 +154,7 @@ existing value."
            `((setf (gethash ',var *variable-source-infos*)
                    ',*current-source-pos-info*)))
        ,@(when doc-string
-           `((ext:annotate var 'documentation 'variable doc-string)))
+           `((ext:annotate ',var 'documentation 'variable ',doc-string)))
        ',var)))
 
 (defmacro defconstant (var form &optional doc-string)
