@@ -94,7 +94,7 @@
   (source-locations-set-info
    (source-location (clos::method-combination-compiler method-combination) t)
    'define-method-combination))
-#+(or)
+
 (defun method-source-location (method)
   ;; NOTE: Because we return this to MAPCON, make sure the lists are fresh.
   (let* ((method-spi (clos::method-source-position method))
@@ -104,9 +104,14 @@
                                                                  'defmethod))
                          nil))
          (sls (or method-sls
-;;                  (source-location (clos::fast-method-function method) t)
-;;                  (source-location (clos::contf-method-function method) t)
-                  (source-location (clos:method-function method) t)))
+                (let ((mf (clos:method-function method)))
+                  ;; FIXME: Move into CLOS somehow
+                  (typecase mf
+                    (clos::%leaf-method-function
+                     (source-location (clos::fmf mf) t))
+                    (clos::%contf-method-function
+                     (source-location (clos::contf mf) t))
+                    (t (source-location mf t))))))
          (description
            (ignore-errors
             (append (method-qualifiers method)
@@ -116,7 +121,7 @@
                                       `(eql ,(clos:eql-specializer-object spec))
                                       (class-name spec)))))))
     (source-locations-set-info sls 'defmethod description)))
-#+(or)
+
 (defun generic-function-source-locations (gf)
   (let ((method-sls (mapcan #'method-source-location (clos:generic-function-methods gf))))
     (multiple-value-bind (file pos)
