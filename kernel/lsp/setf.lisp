@@ -120,7 +120,7 @@ SETF doc and can be retrieved by (documentation 'SYMBOL 'setf)."
            (setf (ext:setf-expander ',access-fn)
                  (lambda (,wholesym ,real-env-var)
                    ,@(when doc (list doc))
-                   (declare (core:lambda-name ,access-fn)
+                   (declare (core:lambda-name (ext:setf-expander ,access-fn))
                             ,@(unless env-var `((ignore ,real-env-var))))
                    (let ((,tempsvar (mapcar (lambda (f) (declare (ignore f)) (gensym))
                                             (rest ,wholesym)))
