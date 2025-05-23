@@ -224,7 +224,26 @@
 ;; NIL otherwise.
 (defparameter *output-layout-mode* nil)
 
-;; The condition FORMAT-ERROR is found later in conditions.lisp
+(define-condition format-error (simple-error)
+  ((format-control :initarg :complaint)
+   (format-arguments :initarg :arguments)
+   (control-string :reader format-error-control-string
+		   :initarg :control-string
+		   :initform *default-format-error-control-string*) 
+   (offset :reader format-error-offset :initarg :offset
+	   :initform *default-format-error-offset*)
+   (print-banner :reader format-error-print-banner :initarg :print-banner
+		 :initform t))
+  (:report (lambda (condition stream)
+	     (format
+              stream
+              "~:[~;Error in format: ~]~
+			 ~?~@[~%  ~A~%  ~V@T^~]"
+              (format-error-print-banner condition)
+              (simple-condition-format-control condition)
+              (simple-condition-format-arguments condition)
+              (format-error-control-string condition)
+              (format-error-offset condition)))))
 
 
 ;;;; TOKENIZE-CONTROL-STRING
@@ -2370,6 +2389,33 @@
            ,guts))))
 
 ;;;; Compile-time checking of format arguments and control string
+
+;;; Conditions the FORMAT compiler macro signals if there's an argument count mismatch.
+;;; CLHS 22.3.10.2 says that having too few arguments is undefined, so that's a warning,
+;;; but having too many just means they're ignored, so that's a style-warning.
+;;; (Alternately we could not complain at all.)
+(define-condition format-warning-too-few-arguments (warning)
+  ((control-string :initarg :control :reader format-warning-control-string)
+   (expected :initarg :expected :reader format-warning-expected)
+   (observed :initarg :observed :reader format-warning-observed))
+  (:report (lambda (condition stream)
+             (format stream
+                     "Format string ~s expects at least ~d arguments,~@
+                      but is only provided ~d."
+                     (format-warning-control-string condition)
+                     (format-warning-expected condition)
+                     (format-warning-observed condition)))))
+(define-condition format-warning-too-many-arguments (style-warning)
+  ((control-string :initarg :control :reader format-warning-control-string)
+   (expected :initarg :expected :reader format-warning-expected)
+   (observed :initarg :observed :reader format-warning-observed))
+  (:report (lambda (condition stream)
+             (format stream
+                     "Format string ~s expects at most ~d arguments,~@
+                      but is provided ~d."
+                     (format-warning-control-string condition)
+                     (format-warning-expected condition)
+                     (format-warning-observed condition)))))
 
 ;;;
 ;;; Signal a warning if the given control string will not work with
