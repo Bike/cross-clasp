@@ -41,6 +41,15 @@
 
 (in-package "SYSTEM")
 
+;; used in setf expansions below
+(defun parse-bytespec (bytespec)
+  (when (and (consp bytespec)
+             (eql (car bytespec) 'byte)
+             (consp (cdr bytespec))
+             (consp (cddr bytespec))
+             (null (cdddr bytespec)))
+    (values (cadr bytespec) (caddr bytespec))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; DEFSETF
