@@ -25,7 +25,7 @@
            #:sigprof #:sigpwr #:sigquit #:sigsegv #:sigstop #:sigtstp #:sigsys
            #:sigterm #:sigtrap #:sigttin #:sigttou #:sigurg #:sigusr1 #:sigusr2
            #:sigvtalrm #:sigxcpu #:sigxfsz #:sigwinch)
-  (:export #:lambda-name)
+  (:export #:lambda-name #:lambda-list)
   (:export #:general #:generalp)
   (:export #:parse-bytespec)
   (:export #:put-f #:rem-f)

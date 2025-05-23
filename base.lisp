@@ -9,6 +9,13 @@
         for p = (assoc 'core:lambda-name decs)
         when p return (second p)))
 
+(defmethod maclina.compile:debug-lambda-list ((client client) decls)
+  (loop for (declare . decs) in decls
+        for p = (assoc 'core:lambda-list decs)
+        when p
+          return (values (rest p) t)
+        finally (return (values nil nil))))
+
 (defun cmp::register-global-function-def (type name)
   (declare (ignore type))
   (clostrum:note-function m:*client* *build-rte* name)
