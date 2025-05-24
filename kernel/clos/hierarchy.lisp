@@ -282,3 +282,9 @@
 (defclass package (core:general) () (:metaclass built-in-class))
 (defclass sequence (t) () (:metaclass built-in-class))
 (defclass list (sequence) () (:metaclass built-in-class))
+
+;;; sequence methods
+(defclass null (symbol list) () (:metaclass built-in-class))
+(defclass cons (list) () (:metaclass built-in-class))
+(defclass array (core:general) () (:metaclass built-in-class))
+(defclass vector (array sequence) () (:metaclass built-in-class))

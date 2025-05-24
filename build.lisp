@@ -38,6 +38,7 @@
     "lsp/trace.lisp"
     "lsp/assorted.lisp"
     "lsp/packlib.lisp"
+    "clos/sequences.lisp"
     "lsp/helpfile.lisp"
     "lsp/describe.lisp"
     "lsp/source-location.lisp"

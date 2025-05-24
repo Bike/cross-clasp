@@ -147,8 +147,22 @@
   (:use #:cl))
 
 (defpackage #:cross-clasp.clasp.sequence
-  (:use #:cl)
-  (:export #:make-sequence-iterator #:with-sequence-iterator #:dosequence))
+  (:use)
+  (:export #:make-sequence-iterator #:with-sequence-iterator #:dosequence)
+  (:export #:elt #:length #:make-sequence-like #:adjust-sequence)
+  (:export #:make-simple-sequence-iterator
+           #:iterator-step #:iterator-endp #:iterator-element
+           #:iterator-index #:iterator-copy)
+  (:export #:protocol-unimplemented #:protocol-unimplemented-operation)
+  (:export #:emptyp #:count #:count-if #:count-if-not #:find #:find-if #:find-if-not
+           #:position #:position-if #:position-if-not #:subseq #:copy-seq #:fill
+           #:nsubstitute #:nsubstitute-if #:nsubstitute-if-not
+           #:substitute #:substitute-if #:substitute-if-not
+           #:replace #:nreverse #:reverse #:reduce #:mismatch #:search
+           #:delete #:delete-if #:delete-if-not #:remove #:remove-if #:remove-if-not
+           #:delete-duplicates #:remove-duplicates #:sort #:stable-sort)
+  (:export #:make-sequence #:define-iterative-sequence
+           #:define-random-access-sequence #:make-random-access-iterator))
 
 (defpackage #:cross-clasp.clasp.debug
   (:use #:cl)
