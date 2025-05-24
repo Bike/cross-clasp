@@ -181,6 +181,8 @@
     core:hash-table-pairs core:hash-equal
     core::coerce-to-package core::package-hash-tables
     ext:lock-package ext:unlock-package ext:package-locked-p
+    core:call-with-package-read-lock core:call-with-package-read-write-lock
+    core:package-local-nicknames-internal (setf core:package-local-nicknames-internal)
     ext:package-implemented-by-list
     core:package-documentation (setf core:package-documentation)
     core::load-cxx-object core::patch-object core::make-record-patcher

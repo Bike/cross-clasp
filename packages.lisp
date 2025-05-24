@@ -83,7 +83,9 @@
            #:function-description-source-pathname
            #:function-description-lineno #:function-description-column
            #:function-description-docstring)
-  (:export #:package-documentation)
+  (:export #:package-documentation
+           #:package-local-nicknames-internal
+           #:call-with-package-read-lock #:call-with-package-read-write-lock)
   (:export #:*variable-source-infos*)
   (:export #:make-source-pos-info
            #:source-pos-info-lineno #:source-pos-info-column
