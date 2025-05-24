@@ -18,11 +18,6 @@
   ()
   (:metaclass built-in-class))
 
-(defclass core:general () () (:metaclass built-in-class))
-
-;; Needed for e.g. method on make-instance.
-(defclass symbol (core:general) () (:metaclass built-in-class))
-
 (defclass standard-object (t) ())
 
 (defclass metaobject () ())
@@ -277,6 +272,11 @@
 (defclass ext:ansi-stream (stream)
   ()
   (:metaclass built-in-class))
+
+(defclass core:general () () (:metaclass built-in-class))
+
+;; Needed for e.g. method on make-instance.
+(defclass symbol (core:general) () (:metaclass built-in-class))
 
 ;;; these get DOCUMENTATION methods.
 (defclass package (core:general) () (:metaclass built-in-class))

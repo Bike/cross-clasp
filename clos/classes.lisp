@@ -683,16 +683,18 @@
          (setf (find-class ',name) ,class)
          ,@(build-note-accessors accessors))
        (eval-when (:load-toplevel :execute)
-         (let ((class
-                 (or (find-class ',name nil)
-                   ,(expand-early-allocate-instance (metaclass class)))))
+         (let* ((old-class (find-class ',name nil))
+                (class
+                  (or old-class
+                    ,(expand-early-allocate-instance (metaclass class)))))
            ;; Install class.
            ;; we do this first so the CPL can refer to the class.
            (core:setf-find-class class ',name)
            ;; Initialize rack slots.
            ,(initialize-class-form 'class class)
            ;; Install stamp.
-           (core:class-new-stamp class))
+           (unless old-class
+             (core:class-new-stamp class)))
          ,@(build-install-accessors accessors)
          ',name))))
 
