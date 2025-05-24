@@ -7,13 +7,8 @@
 (defun parse-defgeneric-options (options)
   (loop with apo with mc with doc with gfclass with mclass
         for (name . value) in options
-        if (eq name :method)
-          collect value into methods
-        if (eq name 'declare)
-          append value into declarations
         if (member name seen-options)
           do (error "Redundant ~s" name)
-        collect name into seen-options
         if (eq name :argument-precedence-order)
           do (setf apo value)
         else if (eq name :method-combination)
@@ -26,7 +21,13 @@
                do (setf gfclass (first value))
         else if (eq name :method-class)
                do (setf mclass (first value))
+        else if (eq name :method)
+               collect value into methods
+        else if (eq name 'declare)
+               append value into declarations
         else do (error "Unknown option ~s" name)
+        unless (member name '(declare :method))
+          collect name into seen-options
         finally (return (values methods apo declarations doc
                                 mc gfclass mclass))))
 
@@ -60,8 +61,6 @@
                         method-combination class method-class)
       (parse-defgeneric-options options)
     (declare (ignore doc))
-    (unless (null methods)
-      (error ":method not yet supported"))
     (multiple-value-bind (required optional rest keys aokp aux keysp)
         (alexandria:parse-ordinary-lambda-list lambda-list)
       (declare (ignore keys aokp aux))
@@ -84,7 +83,9 @@
         `(progn
            (eval-when (:compile-toplevel)
              (note-generic ',name ,gf))
-           (setf (fdefinition ',name) ,(build-gf-form gf)))))))
+           (setf (fdefinition ',name) ,(build-gf-form gf))
+           ,@(loop for method in methods
+                   collect `(defmethod ,name ,@method)))))))
 
 ;;; return the parsed lambda list, but the second value is the list of
 ;;; specializer specifiers.
