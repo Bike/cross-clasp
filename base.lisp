@@ -109,6 +109,7 @@
     (defpack "MP" #:cross-clasp.clasp.mp)
     (defpack "LLVM-SYS" #:cross-clasp.clasp.llvm-sys)
     (defpack "CLOS" #:cross-clasp.clasp.clos)
+    (defpack "CMP" #:cross-clasp.clasp.cmp)
     (defpack "SEQUENCE" #:cross-clasp.clasp.sequence)
     (defpack "GRAY" #:cross-clasp.clasp.gray)
     (defpack "CLASP-DEBUG" #:cross-clasp.clasp.debug)
