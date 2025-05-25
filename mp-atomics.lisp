@@ -66,7 +66,7 @@ defaulting of ORDER is applied."
           (alexandria:parse-body body :documentation t)
         ;; FIXME: probably have to sort the decls by lambda list (ugh)
         `(lambda (,place ,@expander-ll)
-           (declare ,@decls)
+           ,@decls
            ,@(when doc (list doc))
            (destructuring-bind ,place-ll (rest ,place)
              (block ,name ,@body)))))))
