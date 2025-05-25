@@ -210,7 +210,7 @@
     mp:make-shared-mutex mp:suspend-loop
     mp:abort-process mp:enqueue-interrupt
     mp:process-name mp:process-resume mp:all-processes
-    mp:process-active-p
+    mp:process-active-p mp::%abort-process
     mp:make-condition-variable
     mp:condition-variable-signal mp:condition-variable-wait
     mp:push-default-special-binding
@@ -250,7 +250,7 @@
     gc:thread-local-unwind-counter gc:bytes-allocated
     core:sl-boundp core:unbound
     core:vaslistp core:list-from-vaslist
-    core:interpret core:load-source
+    core:interpret load core:load-source
     core:startup-type core:is-interactive-lisp core:noinform-p core:noprint-p
     core:rc-file-name core:no-rc-p core:debugger-disabled-p
     core:command-line-load-eval-sequence

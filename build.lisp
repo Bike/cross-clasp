@@ -1,7 +1,8 @@
 (in-package #:cross-clasp)
 
 (defparameter *files*
-  '("clos/method-combination-environment.lisp"
+  '(;; Enough CLOS to call generic functions
+    "clos/method-combination-environment.lisp"
     "clos/standard-method-combinations.lisp"
     "clos/hierarchy.lisp"
     "clos/method-function.lisp"
@@ -18,6 +19,7 @@
     "clos/print.lisp"
     "clos/misc.lisp"
     "clos/satiate.lisp"
+    ;; Library
     "lsp/debug.lisp"
     "clos/conditions.lisp"
     ;;"lsp/export.lisp"
@@ -45,6 +47,7 @@
     "clos/inspect.lisp"
     ;; macros
     "lsp/source-transformations.lisp"
+    "lsp/cmuutil.lisp"
     "lsp/shiftf-rotatef.lisp"
     "lsp/setf.lisp"
     "lsp/do.lisp"
@@ -56,6 +59,9 @@
     "lsp/defstruct.lisp"
     "lsp/loop2.lisp"
     "lsp/sharpmacros.lisp"
+    "lsp/mp.lisp"
+    "lsp/atomics.lisp"
+    ;; toplevel
     "lsp/top.lisp"
     "lsp/top-hook.lisp"))
 
