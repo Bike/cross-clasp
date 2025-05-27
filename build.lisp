@@ -23,6 +23,7 @@
     "lsp/debug.lisp"
     "clos/conditions.lisp"
     "lsp/assert.lisp"
+    "clos/package.lisp"
     "lsp/arraylib.lisp"
     "lsp/numlib.lisp"
     "lsp/predlib.lisp"
