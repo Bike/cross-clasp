@@ -392,12 +392,13 @@ by (DOCUMENTATION 'SYMBOL 'SETF)."
       (get-setf-expansion place env)
     (let* ((itemp (gensym "itemp")) (store (gensym "store")) (def (gensym "def")))
       (values `(,@vars ,itemp ,@(if default-p (list def) nil))
-              `(,@vals ,indicator ,@(and default-p (list default)))
+              `(,@vals ,indicator ,@(if default-p (list default) nil))
               `(,store)
               `(let ((,(car stores) (sys:put-f ,access-form ,store ,itemp)))
+                 ,@(if default-p (list def) nil) ; prevent unused variable warning
                  ,store-form
                  ,store)
-              `(getf ,access-form ,itemp ,default)))))
+              `(getf ,access-form ,itemp ,@(if default-p (list def) nil))))))
 
 (defsetf subseq (sequence1 start1 &optional end1)
 		(sequence2)

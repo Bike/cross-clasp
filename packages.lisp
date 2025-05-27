@@ -47,7 +47,7 @@
            #:cdr-atomic #:rplacd-atomic #:cas-cdr
            #:atomic-symbol-value #:atomic-set-symbol-value #:cas-symbol-value
            #:atomic-symbol-plist #:atomic-set-symbol-plist #:cas-symbol-plist)
-  (:export #:function-name #:setf-function-name
+  (:export #:function-name #:setf-function-name #:setf-lambda-list
            #:function-docstring #:function-source-pos)
   (:export #:single-dispatch-generic-function-p)
   (:export #:allocate-standard-instance #:allocate-raw-instance

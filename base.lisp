@@ -82,6 +82,11 @@
 (defun ext:add-implementation-package (implementors &optional package)
   (declare (ignore implementors package)))
 
+(defun ext:setf-expander (name)
+  (clostrum:setf-expander m:*client* *build-ce* name))
+(defun (setf ext:setf-expander) (expander name)
+  (setf (clostrum:setf-expander m:*client* *build-rte* name) expander))
+
 (defmethod common-macro-definitions::wrap-in-setf-setf-expander
     ((client client) name function environment)
   (declare (ignore environment))
@@ -149,7 +154,7 @@
     core:gfbytecode-simple-fun/make
     core:single-dispatch-generic-function-p
     ext:specialp core:operator-shadowed-p
-    core:function-name core:setf-function-name
+    core:function-name core:setf-function-name core:setf-lambda-list
     core::valid-function-name-p core::function-block-name
     core:function-docstring (setf core:function-docstring)
     core:function-source-pos ext:function-lambda-list
@@ -205,7 +210,7 @@
     clos:set-funcallable-instance-function
     core:instance-rack core:instance-sig-set
     core:setf-find-class
-    core::get-sysprop (setf core::get-sysprop)
+    core:put-f core::get-sysprop (setf core::get-sysprop)
     core::write-object core:write-addr core::write-ugly-object
     mp:make-lock mp:get-lock mp:giveup-lock
     mp:make-shared-mutex mp:suspend-loop
@@ -262,6 +267,25 @@
     eclector.reader::*quasiquotation-state*
     eclector.reader::*quasiquotation-depth*
     eclector.reader::*consing-dot-allowed-p*))
+
+(defun install-setfs ()
+  (macrolet ((def (name lambda-list &body body)
+               `(setf (ext:setf-expander ',name)
+                      #',(ext:parse-define-setf-expander
+                          name lambda-list body *build-rte*))))
+    (def getf (&environment env place indicator
+                            &optional (default nil default-p))
+      (multiple-value-bind (vars vals stores store-form access-form)
+          (common-macro-definitions:get-setf-expansion m:*client* place env)
+        (let* ((itemp (gensym "ITEMP")) (store (gensym "STORE")) (def (gensym "DEF")))
+          (values `(,@vars ,itemp ,@(if default-p (list def) nil))
+                  `(,@vals ,indicator ,@(if default-p (list default) nil))
+                  `(,store)
+                  `(let ((,(car stores) (core:put-f ,access-form ,store ,itemp)))
+                     ,@(if default-p (list def) nil) ; prevent unused variable warning
+                     ,store-form
+                     ,store)
+                  `(getf ,access-form ,itemp ,@(if default-p (list def) nil))))))))
 
 (defun install-environment (&optional (client m:*client*)
                               (rte *build-rte*)
@@ -363,6 +387,7 @@
   (loop for (fname . set) in '((mp::atomic . mp::expand-atomic))
         for f = (fdefinition set)
         do (setf (clostrum:setf-expander client rte fname) f))
+  (install-setfs)
   ;; Extrinsicl copies over a bunch of classes, but we actually need
   ;; to use our own instead.
   (loop for s being the external-symbols of "CL"
