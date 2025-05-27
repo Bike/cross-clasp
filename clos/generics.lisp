@@ -50,6 +50,7 @@
               specializer-profile ',(specializer-profile compiler-generic)
               :declarations ',(declarations compiler-generic))))
      (core:setf-function-name gf ',(name compiler-generic))
+     (core:setf-lambda-list gf ',(lambda-list compiler-generic))
      (set-funcallable-instance-function
       ;; this is invalidated-discriminator-closure, but that's defined later.
       ;; miss is defined in miss.lisp.
