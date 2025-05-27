@@ -22,7 +22,6 @@
     ;; Library
     "lsp/debug.lisp"
     "clos/conditions.lisp"
-    ;;"lsp/export.lisp"
     "lsp/assert.lisp"
     "lsp/arraylib.lisp"
     "lsp/numlib.lisp"
@@ -61,6 +60,7 @@
     "lsp/sharpmacros.lisp"
     "lsp/mp.lisp"
     "lsp/atomics.lisp"
+    "clos/define-method-combination.lisp"
     ;; toplevel
     "lsp/top.lisp"
     "lsp/top-hook.lisp"))
