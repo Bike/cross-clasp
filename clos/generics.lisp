@@ -268,7 +268,7 @@
 
 (defmacro early-defmethod (name &rest rest)
   (loop for r on rest
-        for e = (first rest)
+        for e = (first r)
         if (consp e)
           return (expand-early-defmethod name qualifiers e (rest r))
         else collect e into qualifiers))
