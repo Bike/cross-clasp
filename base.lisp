@@ -157,7 +157,7 @@
     core:function-name core:setf-function-name core:setf-lambda-list
     core::valid-function-name-p core::function-block-name
     core:function-docstring (setf core:function-docstring)
-    core:function-source-pos ext:function-lambda-list
+    core:function-source-pos core:set-source-pos-info ext:function-lambda-list
     core::coerce-to-function core::coerce-fdesignator
     core::fixnump core:ratiop
     core:short-float-p core:single-float-p
@@ -202,7 +202,7 @@
     core:allocate-raw-instance core:allocate-raw-funcallable-instance
     core:class-stamp-for-instances
     core:make-rack core:rack-ref (setf core:rack-ref)
-    core::cas-rack core::atomic-rack-read
+    core::cas-rack core::atomic-rack-read core::atomic-rack-write
     core:instance-ref core:instance-stamp
     core:instance-class (setf core:instance-class)
     core:instance-sig core:rack-sig
