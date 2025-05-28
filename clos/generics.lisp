@@ -120,7 +120,8 @@
                                   collect (if -p
                                               key
                                               (list (list keyword var) default)))
-    ,@(when aokp '(&allow-other-keys))
+    ;; Keyword checking is done by the GF, so methods should not check again
+    ,@(when (or keyp aokp) '(&allow-other-keys))
     ,@(when aux `(&aux ,@aux))))
 
 (defun specializer-form (specializer)
