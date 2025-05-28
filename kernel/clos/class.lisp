@@ -25,6 +25,8 @@
 (defgeneric compute-default-initargs (class))
 ;; AMOP specifies some of the keys. FIXME? Dunno if we should bother
 (defgeneric ensure-class-using-class (class name &key &allow-other-keys))
+(defgeneric reader-method-class (class direct-slot &rest initargs))
+(defgeneric writer-method-class (class direct-slot &rest initargs))
 
 (defun compute-instance-size (slots)
   ;; could just use cl:count, but type inference is bad atm
@@ -313,6 +315,61 @@ because it contains a reference to the undefined class~%  ~A"
   (static-gfs:invalidate-class-reinitializers* class)
   (std-class-generate-accessors class))
 
+(defun std-class-generate-accessors (standard-class)
+  ;;
+  ;; The accessors are closures, which are generated every time the
+  ;; slots of the class change. The accessors are safe: they check that
+  ;; the slot is bound after retreiving the value, and they may take
+  ;; the liberty of using SI:INSTANCE-REF because they know the class of
+  ;; the instance.
+  ;;
+  (dolist (slotd (slot-value standard-class 'direct-slots))
+    (with-slots ((name name) (allocation allocation) (location location)
+		 (readers readers) (writers writers))
+	slotd
+      (multiple-value-bind (reader writer) (std-class-accessors name)
+	(let* ((options (list :slot-definition slotd
+                              :leaf-method-p t
+                              :source-position (class-source-position
+                                                standard-class)))
+	       (reader-args (list* :function reader
+				   :generic-function nil
+				   :qualifiers nil
+				   :lambda-list '(object)
+				   :specializers `(,standard-class)
+				   options))
+	       (reader-class (apply #'reader-method-class standard-class slotd
+				    reader-args))
+	       (writer-args (list* :function writer
+				   :generic-function nil
+				   :qualifiers nil
+				   :lambda-list '(value object)
+				   :specializers `(,(find-class t) ,standard-class)
+				   options))
+	       (writer-class (apply #'writer-method-class standard-class slotd
+				    writer-args)))
+	  (dolist (fname readers)
+	    (let ((method (make-method reader-class nil `(,standard-class) '(object)
+				       reader
+				       options)))
+	      (add-method fname method)))
+	  (dolist (fname writers)
+	    (let ((method (make-method writer-class nil
+				       `(,(find-class t) ,standard-class) '(value object)
+				       writer
+				       options)))
+	      (add-method fname method))))))))
+
+(defun std-class-accessors (slot-name)
+  (values (make-%leaf-method-function
+           #'(lambda (self)
+               (declare (core:lambda-name std-class-accessors.reader.lambda))
+               (slot-value self slot-name)))
+          (make-%leaf-method-function
+           #'(lambda (new-value self)
+               (declare (core:lambda-name std-class-accessors.writer.lambda))
+               (setf (slot-value self slot-name) new-value)))))
+
 (defmacro mapappend (fun &rest args)
   `(reduce #'append (mapcar ,fun ,@args)))
 
@@ -347,11 +404,6 @@ because it contains a reference to the undefined class~%  ~A"
 	:documentation (slot-definition-documentation slotd)
 	:location (slot-definition-location slotd)))
 
-(defun safe-slot-definition-location (slotd &optional default)
-  (if (or (listp slotd) (slot-boundp slotd 'location))
-      (slot-definition-location slotd)
-      default))
-
 (defmethod compute-effective-slot-definition-initargs ((class class) direct-slotds)
   ;;; See CLHS 7.5.3 for the explanation of how slot options are inherited.
   (let (name initform initfunction allocation documentation
@@ -380,7 +432,7 @@ because it contains a reference to the undefined class~%  ~A"
                          ((subtypep type new-type) type)
                          (T `(and ,new-type ,type)))))
       ;;; Clasp extension: :location can be specified.
-      (let ((new-loc (safe-slot-definition-location slotd)))
+      (let ((new-loc (slot-definition-location slotd)))
         (if location
             (when new-loc
               (unless (eql location new-loc)
@@ -468,6 +520,18 @@ because it contains a reference to the undefined class~%  ~A"
   (values metaclass direct-superclasses
 	  (list* :direct-superclasses direct-superclasses options)))
 
+(defmethod reader-method-class ((class std-class)
+				(direct-slot direct-slot-definition)
+				&rest initargs)
+  (declare (ignore class direct-slot initargs))
+  (find-class 'standard-reader-method))
+
+(defmethod writer-method-class ((class std-class)
+				(direct-slot direct-slot-definition)
+				&rest initargs)
+  (declare (ignore class direct-slot initargs))
+  (find-class 'standard-writer-method))
+
 ;;; ----------------------------------------------------------------------
 ;;; Around methods for COMPUTE-SLOTS which assign locations to each slot.
 ;;;
@@ -484,8 +548,8 @@ because it contains a reference to the undefined class~%  ~A"
   (let* ((size (compute-instance-size slots))
 	 (instance-slots (remove :instance slots :key #'slot-definition-allocation
 						 :test-not #'eq))
-	 (numbered-slots (remove-if-not #'safe-slot-definition-location instance-slots))
-	 (other-slots (remove-if #'safe-slot-definition-location instance-slots))
+	 (numbered-slots (remove-if-not #'slot-definition-location instance-slots))
+	 (other-slots (remove-if #'slot-definition-location instance-slots))
 	 (aux (make-array size :initial-element nil)))
     (loop for i in numbered-slots
           do (let ((loc (slot-definition-location i)))
