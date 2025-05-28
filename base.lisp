@@ -198,17 +198,21 @@
     core::sharp-equal-wrapper-value (setf core::sharp-equal-wrapper-value)
     core:instancep core:allocate-standard-instance core:class-new-stamp
     clos::classp core::subclassp core:name-of-class
+    core:compute-instance-creator
     core:allocate-raw-instance core:allocate-raw-funcallable-instance
     core:class-stamp-for-instances
     core:make-rack core:rack-ref (setf core:rack-ref)
     core::cas-rack core::atomic-rack-read
-    core:instance-ref core:instance-stamp core:instance-class
+    core:instance-ref core:instance-stamp
+    core:instance-class (setf core:instance-class)
+    core:instance-sig core:rack-sig
     clos::standard-instance-access
     (setf clos::standard-instance-access)
     clos::funcallable-standard-instance-access
     (setf clos::funcallable-standard-instance-access)
     clos:set-funcallable-instance-function
-    core:instance-rack core:instance-sig-set
+    core:instance-rack (setf core:instance-rack)
+    core:instance-sig core:instance-sig-set
     core:setf-find-class
     core:put-f core::get-sysprop (setf core::get-sysprop)
     core::write-object core:write-addr core::write-ugly-object

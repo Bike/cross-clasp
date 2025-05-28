@@ -50,11 +50,12 @@
   (:export #:function-name #:setf-function-name #:setf-lambda-list
            #:function-docstring #:function-source-pos)
   (:export #:single-dispatch-generic-function-p)
-  (:export #:allocate-standard-instance #:allocate-raw-instance
+  (:export #:compute-instance-creator
+           #:allocate-standard-instance #:allocate-raw-instance
            #:allocate-raw-funcallable-instance
            #:class-stamp-for-instances #:class-new-stamp
-           #:instance-sig-set #:instance-stamp
-           #:make-rack #:rack-ref #:instance-rack #:instance-class)
+           #:instance-sig #:instance-sig-set #:instance-stamp
+           #:make-rack #:rack-sig #:rack-ref #:instance-rack #:instance-class)
   (:export #:gfbytecode-simple-fun/make)
   (:export #:setf-find-class)
   (:export #:cxx-object-p #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)

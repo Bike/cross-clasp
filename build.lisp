@@ -45,6 +45,11 @@
     "lsp/describe.lisp"
     "lsp/source-location.lisp"
     "clos/inspect.lisp"
+    ;; CLOS part two: defining new generics, classes, etc
+    "clos/change.lisp"
+    "clos/dependent.lisp"
+    "clos/class.lisp"
+    "clos/cpl.lisp"
     ;; macros
     "lsp/source-transformations.lisp"
     "lsp/cmuutil.lisp"

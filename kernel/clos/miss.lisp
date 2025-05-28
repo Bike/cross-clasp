@@ -24,7 +24,7 @@
   (if (let ((gfclass (class-of generic-function)))
         (if (eq gfclass
                 (load-time-value (find-class 'standard-generic-function)))
-            ;; see comment in update-call-history
+            ;; see comment in %update-call-history
             (with-early-accessors (standard-generic-function)
               (mp:atomic (generic-function-call-history generic-function)))
             (let* ((slotd (find 'call-history (class-slots gfclass)
@@ -35,12 +35,38 @@
       (bytecode-interpreted-discriminator generic-function)
       (invalidated-discriminator-closure generic-function)))
 
+(defun invalidate-discriminating-function (generic-function)
+  (set-funcallable-instance-function
+   generic-function
+   (invalidated-discriminator-closure generic-function)))
+
 (defun invalidated-discriminator-closure (generic-function)
   (lambda (&rest args) (apply #'miss generic-function args)))
 
+;; FIXME? Limiting to one extra arg is adequate for our purposes right now
+;; but pretty dumb. We could be more flexible by wrapping the updater in a
+;; lambda that APPLYs it to the argument, but that's also sorta dumb.
+;; Maybe we should have atomic-update-apply or something?
+(defun %update-call-history (generic-function updater updater-arg)
+  (let ((gfclass (class-of generic-function)))
+    (if (eq gfclass #.(find-class 'standard-generic-function))
+        (with-early-accessors (standard-generic-function)
+          (mp:atomic-update (generic-function-call-history generic-function)
+                            updater generic-function updater-arg))
+        ;; Don't wanna go through all the rigamarole of slot-value
+        ;; for an internal slot that won't have weird accessors.
+        ;; But we do want to proof against a subclass shuffling slots around.
+        ;; FIXME: It would be nicer to make g-f-c-h an atomic place, but we'd
+        ;; need to grab the location of the standard slot at compile time.
+        (let* ((slotd (find 'call-history (class-slots gfclass)
+                            :key #'slot-definition-name))
+               (location (slot-definition-location slotd)))
+          (mp:atomic-update (funcallable-standard-instance-access
+                             generic-function location)
+                            updater generic-function updater-arg)))))
+
 (defun update-call-history (generic-function arguments)
-  (let ((gfclass (class-of generic-function))
-        outcome updatedp)
+  (let (outcome updatedp)
     (flet ((updater (call-history generic-function arguments)
              (multiple-value-bind (noutcome new-entries)
                  (miss-info generic-function call-history arguments)
@@ -50,22 +76,7 @@
                       call-history)
                      (t (setf updatedp t)
                         (union-entries call-history new-entries))))))
-      (if (eq gfclass
-              (load-time-value (find-class 'standard-generic-function)))
-          (with-early-accessors (standard-generic-function)
-            (mp:atomic-update (generic-function-call-history generic-function)
-                              #'updater generic-function arguments))
-          ;; Don't wanna go through all the rigamarole of slot-value
-          ;; for an internal slot that won't have weird accessors.
-          ;; But we do want to proof against a subclass shuffling slots around.
-          ;; FIXME: It would be nicer to make g-f-c-h an atomic place, but we'd
-          ;; need to grab the location of the standard slot at compile time.
-          (let* ((slotd (find 'call-history (class-slots gfclass)
-                              :key #'slot-definition-name))
-                 (location (slot-definition-location slotd)))
-            (mp:atomic-update (funcallable-standard-instance-access
-                               generic-function location)
-                              #'updater generic-function arguments))))
+      (%update-call-history generic-function #'updater arguments))
     (values outcome updatedp)))
 
 (defun union-entries (old-call-history new-entries)
