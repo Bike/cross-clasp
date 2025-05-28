@@ -48,7 +48,7 @@
            #:atomic-symbol-value #:atomic-set-symbol-value #:cas-symbol-value
            #:atomic-symbol-plist #:atomic-set-symbol-plist #:cas-symbol-plist)
   (:export #:function-name #:setf-function-name #:setf-lambda-list
-           #:function-docstring #:function-source-pos)
+           #:function-docstring #:function-source-pos #:set-source-pos-info)
   (:export #:single-dispatch-generic-function-p)
   (:export #:compute-instance-creator
            #:allocate-standard-instance #:allocate-raw-instance

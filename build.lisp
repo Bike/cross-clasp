@@ -50,6 +50,7 @@
     "clos/dependent.lisp"
     "clos/class.lisp"
     "clos/cpl.lisp"
+    "clos/generic.lisp"
     ;; macros
     "lsp/source-transformations.lisp"
     "lsp/cmuutil.lisp"
