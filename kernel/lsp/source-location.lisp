@@ -9,6 +9,8 @@
 
 (in-package :ext)
 
+(defun current-source-location () core:*current-source-pos-info*)
+
 (defun compiled-function-name (x)
   (core:function-name x))
 

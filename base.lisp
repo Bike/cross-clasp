@@ -158,6 +158,8 @@
     core::valid-function-name-p core::function-block-name
     core:function-docstring (setf core:function-docstring)
     core:function-source-pos core:set-source-pos-info ext:function-lambda-list
+    core:make-closure core:closure-ref core:closure-length
+    core:function/entry-point
     core::coerce-to-function core::coerce-fdesignator
     core::fixnump core:ratiop
     core:short-float-p core:single-float-p
@@ -251,13 +253,14 @@
     core:function-description-docstring core:function-description-column
     core:function-description-lineno core:function-description-source-pathname
     core:function-description-lambda-list
-    core:make-source-pos-info
+    core:make-source-pos-info ext:current-source-location
     core:source-pos-info-column core:source-pos-info-lineno
     core:source-pos-info-file-handle core:source-pos-info-filepos
     ext:annotate
     core:file-scope core:file-scope-pathname
     core:unix-get-local-time-zone core:unix-daylight-saving-time ext:getenv
     gc:thread-local-unwind-counter gc:bytes-allocated
+    cmp::bytecompile
     core:sl-boundp core:unbound
     core:vaslistp core:list-from-vaslist
     core:interpret load core:load-source
@@ -311,7 +314,8 @@
                        mp:*current-process*
                        core:+type-header-value-map+
                        ext:+process-standard-input+ ext:+process-standard-output+
-                       ext:+process-error-output+ ext:+process-terminal-io+)
+                       ext:+process-error-output+ ext:+process-terminal-io+
+                       cmp:*btb-compile-hook*)
         do (clostrum:make-variable client rte vname))
   (loop for vname in *copied-variables*
         do (clostrum:make-variable client rte vname (symbol-value vname)))

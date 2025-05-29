@@ -51,6 +51,10 @@
     "clos/class.lisp"
     "clos/cpl.lisp"
     "clos/generic.lisp"
+    ;; compiler
+    "cmp/cmputil.lisp"
+    "cmp/compiler-conditions.lisp"
+    "cmp/compile.lisp"
     ;; macros
     "lsp/source-transformations.lisp"
     "lsp/cmuutil.lisp"

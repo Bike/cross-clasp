@@ -56,7 +56,9 @@
            #:class-stamp-for-instances #:class-new-stamp
            #:instance-sig #:instance-sig-set #:instance-stamp
            #:make-rack #:rack-sig #:rack-ref #:instance-rack #:instance-class)
-  (:export #:gfbytecode-simple-fun/make)
+  (:export #:gfbytecode-simple-fun/make #:bytecode-simple-fun
+           #:function/entry-point
+           #:make-closure #:closure-length #:closure-ref)
   (:export #:setf-find-class)
   (:export #:cxx-object-p #:cxx-class #:clbind-cxx-class #:derivable-cxx-class)
   (:export #:unix-get-local-time-zone #:unix-daylight-saving-time)
@@ -68,7 +70,7 @@
   (:export #:noprint-p #:noinform-p)
   (:export #:quasiquote #:*quasiquote*
            #:unquote #:unquote-nsplice #:unquote-splice)
-  (:export #:file-scope #:file-scope-pathname)
+  (:export #:file-scope #:file-scope-pathname #:mkstemp)
   (:export #:interpret)
   (:export #:wrong-number-of-arguments #:sequence-out-of-bounds)
   (:export #:set-breakstep #:unset-breakstep #:breakstepping-p
@@ -147,7 +149,8 @@
   (:export #:tag-tests))
 
 (defpackage #:cross-clasp.clasp.cmp
-  (:use #:cl))
+  (:use #:cl)
+  (:export #:*btb-compile-hook* #:*cleavir-compile-hook*))
 
 (defpackage #:cross-clasp.clasp.sequence
   (:use)
@@ -184,7 +187,7 @@
   (:export #:+process-standard-input+ #:+process-standard-output+
            #:+process-error-output+ #:+process-terminal-io+)
   (:export #:constant-form-value)
-  (:export #:with-current-source-form
+  (:export #:with-current-source-form #:current-source-location
            #:source-location #:source-location-pathname)
   (:export #:function-lambda-list)
   (:export #:type-expander)
@@ -215,7 +218,7 @@
   (:export #:annotate #:*module-provider-functions*)
   (:export #:getenv)
   (:export #:*toplevel-hook*)
-  (:export #:start-autocompilation)
+  (:export #:compiler-note #:start-autocompilation)
   (:import-from #:cross-clasp.clasp.core #:quit)
   (:export #:quit))
 
