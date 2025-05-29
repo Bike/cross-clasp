@@ -37,7 +37,7 @@
     (multiple-value-bind (expansion expanded)
         (macroexpand-1 '+emf-params+ environment)
       (if expanded
-          (values (first expansion) (second expansion))
+          expansion
           ;; If we're not in a discriminator, and so the symbol macro
           ;; isn't bound, we return a banal response.
           ;; FIXME?: Might want to signal an error instead.
@@ -79,7 +79,10 @@
       (apply contf next .method-args.))))
 
 (defun emf-call-method (method rest arg-info)
-  (cond ((eq (class-of (method-function method))
+  (cond ((make-method-form-p method)
+         ;; FIXME: Should call-next-method etc be bound
+         (effective-method-function (second method) arg-info))
+        ((eq (class-of (method-function method))
              (load-time-value (find-class '%leaf-method-function)))
          ;; leaf method functions are valid EMFs.
          (fmf (method-function method)))
@@ -89,9 +92,6 @@
            (emf-from-contf
             (contf (method-function method))
             method next-methods arg-info)))
-        ((make-method-form-p method)
-         ;; FIXME: Should call-next-method etc be bound
-         (effective-method-function (second method) arg-info))
         ;; Could be a nonstandard method with its own EXPAND-APPLY-METHOD.
         (t (emf-default `(call-method ,method ,@rest) arg-info))))
 
@@ -126,7 +126,7 @@
 
 ;;; Convert an element of the second argument of a usual call-method
 ;;; into a method or form producing a method.
-(defun call-method-aux (gf method &optional (arg-info '(t)))
+(defun call-method-aux (gf method &optional (arg-info '(emf-more)))
   (cond ((methodp method) method)
         ((make-method-form-p method)
          `(make-instance ,(generic-function-method-class gf)
@@ -146,7 +146,7 @@
 
 ;;; Convert the second argument of a usual call-method into a list
 ;;; of methods.
-(defun call-method-next-methods (gf next-methods &optional (arg-info '(t)))
+(defun call-method-next-methods (gf next-methods &optional (arg-info '(emf-more)))
   (declare (ignore arg-info))
   (loop for nmethod in next-methods
         collect (call-method-aux gf nmethod)))
