@@ -133,6 +133,8 @@
    (%specializers :initarg :specializers :reader specializers)
    (%qualifiers :initarg :qualifiers :reader qualifiers)
    (%mclass :initarg :class :reader mclass)
+   (%keywords :initarg :keywords :reader method-keywords)
+   (%aok-p :initarg :aok-p :reader method-allows-other-keys-p)
    ;; A cons (LEAF mform) or (CONTF mform fform)
    ;; mform, at load time, will be evaluated to produce the
    ;; method function. fform, if present, evaluates to
@@ -149,14 +151,18 @@
   o)
 
 (defclass compiler-accessor (compiler-method)
-  ((%slot :initarg :slot :reader slot)))
+  ((%slot :initarg :slot :reader slot)
+   (%keywords :initform nil)
+   (%aok-p :initform nil)))
 (defclass compiler-reader (compiler-accessor) ())
 (defclass compiler-writer (compiler-accessor) ())
 
 (defclass effective-accessor (compiler-method)
   ((%original :initarg :original :reader original)
    (%allocation :initform :instance :reader allocation)
-   (%location :initarg :location :reader location)))
+   (%location :initarg :location :reader location)
+   (%keywords :initform nil)
+   (%aok-p :initform nil)))
 (defclass effective-reader (effective-accessor) ())
 (defclass effective-writer (effective-accessor) ())
 

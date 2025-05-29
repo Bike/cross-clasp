@@ -136,6 +136,8 @@
 (defmethod build-method-initargs append ((method compiler-method))
   `(:generic-function (fdefinition ',(name (gf method)))
     :lambda-list ',(lambda-list method)
+    :keywords ',(method-keywords method)
+    :aok-p ',(method-allows-other-keys-p method)
     :specializers (list ,@(mapcar #'specializer-form
                                   (specializers method)))
     :qualifiers ',(qualifiers method)
@@ -212,6 +214,8 @@
            (method (make-instance 'compiler-method
                      :gf generic-function
                      :lambda-list lambda-list
+                     :keywords (mapcar #'caar keys)
+                     :aok-p aokp
                      :specializers (mapcar #'parse-specializer specializers)
                      :qualifiers qualifiers
                      :class (method-class generic-function)
