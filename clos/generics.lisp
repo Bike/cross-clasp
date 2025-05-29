@@ -54,7 +54,9 @@
      (set-funcallable-instance-function
       ;; this is invalidated-discriminator-closure, but that's defined later.
       ;; miss is defined in miss.lisp.
-      gf (lambda (&rest args) (apply #'miss gf args)))
+      gf (lambda (&rest args)
+           (declare (core:lambda-name invalidated-discriminator))
+           (apply #'miss gf args)))
      gf))
 
 (defmacro early-defgeneric (name lambda-list &rest options)

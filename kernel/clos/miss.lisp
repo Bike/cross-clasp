@@ -41,7 +41,9 @@
    (invalidated-discriminator-closure generic-function)))
 
 (defun invalidated-discriminator-closure (generic-function)
-  (lambda (&rest args) (apply #'miss generic-function args)))
+  (lambda (&rest args)
+    (declare (core:lambda-name invalidated-discriminator))
+    (apply #'miss generic-function args)))
 
 ;; FIXME? Limiting to one extra arg is adequate for our purposes right now
 ;; but pretty dumb. We could be more flexible by wrapping the updater in a
