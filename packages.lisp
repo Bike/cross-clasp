@@ -150,6 +150,7 @@
 
 (defpackage #:cross-clasp.clasp.cmp
   (:use #:cl)
+  (:export #:code-walk)
   (:export #:*btb-compile-hook* #:*cleavir-compile-hook*))
 
 (defpackage #:cross-clasp.clasp.sequence

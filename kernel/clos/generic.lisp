@@ -17,6 +17,10 @@
 ;; goes wrong and we want to print generic functions.
 (defgeneric (setf generic-function-name) (name generic-function))
 
+(defgeneric add-method (generic-function method))
+(defgeneric remove-method (generic-function method))
+(defgeneric find-method (generic-function qualifiers specializers &optional errorp))
+
 ;;; ----------------------------------------------------------------------
 ;;; DEFGENERIC
 ;;;
@@ -449,7 +453,6 @@ Not a valid documentation object ~A"
   (reinitialize-instance gf :name name)
   name)
 
-#+(or)
 (defun compile-generic-function-methods (gf)
   (loop with overall-warningsp = nil
         with overall-failurep = nil
@@ -461,6 +464,202 @@ Not a valid documentation object ~A"
                    overall-failurep (or overall-failurep failurep)))
         finally (return
                   (values gf overall-warningsp overall-failurep))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Adding, removing, and finding methods
+;;; This code is here rather than method.lisp because the operations on the
+;;; generic are more involved than those on the methods.
+;;;
+
+(defmethod add-method ((gf standard-generic-function) (method standard-method))
+  ;;
+  ;; 1) The method must not be already installed in another generic function.
+  ;;
+  (let ((other-gf (method-generic-function method)))
+    (unless (or (null other-gf) (eq other-gf gf))
+      (error "The method ~A belongs to the generic function ~A ~
+and cannot be added to ~A." method other-gf gf)))
+  ;;
+  ;; 2) The method and the generic function should have congruent lambda
+  ;;    lists. That is, it should accept the same number of required and
+  ;;    optional arguments, and only accept keyword arguments when the generic
+  ;;    function does.
+  ;;
+  (let ((new-lambda-list (method-lambda-list method)))
+    (if (slot-boundp gf 'lambda-list)
+	(let ((old-lambda-list (generic-function-lambda-list gf)))
+	  (unless (congruent-lambda-p old-lambda-list new-lambda-list)
+	    (error "Cannot add the method ~A to the generic function ~A because their lambda lists ~A and ~A are not congruent."
+		   method gf new-lambda-list old-lambda-list))
+          ;; Add any keywords from the method to the gf display lambda list.
+          (maybe-augment-generic-function-lambda-list gf new-lambda-list))
+        (reinitialize-instance
+         gf :lambda-list (method-lambda-list-for-gf new-lambda-list))))
+  ;;
+  ;; 3) Finally, it is inserted in the list of methods, and the method is
+  ;;    marked as belonging to a generic function.
+  ;;
+  (when (generic-function-methods gf)
+    (let* ((method-qualifiers (method-qualifiers method)) 
+	   (specializers (method-specializers method))
+	   (found (find-method gf method-qualifiers specializers nil)))
+      (when found
+	(remove-method gf found))))
+  ;;
+  ;; Per AMOP's description of ADD-METHOD, we install the method by:
+  ;;  i) Adding it to the list of methods.
+  (push method (%generic-function-methods gf))
+  (setf (%method-generic-function method) gf)
+  ;;  ii) Adding the method to each specializer's direct-methods.
+  (register-method-with-specializers method)
+  ;;  iii) Computing a new discriminating function.
+  ;;       Though in this case it will be the invalidated function.
+  (update-gf-specializer-profile gf (method-specializers method))
+  (compute-a-p-o-function gf)
+  (update-generic-function-call-history-for-add-method gf method)
+  (set-funcallable-instance-function gf (compute-discriminating-function gf))
+  ;;  iv) Updating dependents.
+  (update-dependents gf (list 'add-method method))
+  gf)
+
+;;; auxiliary for add-method
+;;; It takes a DEFMETHOD lambda list and returns a lambda list usable for
+;;; initializing a generic function. The difficulty here is that the CLHS
+;;; page for DEFMETHOD specifies that if a generic function is implicitly
+;;; created, its lambda list lacks any specific keyword parameters.
+;;; So (defmethod foo (... &key a)) (defmethod foo (... &key)) is legal.
+;;; If we were to just use the same method lambda list, this would not be
+;;; true.
+(defun method-lambda-list-for-gf (lambda-list)
+  (multiple-value-bind (req opt rest keyflag keywords aok)
+      (core:process-lambda-list lambda-list 'function)
+    (declare (ignore keywords))
+    `(,@(rest req)
+      ,@(unless (zerop (car opt))
+          (cons '&optional (loop for (o) on (rest opt)
+                                 by #'cdddr
+                                 collect o)))
+      ,@(when rest (list '&rest rest))
+      ,@(when keyflag '(&key))
+      ,@(when aok '(&allow-other-keys)))))
+
+(defun register-method-with-specializers (method)
+  (loop for spec in (method-specializers method)
+        do (add-direct-method spec method)))
+
+(defun update-gf-specializer-profile (gf specializers)
+  ;; Although update-specializer-profile mutates the vector,
+  ;; we still need this setf for the case in which the existing sp
+  ;; was NIL (see compute-gf-specializer-profile below for how this
+  ;; can arise).
+  (setf (generic-function-specializer-profile gf)
+        (let* ((sv (generic-function-specializer-profile gf))
+               (to-update (or sv (make-array (length specializers)
+                                             :initial-element nil))))
+          (update-specializer-profile to-update specializers))))
+
+;;; This "fuzzed" applicable-method-p is used in
+;;; update-call-history-for-add-method, below, to handle added EQL-specialized
+;;; methods properly. See bug #1009.
+(defun fuzzed-applicable-method-p (method specializers)
+  (loop for spec in (method-specializers method)
+        for argspec in specializers
+        always (cond ((typep spec 'eql-specializer)
+                      (if (eql-specializer-p argspec)
+                          (eql (eql-specializer-object argspec)
+                               (eql-specializer-object spec))
+                          (si:subclassp argspec
+                                     (class-of (eql-specializer-object spec)))))
+                     ((eql-specializer-p argspec)
+                      (si:subclassp (class-of (eql-specializer-object argspec))
+                                 spec))
+                     (t (si:subclassp argspec spec)))))
+
+(defun update-call-history-for-add-method (call-history gf method)
+  (declare (ignore gf))
+  "When a method is added then we update the effective-method-functions for
+   those call-history entries with specializers that the method would apply to."
+  (loop for entry in call-history
+        for specializers = (coerce (car entry) 'list)
+        unless (fuzzed-applicable-method-p method specializers)
+          collect entry))
+
+(defun update-generic-function-call-history-for-add-method (generic-function method)
+  "When a method is added then we update the effective-method-functions for
+   those call-history entries with specializers that the method would apply to.
+FIXME!!!! This code will have problems with multithreading if a generic function is in flight. "
+  (%update-call-history generic-function
+                        #'update-call-history-for-add-method method))
+
+(defmethod remove-method ((gf standard-generic-function) (method standard-method))
+  (setf (%generic-function-methods gf)
+	(delete method (generic-function-methods gf))
+	(%method-generic-function method) nil)
+  (loop for spec in (method-specializers method)
+     do (remove-direct-method spec method))
+  (compute-gf-specializer-profile gf)
+  (compute-a-p-o-function gf)
+  (update-generic-function-call-history-for-remove-method gf method)
+  (set-funcallable-instance-function gf (compute-discriminating-function gf))
+  (update-dependents gf (list 'remove-method method))
+  gf)
+
+(defun update-call-history-for-remove-method (call-history gf method)
+  (declare (ignore gf))
+  (let (new-call-history)
+    (loop for entry in call-history
+          for specializers = (coerce (car entry) 'list)
+          unless (method-applicable-to-specializers-p method specializers)
+            do (push (cons (car entry) (cdr entry)) new-call-history))
+    new-call-history))
+
+(defun update-generic-function-call-history-for-remove-method (generic-function method)
+  "When a method is removed then we update the effective-method-functions for
+   those call-history entries with specializers that the method would apply to
+    AND if that means there are no methods left that apply to the specializers
+     then remove the entry from the list.
+FIXME!!!! This code will have problems with multithreading if a generic function is in flight. "
+  (%update-call-history generic-function
+                        #'update-call-history-for-remove-method method))
+
+(defmethod find-method ((gf standard-generic-function) qualifiers specializers
+                        &optional (errorp t))
+  (flet ((filter-specializer (name)
+	   (cond ((typep name 'specializer)
+		  name)
+		 ((atom name)
+		  (let ((class (find-class name nil)))
+		    (unless class
+		      (error "~A is not a valid specializer name" name))
+		    class))
+		 ((and (eq (first name) 'EQL)
+		       (null (cddr name)))
+                  (intern-eql-specializer (second name)))
+		 (t
+		  (error "~A is not a valid specializer name" name))))
+	 (specializer= (cons-or-class specializer)
+           (eq cons-or-class specializer)))
+    (when (/= (length specializers)
+	      (length (generic-function-argument-precedence-order gf)))
+      (error
+       "The specializers list~%~A~%does not match the number of required arguments (~a) in ~A"
+       specializers
+       (length (generic-function-argument-precedence-order gf))
+       (generic-function-name gf)))
+    (loop with specializers = (mapcar #'filter-specializer specializers)
+       for method in (generic-function-methods gf)
+       when (and (equal qualifiers (method-qualifiers method))
+		 (every #'specializer= specializers (method-specializers method)))
+       do (return-from find-method method))
+    ;; If we did not find any matching method, then the list of
+    ;; specializers might have the wrong size and we must signal
+    ;; an error.
+    (when errorp
+      (error "There is no method on the generic function ~S that agrees on qualifiers ~S and specializers ~S"
+	     (generic-function-name gf)
+	     qualifiers specializers)))
+  nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;

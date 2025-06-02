@@ -28,12 +28,6 @@
 (defmethod no-applicable-method (gf &rest args)
   (error 'no-applicable-method-error :generic-function gf :arguments args))
 
-;;; function-keywords
-
-(defgeneric function-keywords (method))
-(defmethod function-keywords ((method standard-method))
-  (values (method-keywords method) (method-allows-other-keys-p method)))
-
 ;;; generic-function-name
 
 (defgeneric generic-function-name (generic-function))

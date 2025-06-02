@@ -229,7 +229,7 @@
 
 ;; needed to make accessor method functions
 (defclass %leaf-method-function (funcallable-standard-object)
-  ((%fmf :initarg :fmf :reader fmf))
+  ((%fmf :initarg :fmf :accessor fmf))
   (:metaclass funcallable-standard-class))
 ) ; with-mutual-defclass
 

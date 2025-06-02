@@ -260,7 +260,8 @@
     core:file-scope core:file-scope-pathname
     core:unix-get-local-time-zone core:unix-daylight-saving-time ext:getenv
     gc:thread-local-unwind-counter gc:bytes-allocated
-    cmp::bytecompile
+    cmp::bytecompile cmp::compile-lambda
+    cmp::module/make cmp::make-null-lexical-environment
     core:sl-boundp core:unbound
     core:vaslistp core:list-from-vaslist
     core:interpret load core:load-source
@@ -315,7 +316,7 @@
                        core:+type-header-value-map+
                        ext:+process-standard-input+ ext:+process-standard-output+
                        ext:+process-error-output+ ext:+process-terminal-io+
-                       cmp:*btb-compile-hook*)
+                       cmp:*btb-compile-hook* cmp::*code-walker*)
         do (clostrum:make-variable client rte vname))
   (loop for vname in *copied-variables*
         do (clostrum:make-variable client rte vname (symbol-value vname)))

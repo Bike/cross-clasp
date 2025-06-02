@@ -59,19 +59,20 @@
    (applicable-method-list-using-specializers generic-function specializers)
    specializers))
 
+(defun method-applicable-to-specializers-p (method argspecs)
+  (loop for spec in (method-specializers method)
+        for argspec in argspecs
+        always (cond ((eql-specializer-p argspec)
+                      (specializer-accepts-p spec (eql-specializer-object argspec)))
+                     ;; if the method has an eql specializer and we don't
+                     ;; the method isn't applicable.
+                     ((eql-specializer-p spec) nil)
+                     (t (core:subclassp argspec spec)))))
+
 (defun applicable-method-list-using-specializers (gf argspecs)
-  (flet ((applicable-method-p (method)
-           (loop for spec in (method-specializers method)
-                 for argspec in argspecs
-                 always (cond ((eql-specializer-p argspec)
-                               (specializer-accepts-p spec (eql-specializer-object argspec)))
-                              ;; if the method has an eql specializer and we don't
-                              ;; the method isn't applicable.
-                              ((eql-specializer-p spec) nil)
-                              (t (core:subclassp argspec spec))))))
-    (loop for method in (generic-function-methods gf)
-          when (applicable-method-p method)
-            collect method)))
+  (loop for method in (generic-function-methods gf)
+        when (method-applicable-to-specializers-p method argspecs)
+          collect method))
 
 (defun sort-applicable-methods (gf methods args-specializers)
   ;; Reorder args-specializers to match APO.

@@ -5,7 +5,7 @@
   (:metaclass funcallable-standard-class))
 
 (defclass %contf-method-function (funcallable-standard-object)
-  ((%contf :initarg :contf :reader contf))
+  ((%contf :initarg :contf :accessor contf))
   (:metaclass funcallable-standard-class))
 
 (defun make-%no-next-method-continuation (method)
