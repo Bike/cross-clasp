@@ -427,8 +427,9 @@
         for posn = 0 then non-blank
         for blank = (position #\space literal :start posn)
         for non-blank = (if blank
-                            (position #\space literal :start blank
-                                                      :test #'char/=)
+                            (or (position #\space literal :start blank
+                                                          :test #'char/=)
+                              end)
                             nil)
         when (null blank)
           collect (subseq literal posn)
