@@ -38,6 +38,8 @@
            #:short-float-p #:single-float-p #:double-float-p #:long-float-p)
   (:export #:data-vector-p #:replace-array #:vref
            #:make-simple-vector-t
+           #:abstract-simple-vector #:complex-vector #:mdarray #:simple-mdarray
+           #:str8ns #:simple-character-string #:str-wns #:bit-vector-ns
            #:sbv-bit-and #:sbv-bit-ior #:sbv-bit-xor #:sbv-bit-eqv
            #:sbv-bit-nand #:sbv-bit-nor #:sbv-bit-andc1 #:sbv-bit-andc2
            #:sbv-bit-orc1 #:sbv-bit-orc2 #:sbv-bit-not)
